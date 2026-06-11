@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>顺着海风</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ background:#070b0d; color:#d4dee4; font-family:Georgia,"Songti SC",serif; line-height:1.9; }
+  .wrap{ max-width:680px; margin:0 auto; padding:50px 24px 110px; }
+  .tag{ font-family:"SF Mono",monospace; font-size:12px; color:#3be0c0; letter-spacing:.15em; border:1px solid #1c4a44; display:inline-block; padding:4px 10px; border-radius:3px; margin-bottom:26px; }
+  h1{ font-size:26px; color:#eef; margin-bottom:8px; }
+  .sub{ font-family:monospace; font-size:12.5px; color:#5a646e; margin-bottom:32px; }
+  .letter{ background:#0d1013; border:1px solid #1b242a; border-radius:8px; padding:28px; font-size:16.5px; color:#cfd5dc; margin-bottom:28px; }
+  .letter p{ margin-bottom:18px; }
+  .letter .q{ color:#46c7d8; font-style:italic; }
+  .puzzle{ margin:30px 0; }
+  .puzzle h3{ font-size:13px; color:#7fbfc9; font-family:monospace; letter-spacing:.05em; margin-bottom:14px; }
+  .pieces{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .pc{ border:1px solid #1c2630; border-radius:9px; padding:16px 12px; text-align:center; background:#0c1116; }
+  .pc.done{ border-color:#1c4a44; background:#0a1614; }
+  .pc .ic{ font-size:22px; } .pc .nm{ font-size:13px; margin-top:6px; color:#aeb7c2; }
+  .pc .st{ font-size:11px; font-family:monospace; margin-top:4px; }
+  .pc.done .st{ color:#3be0c0; } .pc .st.todo{ color:#4a535d; }
+  .cities{ margin:28px 0; background:#0b0f12; border:1px solid #1b242a; border-radius:8px; padding:20px; font-family:monospace; }
+  .cities h3{ color:#7fbfc9; font-size:13px; margin-bottom:14px; font-family:Georgia,serif; }
+  .city{ display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px dashed #1b242a; font-size:13.5px; }
+  .city:last-child{ border-bottom:none; }
+  .city .dot{ width:8px;height:8px;border-radius:50%; }
+  .city .nm{ width:60px; color:#dfe6ee; } .city .dir{ color:#5a646e; }
+  .city.done .dot{ background:#3be0c0; box-shadow:0 0 8px #3be0c0; }
+  .city.next .dot{ background:#e0a35c; box-shadow:0 0 8px #e0a35c; animation:pl 1.6s infinite; }
+  .city.future .dot{ background:#2a323c; }
+  @keyframes pl{50%{opacity:.4}}
+  .chapter{ text-align:center; margin-top:44px; font-family:monospace; color:#5a646e; letter-spacing:.4em; font-size:14px; }
+  .hook{ margin-top:26px; padding:20px; border:1px solid #1b242a; border-radius:8px; background:#0b0f12; color:#8a94a0; font-size:14px; line-height:1.85; }
+  .hook .stamp{ color:#e06a6a; font-family:monospace; }
+  .fade{ opacity:0; animation:fade 1.2s forwards; } @keyframes fade{to{opacity:1}}
+  .fx-grain,.fx-vignette{ position:fixed; inset:0; pointer-events:none; z-index:99; }
+  .fx-vignette{ box-shadow:inset 0 0 200px 50px rgba(0,0,0,.78); }
+  .fx-grain{ opacity:.045; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation:grain .5s steps(3) infinite; }
+  @keyframes grain{0%{transform:translate(0,0)}33%{transform:translate(-5px,3px)}66%{transform:translate(4px,-4px)}100%{transform:translate(0,0)}}
+</style>
+</head>
+<body>
+<div class="fx-vignette"></div>
+<div class="fx-grain"></div>
+<div class="wrap">
+  <span class="tag">● 技术流已追踪完成 · 信号枢纽 [ 海宁 ]</span>
+  <h1>顺着海风</h1>
+  <div class="sub">样本 L-0001 已确认 · 目标存活 · 受控状态</div>
+
+  <div class="letter">
+    <p>你找到她了。不是尸体，不是遗物——是她的声音，活的，被一台机器一个字一个字地榨取。</p>
+    <p>第一章，你以为这是一栋废楼的秘密。第二章，你看见它住进了上百万人的手机。</p>
+    <p>现在你站在海宁的中央调制站里，终于明白了：它早就不是"某个项目"了。它是地铁报站、是商场广播、是深夜电台——它是一座城市本身。你没法卸载一座城市。</p>
+    <p>苏黎帮了你。可你也听到了那条 S-0419 样本——系统能用她的声音，说出她从没说过的话。从现在起，你甚至不能完全确定，哪一句"苏黎"，是真的苏黎。</p>
+    <p>但有一句话是真的，因为只有林知秋会这么说：</p>
+    <p class="q">「他们没有杀我。他们在让我，把自己交出去。别停下。往鹿原去。」</p>
+  </div>
+
+  <div class="puzzle">
+    <h3>// 「寂静计划」拼图</h3>
+    <div class="pieces">
+      <div class="pc done"><div class="ic">💰</div><div class="nm">资金流</div><div class="st">✓ 已揭开</div></div>
+      <div class="pc done"><div class="ic">📡</div><div class="nm">技术流</div><div class="st">✓ 已揭开</div></div>
+      <div class="pc"><div class="ic">⚖️</div><div class="nm">权力流</div><div class="st todo">？ 鹿原</div></div>
+    </div>
+  </div>
+
+  <div class="cities">
+    <h3>📍 寂静计划 · 城市地图</h3>
+    <div class="city done"><span class="dot"></span><span class="nm">钟楼街</span><span class="dir">第一章 · 失音症源点 · 已揭开</span></div>
+    <div class="city done"><span class="dot"></span><span class="nm">锦城</span><span class="dir">第二章 · 助眠App / 资金流 · 已揭开</span></div>
+    <div class="city done"><span class="dot"></span><span class="nm">海宁</span><span class="dir">第三章 · 信号枢纽 / 技术流 · 已揭开</span></div>
+    <div class="city next"><span class="dot"></span><span class="nm">鹿原</span><span class="dir">第四章 · 审批的源头 · 权力流 · 林知秋的下一站</span></div>
+  </div>
+
+  <div class="chapter fade" style="animation-delay:.4s">— 第 三 章 · 完 —</div>
+
+  <div class="hook fade" style="animation-delay:1.2s">
+    那张调制站的审批存根，章是模糊的，但能辨认出几个字：<br>
+    <span class="stamp">鹿原市 · ████ 协调办公室</span><br><br>
+    原来在公司和资本的背后，一直站着的，是一枚<b>公章</b>。<br>
+    这不再是有人在偷偷作恶——这是被"批准"的。<br><br>
+    你订了去鹿原最早的一班车。临行前，手机弹出一条本地新闻推送：<br>
+    <span class="q">「鹿原市'记忆健康'便民服务试点启动，市民可自愿预约，免费清理不愉快的记忆。报名从速。」</span><br><br>
+    第四章《鹿原 · 为你好》，待续。
+  </div>
+</div>
+</body>
+</html>

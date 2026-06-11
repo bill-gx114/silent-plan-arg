@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>安眠岛 SleepIsle — 睡进一座岛</title>
+<style>
+  :root{ --night:#0e1430; --night2:#161d44; --ink:#e8ecf7; --soft:#aab3d4; --muted:#6b7396; --acc:#7c83ff; --acc2:#52e0d0; --card:#1a2150; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; color:var(--ink); background:var(--night); line-height:1.65; }
+  a{color:inherit;}
+  .nav{ display:flex; align-items:center; justify-content:space-between; padding:18px 36px; position:sticky; top:0; background:rgba(14,20,48,.85); backdrop-filter:blur(10px); z-index:10; border-bottom:1px solid #20285c; }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:700; font-size:19px; }
+  .moon{ width:26px; height:26px; border-radius:50%; background:radial-gradient(circle at 32% 32%, #fff 0%, #c5c8ff 40%, #7c83ff 100%); box-shadow:0 0 16px #7c83ff88; }
+  .nav ul{ display:flex; gap:24px; list-style:none; font-size:14px; color:var(--soft); }
+  .hero{ text-align:center; padding:90px 24px 70px; background:radial-gradient(ellipse at 50% 0%, #1c2456 0%, #0e1430 70%); position:relative; overflow:hidden; }
+  .stars{ position:absolute; inset:0; background-image:radial-gradient(1px 1px at 20% 30%,#fff,transparent),radial-gradient(1px 1px at 70% 20%,#fff,transparent),radial-gradient(1px 1px at 40% 60%,#cdd,transparent),radial-gradient(1px 1px at 85% 50%,#fff,transparent),radial-gradient(1px 1px at 55% 80%,#fff,transparent); opacity:.5; }
+  .hero h1{ font-size:46px; font-weight:800; margin-bottom:16px; position:relative; letter-spacing:.02em; }
+  .hero .sub{ font-size:18px; color:var(--soft); max-width:560px; margin:0 auto 28px; position:relative; }
+  .cta{ display:inline-block; background:linear-gradient(135deg,var(--acc),var(--acc2)); color:#0e1430; font-weight:700; padding:14px 38px; border-radius:30px; font-size:16px; position:relative; cursor:pointer; }
+  .stat-row{ display:flex; justify-content:center; gap:48px; margin-top:40px; position:relative; flex-wrap:wrap; }
+  .stat b{ display:block; font-size:28px; color:var(--acc2); }
+  .stat span{ font-size:13px; color:var(--muted); }
+  .section{ max-width:1000px; margin:0 auto; padding:64px 28px; }
+  .section h2{ text-align:center; font-size:28px; margin-bottom:8px; }
+  .section .lead{ text-align:center; color:var(--muted); margin-bottom:40px; }
+  .cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  @media(max-width:760px){ .cards{grid-template-columns:1fr;} .nav ul{display:none;} .nav{padding:16px;} .hero h1{font-size:34px;} }
+  .card{ background:var(--card); border:1px solid #28306a; border-radius:16px; padding:26px; }
+  .card .ic{ font-size:26px; margin-bottom:12px; }
+  .card h3{ font-size:17px; margin-bottom:8px; }
+  .card p{ font-size:14px; color:var(--soft); }
+  .changelog{ background:var(--night2); }
+  .log-item{ display:flex; gap:16px; padding:14px 0; border-bottom:1px solid #283069; font-size:14px; }
+  .log-item .ver{ color:var(--acc2); font-weight:700; min-width:64px; }
+  .log-item .txt{ color:var(--soft); }
+  .log-item .txt em{ color:var(--ink); font-style:normal; }
+  .reviews{ max-width:760px; }
+  .rev{ background:var(--card); border:1px solid #28306a; border-radius:14px; padding:16px 18px; margin-bottom:14px; }
+  .rev .top{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .rev .ava{ width:30px; height:30px; border-radius:50%; background:#2b347a; display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--soft); }
+  .rev .name{ font-size:13px; font-weight:600; }
+  .rev .stars5{ color:#ffcf5c; font-size:12px; margin-left:auto; }
+  .rev .body{ font-size:14px; color:var(--soft); }
+  .rev.dev{ border-color:#3a447f; }
+  .rev.dev .name{ color:var(--acc2); }
+  footer{ background:#0a0f24; padding:40px 28px; color:var(--muted); font-size:13px; border-top:1px solid #20285c; }
+  .foot-grid{ max-width:1000px; margin:0 auto; display:flex; justify-content:space-between; flex-wrap:wrap; gap:18px; }
+  footer .dev-link{ cursor:pointer; }
+  footer .dev-link:hover{ color:var(--soft); }
+  .help{ max-width:760px; margin:24px auto 0; font-size:13px; color:var(--muted); }
+  .help summary{ cursor:pointer; color:#566; }
+  .help p{ margin-top:8px; padding-left:8px; border-left:2px solid #283069; }
+</style>
+</head>
+<body>
+  <div class="nav">
+    <div class="brand"><span class="moon"></span> 安眠岛</div>
+    <ul><li>功能</li><li>更新日志</li><li>用户评价</li><li>下载</li></ul>
+  </div>
+
+  <div class="hero">
+    <div class="stars"></div>
+    <h1>睡进一座岛</h1>
+    <div class="sub">安眠岛用自适应声景与深度睡眠监测，帮你在 12 分钟内入睡。已经有上百万人，把每个夜晚交给了它。</div>
+    <span class="cta">免费下载</span>
+    <div class="stat-row">
+      <div class="stat"><b>1,280,000+</b><span>累计用户</span></div>
+      <div class="stat"><b>4.8</b><span>应用商店评分</span></div>
+      <div class="stat"><b>12 分钟</b><span>平均入睡时长</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>它如何工作</h2>
+    <div class="lead">睡眠是一座岛，我们负责带你上岸。</div>
+    <div class="cards">
+      <div class="card"><div class="ic">🌊</div><h3>自适应声景</h3><p>实时分析你的睡眠阶段，动态调整白噪音与环境音，越接近深睡越安静。</p></div>
+      <div class="card"><div class="ic">📈</div><h3>深度睡眠监测</h3><p>毫米波 + 麦克风协同，无需穿戴，整夜记录你的睡眠结构。</p></div>
+      <div class="card"><div class="ic">⏰</div><h3>智能唤醒</h3><p>在浅睡窗口轻唤你，告别闹钟惊醒。醒来，像从未睡过一样清爽。</p></div>
+    </div>
+  </div>
+
+  <div class="section changelog">
+    <h2>更新日志</h2>
+    <div class="lead">我们每两周让你睡得更好一点。</div>
+    <div style="max-width:720px;margin:0 auto;">
+      <div class="log-item"><span class="ver">v3.9</span><span class="txt">修复了智能唤醒偶发不触发的问题；优化电量占用。</span></div>
+      <div class="log-item"><span class="ver">v3.8</span><span class="txt">新增 6 套自然声景；睡眠报告支持周视图。</span></div>
+      <div class="log-item"><span class="ver">v3.7</span><span class="txt"><em>新增「深度睡眠期个性化音频推送」（灰度内测）。</em>该功能在用户进入深睡后的特定时段，按个性化模型推送定制声景。仅对内测白名单生效。</span></div>
+      <div class="log-item"><span class="ver">v3.6</span><span class="txt">界面改版；新增睡前呼吸引导。</span></div>
+    </div>
+  </div>
+
+  <div class="section reviews">
+    <h2>用户怎么说</h2>
+    <div class="lead">来自真实用户的 1,280,000 个夜晚。</div>
+
+    <div class="rev"><div class="top"><div class="ava">小</div><div class="name">小满_</div><div class="stars5">★★★★★</div></div><div class="body">用了半年，终于不靠褪黑素了。自适应声景真的神，越睡越静。</div></div>
+
+    <div class="rev"><div class="top"><div class="ava">阿</div><div class="name">阿橘不睡觉</div><div class="stars5">★★★★★</div></div><div class="body">我们雾屿花园整个小区都在用，邻居群里团购的会员，哈哈哈，现在楼里晚上安静得很。</div></div>
+
+    <div class="rev"><div class="top"><div class="ava">林</div><div class="name">林之洲</div><div class="stars5">★★★★☆</div></div><div class="body">睡眠是好了。但有个怪事：最近老想不起来前一晚睡前做了什么，有时候连闹钟是几点设的都记混。是我太累了吗？有同款的吗？</div></div>
+
+    <div class="rev"><div class="top"><div class="ava">夜</div><div class="name">夜歌_07</div><div class="stars5">★★★☆☆</div></div><div class="body">每天醒来都觉得做了个特别真实的梦，但内容一点都想不起来，只剩一种……东西被人挪过位置的感觉。说不清。但 App 本身挺好用。</div></div>
+
+    <div class="rev dev"><div class="top"><div class="ava">🦉</div><div class="name">夜枭_cy（开发组）</div><div class="stars5">已置顶</div></div><div class="body">【开发组自查】反馈"记忆模糊"的各位先别卸载，我在排查。——另留一句给可能在找路的人：运营后台的邀请码不是公司发的，是我自己设的，规则还是老一套——<b>那个内测功能的版本号，加上它每天动手的那个整点</b>（时刻写成四位，做开发的懂）。再压着这破事不管，我就真往外说了。</div></div>
+
+    <div class="rev"><div class="top"><div class="ava">恬</div><div class="name">恬恬妈</div><div class="stars5">★★★★★</div></div><div class="body">给娃用的助眠，效果不错，客服也耐心。</div></div>
+  </div>
+
+  <details class="help">
+    <summary>⚿ 找到程野那条「开发组」评论了，但不知道邀请码是什么</summary>
+    <p>程野没直接写邀请码，他写的是<b>规则</b>：邀请码 = 「那个内测功能的<b>版本号</b>」＋「它每天动手的<b>整点</b>」。<br>· 版本号：去上面「更新日志」里找那个可疑的内测功能，它是第几版？<br>· 整点：程野私信里反复强调，它"每天<b>凌晨两点</b>"动手——写成四位数。<br>· 把两段用短横线连起来，就是后台邀请码。</p>
+  </details>
+
+  <footer>
+    <div class="foot-grid">
+      <div>安眠岛 SleepIsle<br>睡进一座岛。© 2024 版权所有</div>
+      <div>下载 · 帮助中心 · 隐私政策 · 用户协议<br>技术支持与运营：<span class="dev-link" onclick="location.href='devlogin.html'">锦屿网络科技有限公司</span></div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>看见缝隙的人 — 林知秋</title>
+<!-- 她总说，故事的答案藏在每一段的起点。从最后一篇开始。 -->
+<style>
+  :root{ --paper:#f6f3ec; --ink:#2a2622; --muted:#8a8378; --line:#e3ddd0; --accent:#9c5b3b; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ background:var(--paper); color:var(--ink); font-family:Georgia,"Songti SC","STSong",serif; line-height:1.75; }
+  .wrap{ max-width:720px; margin:0 auto; padding:0 24px; }
+  header{ border-bottom:1px solid var(--line); padding:48px 0 28px; }
+  .site-title{ font-size:30px; letter-spacing:.04em; }
+  .tagline{ color:var(--muted); font-size:15px; margin-top:8px; font-style:italic; }
+  .bio{ margin-top:18px; font-size:13.5px; color:var(--muted); background:#efe9dd; border-left:3px solid var(--line); padding:12px 16px; }
+  main{ padding:34px 0 80px; }
+  .post{ padding:26px 0; border-bottom:1px solid var(--line); }
+  .post .meta{ font-size:12.5px; color:var(--muted); letter-spacing:.05em; }
+  .post h2{ font-size:22px; margin:8px 0 10px; }
+  .post h2 a{ color:var(--ink); text-decoration:none; }
+  .post h2 a:hover{ color:var(--accent); }
+  .post p{ color:#4a443c; font-size:15.5px; }
+  .latest{ background:#fbf8f1; box-shadow:0 1px 0 var(--line); padding:26px; border:1px solid var(--line); border-radius:4px; margin-bottom:10px; }
+  .latest .flag{ display:inline-block; font-size:11px; letter-spacing:.1em; color:var(--accent); border:1px solid var(--accent); border-radius:3px; padding:2px 7px; margin-bottom:10px; }
+  .more{ color:var(--accent); font-size:14px; text-decoration:none; }
+  footer{ border-top:1px solid var(--line); padding:24px 0; font-size:12px; color:var(--muted); position:relative; }
+  /* 死人开关：几乎不可见的暂停图标 */
+  #ds{ position:fixed; right:14px; bottom:12px; width:22px; height:22px; opacity:.06; cursor:pointer; transition:opacity .3s; font-size:18px; color:var(--ink); }
+  #ds:hover{ opacity:.5; }
+  .modal{ display:none; position:fixed; inset:0; background:rgba(20,18,15,.75); align-items:center; justify-content:center; z-index:10; }
+  .modal.on{ display:flex; }
+  .box{ background:#100c09; color:#d9cdbf; width:90%; max-width:380px; padding:28px; border:1px solid #2a221b; border-radius:6px; font-family:-apple-system,sans-serif; }
+  .box h3{ font-size:15px; margin-bottom:6px; letter-spacing:.05em; }
+  .box p{ font-size:13px; color:#8a7d6e; margin-bottom:16px; line-height:1.6; }
+  .box input{ width:100%; padding:11px 12px; background:#1a140f; border:1px solid #3a2e23; color:#f0e7da; border-radius:4px; font-size:15px; }
+  .box button{ margin-top:12px; width:100%; padding:11px; background:#7a3f25; color:#fff; border:none; border-radius:4px; font-size:14px; cursor:pointer; letter-spacing:.1em; }
+  .box .err{ color:#c96; font-size:12px; min-height:16px; margin-top:8px; }
+  .box .x{ float:right; cursor:pointer; color:#6a5e4f; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="site-title">看见缝隙的人</div>
+    <div class="tagline">林知秋 · 一个独立记者的城市笔记</div>
+    <div class="bio">关于我：写非虚构，走路，记录那些被忽略的人和事。喜欢在文字里藏东西——如果你足够仔细，总能<strong>在开头</strong>找到答案。</div>
+  </header>
+
+  <main>
+    <div class="latest">
+      <span class="flag">最新 · 置顶</span>
+      <div class="meta">2024 年 11 月 18 日 · 调查手记</div>
+      <h2><a href="blog-melody.html">听见深夜旋律的人</a></h2>
+      <p>钟楼街的居民说，他们在凌晨听见过一段无法形容的旋律。然后，那一段时间就从记忆里消失了。我花了三周，试图弄清这究竟是集体的幻觉，还是别的什么——这是我目前为止最不安的一次采访。</p>
+      <p style="margin-top:10px"><a class="more" href="blog-melody.html">阅读全文 →</a></p>
+    </div>
+
+    <div class="post">
+      <div class="meta">2024 年 9 月 2 日 · 城市漫步</div>
+      <h2><a href="blog-post-walk.html">在没有路灯的那条街上走到天亮</a></h2>
+      <p>有些街道白天和夜里像是两座城市。那天我决定从午夜走到清晨，只为了看看一座城在无人时的样子。</p>
+    </div>
+
+    <div class="post">
+      <div class="meta">2024 年 7 月 14 日 · 书评</div>
+      <h2><a href="blog-post-book.html">《被篡改的记忆》：我们记得的，有多少是真的？</a></h2>
+      <p>一本关于记忆可塑性的科普书。读完之后我有一周睡不好——原来记忆并不是录像带，而更像每次回想都重写一遍的草稿。</p>
+    </div>
+
+    <div class="post">
+      <div class="meta">2024 年 5 月 30 日 · 采访手记</div>
+      <h2><a href="blog-post-walk.html">那些不肯上镜的人</a></h2>
+      <p>做了五年记者，我越来越尊重那些选择沉默的人。沉默有时候不是怯懦，是一种我还没读懂的语言。</p>
+    </div>
+
+    <div class="post">
+      <div class="meta">2024 年 3 月 11 日 · 随笔</div>
+      <h2><a href="blog-post-book.html">为什么我把每件事都记下来</a></h2>
+      <p>因为我不相信自己的记忆。也因为，写下来的东西，别人没那么容易拿走。</p>
+    </div>
+  </main>
+
+  <footer>
+    © 2024 林知秋 · 看见缝隙的人 · 保留所有权利
+  </footer>
+</div>
+
+<div id="ds" title="">⏸</div>
+<div class="modal" id="modal">
+  <div class="box">
+    <span class="x" onclick="closeDS()">✕</span>
+    <h3>死人开关 · 最终层</h3>
+    <p>这一层需要密钥。如果你已经走完了全部的路，你会知道它是什么。</p>
+    <input id="dskey" type="text" placeholder="输入密钥" autocomplete="off">
+    <button onclick="tryDS()">解锁</button>
+    <div class="err" id="dserr"></div>
+  </div>
+</div>
+
+<script>
+  const norm = s => (s||'').trim().replace(/\s+/g,'').replace(/[，。、？！,.\?!]/g,'');
+  document.getElementById('ds').onclick = ()=> document.getElementById('modal').classList.add('on');
+  function closeDS(){ document.getElementById('modal').classList.remove('on'); }
+  // 从录音页带密钥回来时，自动弹出死人开关
+  if(new URLSearchParams(location.search).get('ds')==='1'){
+    document.getElementById('modal').classList.add('on');
+    setTimeout(()=>document.getElementById('dskey')?.focus(),300);
+  }
+  let dsTries = 0;
+  function tryDS(){
+    const v = norm(document.getElementById('dskey').value);
+    if(v==='明砚陈'){ location.href='switch.html'; return; }
+    dsTries++;
+    document.getElementById('dserr').textContent = dsTries<3
+      ? '密钥错误。'
+      : '密钥错误。它属于那个把一切留在录音里的人——让他的名字，像回声一样回来。';
+  }
+  document.getElementById('dskey')?.addEventListener('keydown', e=>{ if(e.key==='Enter') tryDS(); });
+</script>
+</body>
+</html>

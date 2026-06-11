@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企信宝 · 企业信息查询</title>
+<style>
+  :root{ --bg:#eef1f6; --card:#fff; --ink:#1f2937; --soft:#5b6573; --muted:#9aa3b2; --line:#e2e7ef; --acc:#2563eb; --bad:#dc2626; --warn:#d97706; --ok:#059669; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:-apple-system,"Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); line-height:1.6; }
+  .bar{ background:var(--card); border-bottom:1px solid var(--line); padding:14px 24px; display:flex; align-items:center; gap:14px; position:sticky; top:0; z-index:10; }
+  .logo{ font-weight:800; font-size:18px; color:var(--acc); white-space:nowrap; }
+  .search{ flex:1; display:flex; gap:8px; max-width:560px; }
+  .search input{ flex:1; padding:10px 14px; border:1px solid var(--line); border-radius:8px; font-size:14px; }
+  .search button{ padding:10px 20px; background:var(--acc); color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:14px; }
+  .wrap{ max-width:760px; margin:0 auto; padding:24px 18px 100px; }
+  .hint-bar{ background:#fff7ed; border:1px solid #fed7aa; color:var(--warn); font-size:13px; padding:10px 14px; border-radius:8px; margin-bottom:18px; }
+  .company{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:22px; margin-bottom:16px; }
+  .company .hd{ display:flex; align-items:flex-start; gap:12px; margin-bottom:16px; }
+  .company .nm{ font-size:20px; font-weight:700; }
+  .badge{ font-size:11px; padding:3px 9px; border-radius:5px; font-weight:600; white-space:nowrap; }
+  .b-live{ background:#ecfdf5; color:var(--ok); }
+  .b-dead{ background:#fef2f2; color:var(--bad); }
+  .b-shell{ background:#fffbeb; color:var(--warn); }
+  .kv{ display:grid; grid-template-columns:90px 1fr; gap:8px 14px; font-size:13.5px; margin-bottom:6px; }
+  .kv .k{ color:var(--muted); }
+  .kv .v{ color:var(--soft); }
+  .rel{ margin-top:16px; border-top:1px solid var(--line); padding-top:14px; }
+  .rel h4{ font-size:13px; color:var(--muted); margin-bottom:10px; letter-spacing:.03em; }
+  .relrow{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:13.5px; }
+  .relrow:last-child{ border-bottom:none; }
+  .relrow .role{ font-size:11px; color:var(--muted); min-width:84px; }
+  .link{ color:var(--acc); cursor:pointer; font-weight:600; }
+  .link:hover{ text-decoration:underline; }
+  .pct{ margin-left:auto; font-size:12px; color:var(--soft); }
+  .empty{ text-align:center; color:var(--muted); padding:50px 20px; font-size:14px; }
+  .crumbs{ font-size:12px; color:var(--muted); margin-bottom:14px; }
+  .crumbs span{ color:var(--acc); cursor:pointer; }
+  .next{ margin-top:24px; background:var(--card); border:1px solid var(--line); border-left:3px solid var(--acc); border-radius:10px; padding:20px; }
+  .next h4{ font-size:14px; margin-bottom:8px; color:var(--acc); }
+  .next p{ font-size:13.5px; color:var(--soft); margin-bottom:14px; }
+  .next .field{ display:flex; gap:8px; flex-wrap:wrap; }
+  .next input{ flex:1; min-width:200px; padding:11px 12px; border:1px solid var(--line); border-radius:7px; font-size:15px; }
+  .next button{ padding:11px 18px; background:var(--acc); color:#fff; border:none; border-radius:7px; cursor:pointer; }
+  .next .err{ width:100%; color:var(--bad); font-size:12.5px; min-height:16px; margin-top:8px; }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <div class="logo">企信宝</div>
+    <div class="search">
+      <input id="q" type="text" placeholder="输入公司名 / 代号 查询" autocomplete="off">
+      <button onclick="doSearch()">查询</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hint-bar">💡 程野说："下发这些推送的，是运营安眠岛的公司——锦屿网络。但你顺着它的钱往上查，会发现更有意思的东西。" 试着先查 <span class="link" onclick="go('锦屿网络')">锦屿网络</span>，再点开它背后的股东，一层层往上穿透。</div>
+    <div class="crumbs" id="crumbs"></div>
+    <div id="result"></div>
+
+    <div class="next">
+      <h4>→ 资金流拼图</h4>
+      <p>把两条线接上：一条是<strong>安眠岛 / 锦屿网络</strong>，一条是第一章那家<strong>回声科技</strong>。它们的钱，最终都流向了同一个实体。那个站在两者背后的公司，叫什么名字？</p>
+      <div class="field">
+        <input id="ans" type="text" placeholder="输入那个共同实体的名字" autocomplete="off">
+        <button onclick="check()">确认</button>
+        <div class="err" id="err"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const DB={
+    '锦屿网络':{ key:'锦屿网络', name:'锦屿网络科技有限公司', badge:['b-live','存续'],
+      kv:{ '统一信用代码':'91510100MA6***K2X7', '法定代表人':'周临', '注册地':'四川 · 锦城', '注册资本':'500 万元', '经营范围':'移动应用开发、声学技术服务（安眠岛 SleepIsle 运营方）' },
+      rel:[ {role:'天使轮投资',to:'静潮资本',pct:'持股 40%'}, {role:'创始团队',to:null,name:'周临 等 3 人',pct:'持股 60%'} ] },
+    '静潮资本':{ key:'静潮资本', name:'静潮资本管理（海宁）有限公司', badge:['b-shell','存续 · 疑似空壳'],
+      kv:{ '统一信用代码':'91330481MA2***Q9F0', '内部简称 / 代号':'ST-CAP（SILENT TIDE CAPITAL）', '注册地':'浙江 · 海宁', '注册资本':'1000 万元（认缴，实缴 0）', '参保人数':'0', '实际控制人':'经多层持股嵌套，无法穿透到自然人' },
+      rel:[ {role:'对外投资',to:'锦屿网络',pct:'持股 40%'}, {role:'破产清算资产受让（2020）',to:'回声科技',pct:'受让全部技术资产'}, {role:'上层股东',to:null,name:'离岸架构（开曼）· 信息不可见',pct:'—'} ] },
+    '回声科技':{ key:'回声科技', name:'回声科技有限公司', badge:['b-dead','已注销（2020）'],
+      kv:{ '统一信用代码':'91110108****5R3Q', '法定代表人':'（已注销）', '注册地':'已迁出', '历史业务':'智能声学 / 主动降噪（核心项目「频率同步」）', '注销方式':'破产清算' },
+      rel:[ {role:'清算资产受让方',to:'静潮资本',pct:'受让全部技术资产与专利'}, {role:'前首席研究员',to:null,name:'陈砚明（已离职 / 失联）',pct:'—'} ] },
+  };
+  const ALIAS={ '锦屿':'锦屿网络','锦屿网络科技':'锦屿网络','安眠岛':'锦屿网络','sleepisle':'锦屿网络',
+    'st-cap':'静潮资本','stcap':'静潮资本','静潮':'静潮资本','silent tide':'静潮资本','静潮资本管理':'静潮资本',
+    '回声':'回声科技','回声科技有限公司':'回声科技','echo':'回声科技' };
+
+  let trail=[];
+  function resolve(s){ s=(s||'').trim().toLowerCase();
+    for(const k in DB){ if(k.toLowerCase()===s) return k; }
+    if(ALIAS[s]) return ALIAS[s];
+    for(const a in ALIAS){ if(s.includes(a)) return ALIAS[a]; }
+    for(const k in DB){ if(s && (k.includes(s)||DB[k].name.toLowerCase().includes(s))) return k; }
+    return null;
+  }
+  function doSearch(){ go(document.getElementById('q').value); }
+  function go(s){
+    const k=resolve(s);
+    const res=document.getElementById('result');
+    if(!k){ res.innerHTML='<div class="empty">未找到匹配的企业。试试「锦屿网络」「静潮资本」「回声科技」，或代号「ST-CAP」。</div>'; document.getElementById('crumbs').innerHTML=''; return; }
+    if(trail[trail.length-1]!==k) trail.push(k);
+    renderCrumbs();
+    const c=DB[k];
+    let rel=c.rel.map(r=>{
+      const target = r.to ? `<span class="link" onclick="go('${r.to}')">${DB[r.to].name}</span>` : `<span style="color:var(--soft)">${r.name}</span>`;
+      return `<div class="relrow"><span class="role">${r.role}</span>${target}<span class="pct">${r.pct}</span></div>`;
+    }).join('');
+    let kv=Object.entries(c.kv).map(([k,v])=>`<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+    res.innerHTML=`<div class="company">
+      <div class="hd"><div class="nm">${c.name}</div><span class="badge ${c.badge[0]}">${c.badge[1]}</span></div>
+      ${kv}
+      <div class="rel"><h4>股权 / 关联关系（点击可继续穿透）</h4>${rel}</div>
+    </div>`;
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function renderCrumbs(){
+    document.getElementById('crumbs').innerHTML='穿透路径：'+trail.map((k,i)=>`<span onclick="jump(${i})">${DB[k].name.replace(/（.*?）|有限公司|管理/g,'')}</span>`).join(' → ');
+  }
+  function jump(i){ trail=trail.slice(0,i+1); go(trail[i]); }
+  document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+  let tries=0;
+  function check(){
+    const v=(document.getElementById('ans').value||'').trim().replace(/资本|管理|（.*?）|\(.*?\)|公司|有限/g,'').toLowerCase();
+    const err=document.getElementById('err');
+    if(v==='静潮'||v.includes('静潮')||v==='st-cap'||v==='stcap'||v.includes('silent tide')){ location.href='end.html'; return; }
+    tries++;
+    if(tries<3){ err.textContent='不对。查锦屿网络的股东，再查回声科技的清算受让方——看哪个名字两边都出现了。'; }
+    else if(tries<5){ err.textContent='不对。那家注册在海宁、参保人数为 0、代号 ST-CAP 的"空壳"。'; }
+    else { err.textContent='提示：答案是「静潮资本」。'; }
+  }
+  document.getElementById('ans').addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+
+  go('锦屿网络');
+</script>
+</body>
+</html>

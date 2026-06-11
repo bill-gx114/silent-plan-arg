@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回声科技 · 员工内部系统</title>
+<!--
+  系统维护备注（IT，2019.11.10）：
+  陈砚明（CYM）于 11 月 9 日上传了最后一个文件后，账号再未登录。
+  该文件未走正常审批，被他藏进了归档区（archive/legacy），归档页文件名：
+      echo-archive-legacy-testimony.html
+  尚未清理。等上级指示。
+-->
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:"Menlo","Consolas",monospace; background:#0a0f0c; color:#9fd9b0; line-height:1.7; }
+  /* 登录态 */
+  .login{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .login .box{ width:100%; max-width:380px; border:1px solid #1c3326; background:#0d1410; border-radius:6px; padding:30px; }
+  .login h1{ font-size:16px; color:#6fcf97; margin-bottom:4px; letter-spacing:.1em; }
+  .login .sub{ font-size:12px; color:#5a7a64; margin-bottom:22px; }
+  .login label{ font-size:12px; color:#7fae8c; display:block; margin-bottom:6px; }
+  .login input{ width:100%; padding:11px; background:#091009; border:1px solid #234; color:#bdf; border-radius:4px; font-size:15px; font-family:inherit; }
+  .login button{ margin-top:16px; width:100%; padding:11px; background:#1a5c38; color:#cffadd; border:1px solid #2d7a4f; border-radius:4px; cursor:pointer; letter-spacing:.15em; }
+  .login .err{ color:#d08a5a; font-size:12px; min-height:16px; margin-top:10px; }
+  .login .tip{ color:#4a6a54; font-size:11.5px; margin-top:14px; line-height:1.6; }
+  /* 内网态 */
+  #app{ display:none; max-width:840px; margin:0 auto; padding:24px 20px 90px; }
+  .head{ border-bottom:1px solid #1c3326; padding-bottom:14px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; }
+  .head .t{ color:#6fcf97; font-size:15px; letter-spacing:.1em; }
+  .head .u{ font-size:12px; color:#5a7a64; }
+  .blink{ animation:bl 1.2s steps(2) infinite; } @keyframes bl{50%{opacity:.3}}
+  .panel{ border:1px solid #1c3326; background:#0d1410; border-radius:6px; margin-bottom:18px; }
+  .panel .bar{ padding:10px 16px; border-bottom:1px solid #1c3326; font-size:13px; color:#8fd0a2; display:flex; justify-content:space-between; }
+  .panel .body{ padding:16px; font-size:13.5px; color:#a9d9b8; }
+  .deleted{ color:#5a6a60; font-style:italic; }
+  .file{ display:flex; align-items:center; gap:10px; padding:9px 12px; border:1px solid #16281d; border-radius:4px; margin-bottom:8px; background:#0b110d; }
+  .file .nm{ flex:1; }
+  .file .tag{ font-size:11px; padding:2px 8px; border-radius:3px; }
+  .tag.warn{ background:#3a2410; color:#e0a060; }
+  .tag.del{ background:#2a1010; color:#c06060; }
+  .memo{ background:#0b1410; border:1px solid #234a32; border-radius:5px; padding:18px; color:#bfe6cc; font-size:13.5px; line-height:1.85; white-space:pre-wrap; }
+  .memo .sig{ color:#7fae8c; margin-top:14px; }
+  .reveal{ display:none; }
+  .hintline{ color:#5a7a64; font-size:12px; margin-top:10px; }
+  a.path{ color:#6fcf97; }
+</style>
+</head>
+<body>
+
+<!-- 登录页 -->
+<div class="login" id="login">
+  <div class="box">
+    <h1>ECHO // 内部系统</h1>
+    <div class="sub">EMPLOYEE ACCESS ONLY · v2.3.1</div>
+    <label>访问码</label>
+    <input id="code" type="text" placeholder="ACCESS CODE" autocomplete="off">
+    <button onclick="tryLogin()">登 录</button>
+    <div class="err" id="err"></div>
+    <div class="tip">系统残留通道 · 未随主站注销 · 仅限项目核心成员</div>
+  </div>
+</div>
+
+<!-- 内网 -->
+<div id="app">
+  <div class="head">
+    <div class="t">ECHO // 内部系统 <span class="blink">_</span></div>
+    <div class="u">访客会话 · 大部分数据已被清理</div>
+  </div>
+
+  <div class="panel">
+    <div class="bar"><span>📂 项目档案</span><span>权限：只读（残留）</span></div>
+    <div class="body">
+      <div class="file"><span class="nm">PROJECT_频率同步 / 概述.doc</span><span class="tag warn">部分残留</span></div>
+      <div class="file"><span class="nm">PROJECT_频率同步 / 实验数据_2019Q3.xlsx</span><span class="tag del">已删除</span></div>
+      <div class="file"><span class="nm">PROJECT_频率同步 / 钟楼街部署记录.pdf</span><span class="tag del">已删除</span></div>
+      <p style="margin-top:8px"><b style="color:#8fd0a2">「频率同步」项目摘要（残留片段）：</b></p>
+      <p style="margin-top:6px">本项目研究特定频率（约 18–19Hz 次声波段）对人类短期记忆<b>编码过程</b>的干扰效应。实验阶段：<span style="color:#e0a060">已完成</span>。部署阶段：<span style="color:#e0a060">进行中</span>。</p>
+      <p class="deleted" style="margin-top:6px">［以下 47 页内容已被管理员删除］</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="bar"><span>✉ 异议备忘（未删除 · 疑似遗漏）</span><span>来自：陈砚明</span></div>
+    <div class="body">
+      <div class="memo">致管理层：
+
+我第四次正式要求终止「频率同步」的社区测试。
+
+实验室数据和现实部署之间，存在不可接受的偏差——
+我们的模型预测记忆干扰窗口为 5 分钟，
+但钟楼街的实地数据显示，窗口已经扩大到了 30 分钟。
+
+更令我无法接受的是：
+3 号受试者在干扰窗口内，被植入了一段她从未经历过的「记忆」，
+且至今深信不疑。
+
+这已经不是降噪研究了。你们清楚这是什么。
+
+我给你们一周时间。如果项目不停止，我会向外部报告。<div class="sig">—— 陈砚明　2019.11.02</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="bar"><span>👥 员工通讯录</span><span>多数条目已清空</span></div>
+    <div class="body">
+      <div class="file"><span class="nm">陈砚明 · 首席研究员 · <span style="color:#c06060">已离职</span></span><span class="tag warn">最后登录 2019.11.09</span></div>
+      <p class="hintline">注：陈砚明的最后登录日（11.09），恰好是他在异议备忘里给出的「一周期限」的最后一天。那天之后，他再没有出现过。</p>
+      <p class="hintline" style="margin-top:14px;color:#7fae8c">⌕ 检索系统残留……发现 1 条未清理的运维备注（2019.11.10）。<br>备注正文：<span style="color:#5a7a64">［字段损坏，前端无法渲染。原始数据仍在本页底层。］</span></p>
+      <details style="margin-top:14px;font-size:12px;color:#7fae8c"><summary style="cursor:pointer;color:#5a7a64">⚿ 需要帮助？（第一层提示）</summary>
+        <p class="hintline" style="margin-top:8px">「前端无法渲染」不等于不存在。你现在看到的一切，都只是这个页面的<b>渲染结果</b>——而页面的<b>原文</b>，浏览器一直都拿在手里。</p>
+        <details style="margin-top:10px"><summary style="cursor:pointer;color:#5a7a64">⚿ 还是卡住？（第二层提示）</summary>
+          <p class="hintline" style="margin-top:8px">右键 → 「查看网页源代码」（手机端：在地址栏网址前加 view-source: ）。运维把那个归档页的文件名写在了注释里——找到后，把它接在当前网址最后一段的位置访问。实在无法查看源码，<a class="path" href="echo-archive-legacy-testimony.html">从这里直接前往 →</a></p>
+        </details>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script>
+  let loginTries=0;
+  function tryLogin(){
+    const v=(document.getElementById('code').value||'').trim().replace(/hz/ig,'').replace(/\s/g,'');
+    const err=document.getElementById('err');
+    if(v==='18.9'){
+      document.getElementById('login').style.display='none';
+      document.getElementById('app').style.display='block';
+      window.scrollTo(0,0);
+      return;
+    }
+    loginTries++;
+    if(loginTries<3){ err.textContent='ACCESS DENIED · 访问码错误'; }
+    else if(loginTries<5){ err.textContent='ACCESS DENIED · 这家公司的一切，都围绕一个数字运转'; }
+    else { err.textContent='ACCESS DENIED · 钟楼街的那面墙上，freq: 后面写着什么？'; }
+  }
+  document.getElementById('code').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
+</script>
+</body>
+</html>

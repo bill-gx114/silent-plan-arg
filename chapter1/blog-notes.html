@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>田野笔记 · 钟楼街的 500 米</title>
+<style>
+  :root{ --bg:#14130f; --card:#1b1a15; --ink:#d8d2c4; --muted:#8c8576; --line:#2c2a22; --accent:#c08a4a; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ background:var(--bg); color:var(--ink); font-family:"Menlo","Courier New",monospace; line-height:1.8; }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 22px 100px; }
+  .top{ padding:24px 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:baseline; }
+  .top a{ color:var(--accent); text-decoration:none; font-size:13px; }
+  .lock{ font-size:12px; color:var(--muted); }
+  h1{ font-size:24px; margin:34px 0 6px; letter-spacing:.02em; font-family:Georgia,"Songti SC",serif; }
+  .sub{ color:var(--muted); font-size:13px; margin-bottom:30px; }
+  .entry{ background:var(--card); border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:5px; padding:16px 18px; margin-bottom:16px; }
+  .entry .day{ color:var(--accent); font-size:13px; letter-spacing:.1em; margin-bottom:6px; }
+  .entry p{ font-size:14.5px; color:#cfc8b8; }
+  .photos{ margin-top:34px; }
+  .photos h2{ font-size:16px; color:var(--ink); margin-bottom:6px; font-family:Georgia,serif; }
+  .photos .note{ font-size:13px; color:var(--muted); margin-bottom:18px; line-height:1.7; }
+  .grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  @media(max-width:560px){ .grid{ grid-template-columns:1fr; } }
+  .frame{ background:#0c0b08; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .frame .cap{ font-size:11.5px; color:var(--muted); padding:7px 10px; border-top:1px solid var(--line); display:flex; justify-content:space-between; }
+  .frame.key .cap{ color:var(--accent); }
+  .frame svg{ display:block; width:100%; height:auto; }
+  .darkroom{ margin-top:24px; background:var(--card); border:1px solid var(--line); border-radius:6px; padding:16px 18px; }
+  .darkroom h3{ font-size:14px; margin-bottom:4px; }
+  .darkroom p{ font-size:12.5px; color:var(--muted); margin-bottom:14px; }
+  .slider-row{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .slider-row label{ font-size:12px; color:var(--muted); width:84px; }
+  .slider-row input[type=range]{ flex:1; accent-color:var(--accent); }
+  .slider-row .val{ font-size:12px; color:var(--ink); width:42px; text-align:right; }
+  #photo3wrap{ transition:filter .1s; }
+  .next{ margin-top:34px; background:#171510; border:1px solid var(--line); border-radius:6px; padding:20px; }
+  .next h4{ color:var(--accent); font-size:14px; margin-bottom:8px; }
+  .next p{ font-size:13.5px; color:#bdb6a6; margin-bottom:14px; }
+  .next .field{ display:flex; gap:8px; flex-wrap:wrap; }
+  .next input{ flex:1; min-width:200px; padding:10px 12px; background:#0e0d09; border:1px solid var(--line); color:var(--ink); border-radius:4px; font-size:15px; font-family:inherit; }
+  .next button{ padding:10px 18px; background:var(--accent); color:#1a1206; border:none; border-radius:4px; font-weight:600; cursor:pointer; }
+  .next .err{ width:100%; color:#d08a5a; font-size:12.5px; min-height:16px; margin-top:8px; }
+  .next .ok{ color:#7fb069; }
+  .fx-grain,.fx-vignette{ position:fixed; inset:0; pointer-events:none; z-index:99; }
+  .fx-vignette{ box-shadow:inset 0 0 200px 50px rgba(0,0,0,.7); }
+  .fx-grain{ opacity:.04; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation:grain .5s steps(3) infinite; }
+  @keyframes grain{ 0%{transform:translate(0,0)} 33%{transform:translate(-5px,3px)} 66%{transform:translate(4px,-4px)} 100%{transform:translate(0,0)} }
+</style>
+</head>
+<body>
+<div class="fx-vignette"></div>
+<div class="fx-grain"></div>
+<div class="wrap">
+  <div class="top"><a href="blog-melody.html">← 返回文章</a><span class="lock">🔒 田野笔记 · 已解锁</span></div>
+
+  <h1>钟楼街的 500 米</h1>
+  <div class="sub">林知秋 · 私人调查笔记 · 请勿外传</div>
+
+  <div class="entry"><div class="day">DAY 1</div><p>走访了 7 户「失音症」居民，逐户记录症状与发作时间。所有人都提到凌晨的那段旋律，所有人都有 15–30 分钟的记忆空白。没有人愿意正式录音。</p></div>
+  <div class="entry"><div class="day">DAY 3</div><p>把所有病例的住址标到地图上之后，我愣住了——它们全部落在以钟楼街 29 号为圆心、半径约 500 米的范围内。出了这个圈，再没有一例。这不是巧合。</p></div>
+  <div class="entry"><div class="day">DAY 5</div><p>钟楼街 29 号是一栋废弃建筑，门口挂着「危险建筑 禁止入内」的牌子。可我查了市政档案——这栋楼从来没有被列入过危房名单。是谁挂的牌子？为什么不让人靠近？</p></div>
+  <div class="entry"><div class="day">DAY 7</div><p>我决定进去看看，带了相机。里面比想象的空，但七楼有一间房不一样：墙上有设备拆走后留下的痕迹，还有人留下过什么。光线太差了，照片几乎全黑。我没有修图——有些东西，得自己冲出来才算亲眼看见。</p></div>
+
+  <div class="photos">
+    <h2>现场照片（4 张）</h2>
+    <div class="note">钟楼街 29 号 · 七楼。手持，无闪光灯。</div>
+    <div class="grid">
+      <!-- 照片1：走廊 -->
+      <div class="frame">
+        <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
+          <rect width="320" height="220" fill="#0a0908"/>
+          <polygon points="60,0 260,0 200,220 120,220" fill="#121009"/>
+          <polygon points="120,220 200,220 175,80 145,80" fill="#1a1610"/>
+          <rect x="20" y="40" width="40" height="150" fill="#0d0b08"/>
+          <rect x="262" y="40" width="40" height="150" fill="#0d0b08"/>
+          <rect x="140" y="78" width="40" height="70" fill="#070605"/>
+          <circle cx="160" cy="30" r="18" fill="#2a2519" opacity="0.5"/>
+        </svg>
+        <div class="cap"><span>IMG_0418.JPG</span><span>f/2.8 · 1/15s</span></div>
+      </div>
+      <!-- 照片2：拆除痕迹 -->
+      <div class="frame">
+        <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
+          <rect width="320" height="220" fill="#100d09"/>
+          <rect x="0" y="0" width="320" height="150" fill="#15110b"/>
+          <rect x="40" y="30" width="90" height="60" fill="#0a0806" opacity="0.8"/>
+          <rect x="150" y="40" width="120" height="80" fill="#0b0907" opacity="0.7"/>
+          <line x1="40" y1="30" x2="130" y2="90" stroke="#221c12" stroke-width="2"/>
+          <rect x="0" y="150" width="320" height="70" fill="#0c0a07"/>
+          <text x="200" y="180" fill="#1c1810" font-size="9" font-family="monospace">— 设备已拆除 —</text>
+        </svg>
+        <div class="cap"><span>IMG_0421.JPG</span><span>f/2.8 · 1/10s</span></div>
+      </div>
+      <!-- 照片3：墙面 -->
+      <div class="frame">
+        <div>
+        <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
+          <rect width="320" height="220" fill="#0a0908"/>
+          <!-- 墙体纹理 -->
+          <rect x="0" y="0" width="320" height="220" fill="#13110c"/>
+          <rect x="10" y="12" width="300" height="196" fill="#100e0a"/>
+          <rect x="0" y="150" width="320" height="8" fill="#0c0a07" opacity="0.6"/>
+          <circle cx="50" cy="60" r="30" fill="#0d0b08" opacity="0.6"/>
+          <circle cx="270" cy="170" r="40" fill="#0c0a07" opacity="0.5"/>
+          <!-- 隐藏喷漆：颜色极接近背景，需提高亮度/对比度才能看清 -->
+          <g font-family="'Courier New',monospace">
+            <text x="40" y="78" fill="#15130f" font-size="26" font-weight="bold" letter-spacing="3">ECHO-LAB-7F</text>
+            <text x="42" y="118" fill="#141210" font-size="18" letter-spacing="2">2019.03.15</text>
+            <text x="42" y="152" fill="#16140f" font-size="20" font-weight="bold" letter-spacing="2">freq: 18.9Hz</text>
+          </g>
+          <!-- 噪点遮罩 -->
+          <rect width="320" height="220" fill="url(#noise)" opacity="0.04"/>
+          <defs>
+            <pattern id="noise" width="4" height="4" patternUnits="userSpaceOnUse">
+              <rect width="4" height="4" fill="#000"/><circle cx="1" cy="1" r="0.5" fill="#fff"/>
+            </pattern>
+          </defs>
+        </svg>
+        </div>
+        <div class="cap"><span>IMG_0427.JPG</span><span>f/2.8 · 1/8s</span></div>
+      </div>
+      <!-- 照片4：窗 -->
+      <div class="frame">
+        <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
+          <rect width="320" height="220" fill="#0b0a08"/>
+          <rect x="90" y="40" width="140" height="140" fill="#1a1813"/>
+          <rect x="96" y="46" width="128" height="128" fill="#0e0c09"/>
+          <line x1="160" y1="46" x2="160" y2="174" stroke="#070605" stroke-width="4"/>
+          <line x1="96" y1="110" x2="224" y2="110" stroke="#070605" stroke-width="4"/>
+          <circle cx="130" cy="80" r="10" fill="#211d14" opacity="0.6"/>
+        </svg>
+        <div class="cap"><span>IMG_0433.JPG</span><span>f/2.8 · 1/13s</span></div>
+      </div>
+    </div>
+
+    <div class="darkroom">
+      <h3>🎞 暗房工具</h3>
+      <p>调整曝光与对比度，冲洗上面的照片。</p>
+      <div class="slider-row">
+        <label>曝光 / 亮度</label>
+        <input type="range" id="bright" min="100" max="900" value="100">
+        <span class="val" id="brightVal">100%</span>
+      </div>
+      <div class="slider-row">
+        <label>对比度</label>
+        <input type="range" id="contrast" min="100" max="700" value="100">
+        <span class="val" id="contrastVal">100%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="next">
+    <h4>→ 知秋的加密附注</h4>
+    <p>「下一段调查已锁定。钥匙：<strong>一切开始的那一天</strong>。」</p>
+    <div class="field">
+      <input id="freq" type="text" placeholder="????.??.??" autocomplete="off">
+      <button onclick="checkGate()">确认</button>
+      <div class="err" id="freqErr"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const b=document.getElementById('bright'), c=document.getElementById('contrast');
+  const photos=document.querySelectorAll('.grid svg');
+  function apply(){
+    photos.forEach(p=>{ p.style.filter=`brightness(${b.value}%) contrast(${c.value}%)`; });
+    document.getElementById('brightVal').textContent=b.value+'%';
+    document.getElementById('contrastVal').textContent=c.value+'%';
+  }
+  b.oninput=apply; c.oninput=apply;
+
+  let gateTries=0;
+  function checkGate(){
+    const v=(document.getElementById('freq').value||'').replace(/\D/g,'');
+    const err=document.getElementById('freqErr');
+    if(v==='20190315'||v==='2019315'){ location.href='echo-tech.html'; return; }
+    gateTries++;
+    if(gateTries<3){ err.textContent='不对。那一天，被留在了这房间里的某个地方。'; }
+    else if(gateTries<5){ err.textContent='不对。墙记得那一天。照片还没有冲干净。'; }
+    else { err.textContent='提示：把照片冲洗到足够亮，墙上喷漆的第二行，就是那个日子。'; }
+  }
+  document.getElementById('freq').addEventListener('keydown',e=>{if(e.key==='Enter')checkGate();});
+</script>
+</body>
+</html>

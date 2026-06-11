@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一条转来的消息</title>
+<!-- 有些声音，是从别人嘴里借走的。 -->
+<style>
+  :root{ --bg:#0a0f14; --panel:#10171e; --in:#15212b; --text:#dde7ee; --muted:#6a7a86; --acc:#46c7d8; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{ background:var(--bg); color:var(--text); font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:16px; }
+  .win{ width:100%; max-width:480px; height:min(86vh,780px); background:var(--panel); border:1px solid #1b2731; border-radius:16px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.6); }
+  .bar{ padding:14px 18px; border-bottom:1px solid #1b2731; display:flex; align-items:center; gap:10px; background:#0c1318; }
+  .ava{ width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1c3a42,#2b5560);display:flex;align-items:center;justify-content:center;font-size:14px;color:#9fd4dc; }
+  .bar .nm{ font-size:14px; } .bar .nm small{ display:block; color:var(--muted); font-size:11px; }
+  .bar .wave{ margin-left:auto; font-size:11px; color:var(--acc); }
+  .feed{ flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:12px; }
+  .msg{ max-width:86%; padding:10px 13px; border-radius:12px; font-size:14px; line-height:1.6; background:var(--in); border-top-left-radius:3px; opacity:0; transform:translateY(8px); animation:rise .45s forwards; }
+  .msg.link{ background:transparent; border:1px solid var(--acc); }
+  .msg.link a{ color:var(--acc); text-decoration:none; }
+  .msg.audio{ background:#13202a; border:1px solid #244049; display:flex; align-items:center; gap:10px; font-family:monospace; font-size:12.5px; color:#9fd4dc; cursor:default; }
+  .msg.audio .pp{ font-size:16px; }
+  .msg.audio .bars{ display:flex; gap:2px; align-items:flex-end; height:18px; }
+  .msg.audio .bars i{ width:3px; background:var(--acc); animation:eq 1s infinite ease-in-out; }
+  @keyframes eq{0%,100%{height:4px}50%{height:16px}}
+  .sys{ align-self:center; font-size:11px; color:var(--muted); background:none; text-align:center; max-width:92%; }
+  @keyframes rise{ to{opacity:1;transform:translateY(0);} }
+  .typing-bubble{ background:var(--in); border-top-left-radius:3px; max-width:60px; display:flex; gap:5px; align-items:center; padding:13px; }
+  .typing-bubble span{ width:6px;height:6px;border-radius:50%;background:var(--muted);animation:td 1.3s infinite; }
+  .typing-bubble span:nth-child(2){animation-delay:.2s;} .typing-bubble span:nth-child(3){animation-delay:.4s;}
+  @keyframes td{0%,60%,100%{opacity:.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-4px);}}
+  .hint{ text-align:center; font-size:11px; color:#36424c; padding:10px; }
+  .fx-grain,.fx-vignette{ position:fixed; inset:0; pointer-events:none; z-index:99; }
+  .fx-vignette{ box-shadow:inset 0 0 180px 40px rgba(0,0,0,.7); }
+  .fx-grain{ opacity:.04; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation:grain .5s steps(3) infinite; }
+  @keyframes grain{0%{transform:translate(0,0)}33%{transform:translate(-5px,3px)}66%{transform:translate(4px,-4px)}100%{transform:translate(0,0)}}
+</style>
+</head>
+<body>
+  <div class="fx-vignette"></div>
+  <div class="fx-grain"></div>
+  <div class="win">
+    <div class="bar">
+      <div class="ava">苏</div>
+      <div class="nm">苏黎<small>海宁人民广播电台 · 主播</small></div>
+      <div class="wave">● 在线</div>
+    </div>
+    <div class="feed" id="feed"></div>
+    <div class="hint">这条对话，不在台里的系统记录里。</div>
+  </div>
+<script>
+  const feed=document.getElementById('feed');
+  const script=[
+    {t:'sys',x:'— 一个海宁本地号码，添加了你为联系人 —'},
+    {t:'in',x:'你好。冒昧加你。我叫苏黎，在海宁电台做一档深夜节目，叫《海风》。'},
+    {t:'in',x:'我是顺着你公开的那些东西找过来的——钟楼街、安眠岛、那个叫"静潮资本"的空壳。'},
+    {t:'in',x:'因为我这边，也出事了。而且，比你想的更靠近源头。'},
+    {t:'in',x:'上周开始，有听众说，在我节目的重播里听到了我"从没录过"的内容。'},
+    {t:'in',x:'最邪门的是那天之后——整个海港新村的人，都"记得"前一晚有过一场台风预警。可那晚，天气好得很，根本没有任何预警。'},
+    {t:'in',x:'我去翻了重播存档。有一期，时长不对。重播比我原本录的，多了几分钟。'},
+    {t:'in',x:'那多出来的几分钟里，背景有种声音。我把它单独抽出来反复听……它不是杂音。它是有"结构"的。像电报。'},
+    {t:'in',x:'我一个人弄不明白。但还有一件事，是我必须给你听的——'},
+    {t:'audio',x:'语音留言 · 00:14 · 来源：未知外地号码'},
+    {t:'in',x:'这段是匿名转进我台里信箱的。是个女人的声音。她说她叫……林知秋。'},
+    {t:'in',x:'她说，如果有人能听到这段，就让他"顺着海风，找到我"。'},
+    {t:'in',x:'她还活着，对不对？帮我。也帮她。'},
+    {t:'link',x:'→ 打开《海风》节目存档',href:'radio.html'},
+    {t:'sys',x:'苏黎正在等待…'},
+  ];
+  let i=0;
+  function render(m){
+    const el=document.createElement('div');
+    if(m.t==='sys'){el.className='msg sys';el.textContent=m.x;}
+    else if(m.t==='link'){el.className='msg link';el.innerHTML='<a href="'+m.href+'">'+m.x+'</a>';}
+    else if(m.t==='audio'){el.className='msg audio';el.innerHTML='<span class="pp">▶</span><div class="bars"><i style="animation-delay:0s"></i><i style="animation-delay:.2s"></i><i style="animation-delay:.4s"></i><i style="animation-delay:.1s"></i><i style="animation-delay:.3s"></i></div><span>'+m.x+'</span>';}
+    else{el.className='msg';el.textContent=m.x;}
+    feed.appendChild(el); feed.scrollTop=feed.scrollHeight;
+  }
+  function showTyping(cb,dur){
+    const t=document.createElement('div'); t.className='msg typing-bubble';
+    t.innerHTML='<span></span><span></span><span></span>';
+    feed.appendChild(t); feed.scrollTop=feed.scrollHeight;
+    setTimeout(()=>{t.remove();cb();},dur);
+  }
+  function next(){
+    if(i>=script.length)return;
+    const m=script[i++];
+    if(m.t==='in'){ showTyping(()=>{render(m);setTimeout(next,460);}, Math.min(1800,600+m.x.length*28)); }
+    else{ render(m); setTimeout(next, m.t==='link'?900:1000); }
+  }
+  setTimeout(next,700);
+</script>
+</body>
+</html>
