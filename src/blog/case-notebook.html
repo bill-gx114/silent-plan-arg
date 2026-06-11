@@ -37,6 +37,12 @@
   </main>
   <script type="module">
     import { notebookView, submitNotebook } from "./blog.js";
+    const params = new URLSearchParams(location.search);
+    if (params.get("fragment")) document.querySelector("#fragment-input").value = params.get("fragment");
+    if (params.get("token")) document.querySelector("#token-input").value = params.get("token");
+    if (params.get("fragment") || params.get("token")) {
+      document.querySelector("#status").textContent = "档案镜像已把两项材料带回。请逐项确认并提交，系统不会自动替你采信证据。";
+    }
     const render = () => {
       const { state, endings: available } = notebookView();
       document.querySelector("#memo-count").textContent = state.memos;
