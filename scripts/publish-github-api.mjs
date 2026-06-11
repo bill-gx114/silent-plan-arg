@@ -1,0 +1,50 @@
+import { execFileSync, spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+
+const repository = process.argv[2];
+if (!repository || !repository.includes("/")) {
+  throw new Error("Usage: node scripts/publish-github-api.mjs owner/repository");
+}
+
+function gh(path, method = "GET", input) {
+  const args = ["api", `repos/${repository}/${path}`];
+  if (method !== "GET") args.push("--method", method);
+  if (input !== undefined) args.push("--input", "-");
+  const result = spawnSync("gh", args, {
+    input: input === undefined ? undefined : JSON.stringify(input),
+    encoding: "utf8",
+    maxBuffer: 20 * 1024 * 1024
+  });
+  if (result.status !== 0) throw new Error(result.stderr || result.stdout);
+  return result.stdout ? JSON.parse(result.stdout) : null;
+}
+
+const files = execFileSync("git", ["ls-files", "-z"]).toString("utf8").split("\0").filter(Boolean);
+const tree = [];
+let completed = 0;
+
+for (const path of files) {
+  const content = readFileSync(path).toString("base64");
+  const blob = gh("git/blobs", "POST", { content, encoding: "base64" });
+  tree.push({ path, mode: "100644", type: "blob", sha: blob.sha });
+  completed += 1;
+  if (completed % 10 === 0 || completed === files.length) {
+    console.log(`Uploaded ${completed}/${files.length} files`);
+  }
+}
+
+const createdTree = gh("git/trees", "POST", { tree });
+const commit = gh("git/commits", "POST", {
+  message: "Build layered investigation ARG",
+  tree: createdTree.sha
+});
+
+try {
+  gh("git/refs", "POST", { ref: "refs/heads/main", sha: commit.sha });
+} catch (error) {
+  if (!String(error.message).includes("Reference already exists")) throw error;
+  gh("git/refs/heads/main", "PATCH", { sha: commit.sha, force: true });
+}
+
+console.log(JSON.stringify({ repository, commit: commit.sha, files: files.length }));
+
