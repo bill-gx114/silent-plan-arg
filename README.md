@@ -2,6 +2,9 @@
 
 都市悬疑 ARG《寂静计划》的静态网页项目。新版第一章将原有线性密码链重构为三个相互验证的调查站点：
 
+- 在线游玩：https://bill-gx114.github.io/silent-plan-arg/
+- GitHub：https://github.com/bill-gx114/silent-plan-arg
+
 - 林知秋的个人博客
 - Echo Technologies 企业官网
 - `legacy.echo-mirror` 废弃档案镜像
@@ -35,4 +38,3 @@ npm test
 ## 游玩提示
 
 新版第一章电脑优先。手机可以阅读全部剧情，并提供降低沉浸感的兼容取证路径。
-
