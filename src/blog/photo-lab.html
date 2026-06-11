@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>照片取证台 · ZL-0315</title>
+  <link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="blog.css">
+</head>
+<body>
+  <main class="shell">
+    <div class="topbar"><span class="brand">照片取证台</span><a href="attachments.html">返回附件</a></div>
+    <section class="grid">
+      <div class="panel">
+        <div class="lab-photo" id="photo">
+          <svg viewBox="0 0 800 430" role="img" aria-label="钟楼街旧楼暗部照片">
+            <rect width="800" height="430" fill="#15130f"/>
+            <rect x="120" y="55" width="560" height="340" fill="#242019"/>
+            <rect x="175" y="100" width="130" height="210" fill="#090b0c"/>
+            <rect x="495" y="100" width="130" height="210" fill="#090b0c"/>
+            <rect x="352" y="160" width="95" height="235" fill="#080808"/>
+            <rect x="370" y="180" width="58" height="20" fill="#91ffb0"/>
+            <text x="399" y="195" fill="#092d14" font-size="14" text-anchor="middle">EXIT</text>
+            <g fill="#4e493f" font-family="monospace" font-size="24">
+              <text x="170" y="350">ECHO / ACOUSTIC TEST UNIT</text>
+              <text x="170" y="380">BACKUP GRID: E-29</text>
+            </g>
+          </svg>
+        </div>
+        <label>亮度 <input id="brightness" type="range" min="25" max="180" value="32"></label>
+        <label>对比度 <input id="contrast" type="range" min="80" max="260" value="160"></label>
+      </div>
+      <aside class="panel">
+        <h1>材料对齐</h1>
+        <p><b>图片元数据：</b>2019-03-15 02:21:36</p>
+        <p><b>采访记录：</b>02:17–02:33 出现记忆空白。</p>
+        <p><b>停电公告：</b>02:00–04:00，钟楼街 11–47 号市电中断。</p>
+        <p><b>建筑档案：</b>只有 29 号旧实验楼登记了独立备用电源。</p>
+        <form id="photo-form">
+          <label>哪项细节证明照片不是普通废楼？<select id="proof"><option value="">选择证据</option><option value="graffiti">墙上喷漆</option><option value="exit">停电时仍亮着的出口灯</option><option value="window">窗户数量</option></select></label>
+          <button class="primary" type="submit">提交证据组合</button>
+          <p id="status" class="status" role="status"></p>
+        </form>
+        <button id="memo" type="button">使用一枚备忘</button>
+        <p id="hint" class="muted"></p>
+      </aside>
+    </section>
+    <section id="result" class="panel hidden">
+      <h2>结论：病例源点是钟楼街 29 号</h2>
+      <p>出口灯、备用电登记与照片时间形成三点交叉验证。反光标识同时指向 Echo Technologies。</p>
+      <p>隐藏证据片段：<span class="fragment-chip">BLACKOUT</span></p>
+      <p><a data-site="corporate" href="../corporate/">调查 Echo Technologies →</a></p>
+    </section>
+  </main>
+  <script type="module">
+    import { completePuzzle, useMemo } from "./blog.js";
+    const apply = () => {
+      document.querySelector("#photo").style.setProperty("--brightness", `${document.querySelector("#brightness").value / 100}`);
+      document.querySelector("#photo").style.setProperty("--contrast", `${document.querySelector("#contrast").value / 100}`);
+    };
+    document.querySelector("#brightness").addEventListener("input", apply);
+    document.querySelector("#contrast").addEventListener("input", apply);
+    apply();
+    document.querySelector("#photo-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const ok = document.querySelector("#proof").value === "exit" && Number(document.querySelector("#brightness").value) >= 75;
+      document.querySelector("#status").textContent = ok ? "证据组合成立。" : "这个细节还不能排除另外三栋建筑。";
+      if (ok) { completePuzzle("p2"); document.querySelector("#result").classList.remove("hidden"); }
+    });
+    document.querySelector("#memo").addEventListener("click", () => {
+      document.querySelector("#hint").textContent = useMemo("p2").hint;
+    });
+  </script>
+</body>
+</html>

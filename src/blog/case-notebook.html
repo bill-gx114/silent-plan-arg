@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>案件笔记 · 林知秋</title>
+  <link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="blog.css">
+</head>
+<body>
+  <main class="shell">
+    <div class="topbar"><span class="brand">CASE NOTEBOOK / ZL-0315</span><a href="blog.html">返回博客</a></div>
+    <section class="notebook-grid">
+      <aside class="panel">
+        <p class="eyebrow">剩余备忘</p>
+        <div class="memo-count" id="memo-count">3</div>
+        <p class="muted">备忘只补齐桥接线索，不替你完成证据判断。</p>
+        <p><a href="attachments.html">博客附件</a></p>
+        <p><a data-site="corporate" href="../corporate/">回声科技</a></p>
+        <p><a data-site="archive" href="../archive/">档案镜像</a></p>
+      </aside>
+      <section class="panel">
+        <h1>汇总跨站证据</h1>
+        <form id="fragment-form">
+          <label>证据片段<input id="fragment-input" placeholder="输入你在材料中发现的英文片段"></label>
+          <button type="submit">记录片段</button>
+        </form>
+        <form id="token-form">
+          <label>启动令牌<input id="token-input" placeholder="由档案镜像生成"></label>
+          <button type="submit">记录令牌</button>
+        </form>
+        <p class="status" id="status" role="status"></p>
+        <h2>已记录的证据片段</h2>
+        <div id="fragments" class="actions"></div>
+        <h2>调查结论</h2>
+        <div id="endings"></div>
+      </section>
+    </section>
+  </main>
+  <script type="module">
+    import { notebookView, submitNotebook } from "./blog.js";
+    const render = () => {
+      const { state, endings: available } = notebookView();
+      document.querySelector("#memo-count").textContent = state.memos;
+      document.querySelector("#fragments").innerHTML = state.fragments.length
+        ? state.fragments.map((item) => `<span class="fragment-chip">${item}</span>`).join("")
+        : '<span class="muted">尚未提交隐藏证据。</span>';
+      document.querySelector("#endings").innerHTML = available.map((item) => {
+        const labels = { publish: "公开证据", hold: "暂缓并保存", follow: "沿她真正的路线继续" };
+        return `<a class="ending" href="dead-switch.html?ending=${item}">${labels[item]}</a>`;
+      }).join("");
+    };
+    document.querySelector("#fragment-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const before = notebookView().state.fragments.length;
+      const input = document.querySelector("#fragment-input");
+      const state = submitNotebook(input.value, "");
+      document.querySelector("#status").textContent = state.fragments.length > before ? "证据片段已记录。" : "这个片段无法与现有材料对应。";
+      input.value = ""; render();
+    });
+    document.querySelector("#token-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const state = submitNotebook("", document.querySelector("#token-input").value);
+      document.querySelector("#status").textContent = state.switchToken ? "启动令牌已记录。" : "令牌为空。";
+      render();
+    });
+    render();
+  </script>
+</body>
+</html>

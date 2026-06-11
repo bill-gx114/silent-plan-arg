@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>死人开关 · 最终选择</title>
+  <link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="blog.css">
+</head>
+<body>
+  <main class="shell">
+    <p class="eyebrow">dead man's switch / decision node</p>
+    <h1 id="title">正在核验你的选择</h1>
+    <section id="content" class="panel"></section>
+    <p><a href="case-notebook.html">← 返回案件笔记</a></p>
+  </main>
+  <script type="module">
+    import { ARG_CONFIG } from "../shared/config.js";
+    import { notebookView } from "./blog.js";
+    const choice = new URLSearchParams(location.search).get("ending");
+    const available = notebookView().endings;
+    if (!available.includes(choice)) {
+      title.textContent = "证据不足";
+      content.innerHTML = "<p>你还不能为这个结论负责。回到案件笔记，补齐来源。</p>";
+    } else if (choice === "publish") {
+      title.textContent = "证据已公开";
+      content.innerHTML = `<p>上传完成。最初三分钟里，转发数字不断上涨。</p><p>随后，十七份格式完美的“原始资料”同时出现。它们互相矛盾，也与你的证据矛盾。没有人知道该相信哪一份。</p><p class="danger">你公开了真相，也把它送进了一片预先准备好的噪声。</p>`;
+    } else if (choice === "hold") {
+      title.textContent = "证据已离线保存";
+      content.innerHTML = `<p>你没有按下发布键。系统生成了完整证据包，并从网络上撤回控制台。</p><p>四小时后，一个叫程野的人联系你。他说，他在一款助眠应用里见过同一个项目代号。</p><p><a href="${ARG_CONFIG.chapter2Url}">接收程野的加密会话 →</a></p>`;
+    } else {
+      title.textContent = "她真正留下的路线";
+      content.innerHTML = `<p>四处矛盾拼成同一个事实：林知秋提前测试过死人开关。公开按钮只是诱饵，用来判断是否有人完整复核了她的材料。</p><p>真正的指令藏在测试录音末尾：“不要替我按按钮。去找钱从哪里来。”</p><p><a href="${ARG_CONFIG.chapter2Url}">使用追踪令牌，前往锦城 →</a></p>`;
+    }
+  </script>
+</body>
+</html>
