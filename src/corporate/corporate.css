@@ -1,0 +1,28 @@
+:root { --corp-blue: #4ac8ff; --corp-bg: #07111b; }
+body { background: linear-gradient(145deg, #07111b, #0b1824 55%, #061018); }
+.corp-nav { position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 17px max(20px, calc((100vw - 1040px) / 2)); background: #07111bea; border-bottom: 1px solid #173047; backdrop-filter: blur(12px); }
+.corp-nav nav { display: flex; gap: 18px; }
+.corp-nav a { color: #b8cfdf; text-decoration: none; }
+.logo { font: 800 18px/1 ui-monospace, monospace; letter-spacing: .12em; }
+.logo span { color: var(--corp-blue); }
+.corp-hero { min-height: 480px; display: grid; align-content: center; padding: 70px max(24px, calc((100vw - 1040px) / 2)); background: radial-gradient(circle at 75% 25%, #123e55, transparent 36%); }
+.corp-hero h1 { max-width: 700px; margin: .15em 0; font-size: clamp(48px, 9vw, 94px); line-height: .95; }
+.corp-hero > p:not(.eyebrow) { max-width: 620px; color: #a9bdca; font-size: 18px; }
+.notice { border-left: 3px solid #d9a45f; padding-left: 12px; }
+.corp-section { width: min(1040px, calc(100% - 40px)); margin: 0 auto; padding: 64px 0; }
+.button { display: inline-block; border: 1px solid var(--corp-blue); border-radius: 5px; padding: 10px 16px; color: var(--corp-blue); text-decoration: none; }
+.archive-shell { width: min(1120px, calc(100% - 28px)); margin: 30px auto 80px; }
+.snapshot-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0; }
+.snapshot-tabs button[aria-pressed="true"] { background: var(--corp-blue); color: #04101a; }
+.snapshot { border: 1px solid #254056; border-radius: 10px; background: #0c1721; padding: 22px; }
+.snapshot del { color: #e88787; }
+.snapshot ins { color: #87dda5; text-decoration: none; }
+.diff-table td:nth-child(2) { background: #251619; }
+.diff-table td:nth-child(3) { background: #11251a; }
+.terminal { background: #03070a; border: 1px solid #254056; border-radius: 8px; padding: 18px; font-family: ui-monospace, monospace; color: #9fd9b9; overflow: auto; }
+.log-row.hidden-row { display: none; }
+@media (max-width: 620px) {
+  .corp-nav { align-items: flex-start; flex-direction: column; }
+  .corp-hero { min-height: 390px; }
+}
+

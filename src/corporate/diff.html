@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>版本差异报告</title><link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="corporate.css"></head>
+<body>
+  <main class="archive-shell">
+    <div class="topbar"><span class="brand">VERSION DIFF</span><a href="archive.html">返回快照</a></div>
+    <h1>2019 → 2020 批量变更</h1>
+    <table class="diff-table">
+      <thead><tr><th>对象</th><th>删除前</th><th>删除后</th><th>时间</th></tr></thead>
+      <tbody>
+        <tr><td>团队成员</td><td>陈砚明 / 首席研究员</td><td>记录不存在</td><td>11-09 23:48</td></tr>
+        <tr><td>项目名称</td><td>频率同步</td><td>低频声场归档</td><td>11-09 23:48</td></tr>
+        <tr><td>内部声明</td><td>社区测试异议</td><td>文件不存在</td><td>11-09 23:48</td></tr>
+        <tr><td>产品参数</td><td>18.9 Hz / 500 m</td><td>字段已移除</td><td>11-09 23:48</td></tr>
+      </tbody>
+    </table>
+    <section class="panel">
+      <h2>选择最能解释变更的结论</h2>
+      <form id="diff-form">
+        <label><input type="radio" name="answer" value="resign"> 陈砚明正常离职，页面自然更新</label>
+        <label><input type="radio" name="answer" value="batch"> 同一批次清理了人物、项目、异议与参数</label>
+        <label><input type="radio" name="answer" value="error"> 网页存档发生随机错误</label>
+        <button class="primary" type="submit">提交结论</button><p id="status" class="status"></p>
+      </form>
+    </section>
+    <section id="next" class="panel hidden"><p>结论成立。批量删除仍留下两个入口：员工目录和资源请求日志。</p><div class="actions"><a href="directory.html">查员工目录</a><a href="request-log.html">查请求日志</a></div></section>
+  </main>
+  <script>
+    document.querySelector("#diff-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const answer = new FormData(event.currentTarget).get("answer");
+      document.querySelector("#status").textContent = answer === "batch" ? "结论成立：这是一次有组织的批量删除。" : "这个解释无法说明四类内容为何在同一分钟变化。";
+      if (answer === "batch") document.querySelector("#next").classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>
+
