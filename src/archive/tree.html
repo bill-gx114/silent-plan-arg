@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>mirror tree · CYM-071</title><link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="archive.css"></head>
+<body>
+  <main class="terminal-shell">
+    <p class="eyebrow">mirror mount / read only</p><p class="crumb">/legacy/CYM-071/DEL-1109/testimony.pkg</p>
+    <h1>目录已挂载</h1>
+    <section id="denied" class="panel hidden"><p class="danger">路径上下文无效。请从镜像入口重新挂载。</p><a href="index.html">返回入口</a></section>
+    <section id="tree-panel" class="panel hidden">
+      <ul class="tree">
+        <li>legacy/
+          <ul class="tree"><li>CYM-071/
+            <ul class="tree"><li>DEL-1109/
+              <ul class="tree">
+                <li><a href="package.html">testimony.pkg</a> <span class="muted">2-channel audio container</span></li>
+                <li>upload.log</li><li>manifest.sha256</li><li>switch.dryrun</li>
+              </ul>
+            </li></ul>
+          </li></ul>
+        </li>
+      </ul>
+      <p>镜像记录显示：删除批次结束后，另一个账户在同一目录执行过一次只读校验。</p>
+    </section>
+  </main>
+  <script type="module">
+    import { isExpectedPath } from "./archive.js";
+    const ok = isExpectedPath(new URLSearchParams(location.search).get("path"));
+    document.querySelector(ok ? "#tree-panel" : "#denied").classList.remove("hidden");
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>死人开关测试日志</title><link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="archive.css"></head>
+<body>
+  <main class="terminal-shell">
+    <p class="eyebrow">switch.dryrun / unauthorized read</p><h1>一次发生在失踪前的预演</h1>
+    <section class="panel">
+      <p class="console-line" style="animation-delay:.1s">[2024-11-09 22:16:02] operator=LZQ-EXT</p>
+      <p class="console-line" style="animation-delay:.4s">[2024-11-09 22:16:05] action=DRY_RUN</p>
+      <p class="console-line" style="animation-delay:.7s">[2024-11-09 22:16:09] publish_target=DECOY</p>
+      <p class="console-line" style="animation-delay:1s">[2024-11-09 22:16:13] route_token=FOLLOW-THE-TIDE</p>
+      <p class="console-line" style="animation-delay:1.3s">[2024-11-09 22:16:17] note="公开不是终点。让复核过的人继续追资金流。"</p>
+    </section>
+    <section class="panel evidence">
+      <p>隐藏证据片段：<span class="fragment-chip">DRYRUN</span></p>
+      <p>启动令牌：<span class="fragment-chip">FOLLOW-THE-TIDE</span></p>
+      <p>这份日志证明林知秋在失踪前亲自测试过死人开关。她知道公开按钮会成为诱饵。</p>
+      <a id="notebook-link" href="../blog/case-notebook.html">返回案件笔记，提交证据 →</a>
+    </section>
+  </main>
+  <script type="module">
+    import { blogNotebookUrl } from "./archive.js";
+    document.querySelector("#notebook-link").href = blogNotebookUrl();
+  </script>
+</body>
+</html>
