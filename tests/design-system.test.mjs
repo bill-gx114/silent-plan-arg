@@ -4,6 +4,27 @@ import test from "node:test";
 
 const rawCss = await readFile(new URL("../src/shared/base.css", import.meta.url), "utf8");
 const css = rawCss.replace(/\/\*[\s\S]*?\*\//g, "");
+const templateMaps = {
+  blog: {
+    "index.html": "page--reading",
+    "blog.html": "page--reading",
+    "report.html": "page--reading",
+    "revision.html": "page--workspace",
+    "attachments.html": "page--records",
+    "photo-lab.html": "page--workspace",
+    "case-notebook.html": "page--decision",
+    "dead-switch.html": "page--decision",
+  },
+};
+
+async function readBlogPage(file) {
+  return readFile(new URL(`../src/blog/${file}`, import.meta.url), "utf8");
+}
+
+function classTokens(attributes) {
+  const match = attributes.match(/\bclass\s*=\s*["']([^"']*)["']/i);
+  return new Set(match?.[1].trim().split(/\s+/).filter(Boolean) ?? []);
+}
 
 function extractBlockRange(source, startIndex, label) {
   const openingBrace = source.indexOf("{", startIndex);
@@ -277,5 +298,38 @@ test("shared design-system exposes page, layout, form, and feedback selectors", 
 
   for (const selector of selectors) {
     assert.match(css, new RegExp(`\\${selector}(?=[\\s,{.:#>+~\\[])`), selector);
+  }
+});
+
+test("blog pages use their assigned shared page templates and one h1", async () => {
+  for (const [file, template] of Object.entries(templateMaps.blog)) {
+    const html = await readBlogPage(file);
+    const mains = [...html.matchAll(/<main\b([^>]*)>/gi)];
+    assert.equal(mains.length, 1, `${file} has one main`);
+
+    const classes = classTokens(mains[0][1]);
+    assert.ok(classes.has("page"), `${file} main uses page`);
+    assert.ok(classes.has(template), `${file} main uses ${template}`);
+
+    const headings = html.match(/<h1\b/gi) ?? [];
+    assert.equal(headings.length, 1, `${file} has exactly one h1`);
+  }
+});
+
+test("blog records page provides a horizontal data viewport", async () => {
+  const html = await readBlogPage("attachments.html");
+  assert.match(html, /class\s*=\s*["'][^"']*\bdata-scroll\b[^"']*["']/i);
+});
+
+test("interactive blog pages use shared field, action, and status groups", async () => {
+  for (const file of ["revision.html", "photo-lab.html", "case-notebook.html"]) {
+    const html = await readBlogPage(file);
+    for (const className of ["field-group", "form-actions", "status"]) {
+      assert.match(
+        html,
+        new RegExp(`class\\s*=\\s*["'][^"']*\\b${className}\\b[^"']*["']`, "i"),
+        `${file} uses ${className}`,
+      );
+    }
   }
 });
