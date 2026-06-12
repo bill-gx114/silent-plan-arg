@@ -6,6 +6,8 @@ const rawCss = await readFile(new URL("../src/shared/base.css", import.meta.url)
 const css = rawCss.replace(/\/\*[\s\S]*?\*\//g, "");
 const rawBlogCss = await readFile(new URL("../src/blog/blog.css", import.meta.url), "utf8");
 const blogCss = rawBlogCss.replace(/\/\*[\s\S]*?\*\//g, "");
+const rawCorporateCss = await readFile(new URL("../src/corporate/corporate.css", import.meta.url), "utf8");
+const corporateCss = rawCorporateCss.replace(/\/\*[\s\S]*?\*\//g, "");
 const templateMaps = {
   blog: {
     "index.html": "page--reading",
@@ -17,10 +19,23 @@ const templateMaps = {
     "case-notebook.html": "page--decision",
     "dead-switch.html": "page--decision",
   },
+  corporate: {
+    "index.html": "page--marketing",
+    "products.html": "page--records",
+    "team.html": "page--records",
+    "archive.html": "page--workspace",
+    "diff.html": "page--workspace",
+    "directory.html": "page--records",
+    "request-log.html": "page--records",
+  },
 };
 
 async function readBlogPage(file) {
   return readFile(new URL(`../src/blog/${file}`, import.meta.url), "utf8");
+}
+
+async function readCorporatePage(file) {
+  return readFile(new URL(`../src/corporate/${file}`, import.meta.url), "utf8");
 }
 
 function classTokens(attributes) {
@@ -706,4 +721,127 @@ test("paper theme feedback colors meet text contrast and are consumed", () => {
   assertDeclaration(extractRuleBody(css, '.status[data-state="success"]'), "color", "var(--success)");
   assertDeclaration(extractRuleBody(css, '.status[data-state="error"]'), "color", "var(--danger)");
   assertDeclaration(extractRuleBody(css, ".danger"), "color", "var(--danger)");
+});
+
+test("corporate pages use their assigned shared page templates and one h1", async () => {
+  for (const [file, template] of Object.entries(templateMaps.corporate)) {
+    const root = parseHtml(await readCorporatePage(file));
+    const main = findOne(root, (node) => node.tag === "main", `${file} main`);
+    assert.ok(hasClass(main, "page"), `${file} main uses page`);
+    assert.ok(hasClass(main, template), `${file} main uses ${template}`);
+    assert.equal(allElements(root, (node) => node.tag === "h1").length, 1, `${file} has one h1`);
+  }
+
+  for (const [file, text] of [
+    ["products.html", "技术与产品档案"],
+    ["team.html", "当前团队"],
+  ]) {
+    const html = await readCorporatePage(file);
+    assert.match(html, new RegExp(`<h1[^>]*>\\s*${text}\\s*</h1>`), `${file} h1`);
+  }
+});
+
+test("corporate data tables are nested in horizontal data viewports", async () => {
+  for (const [file, tableClass] of [
+    ["diff.html", "diff-table"],
+    ["directory.html", null],
+    ["request-log.html", null],
+  ]) {
+    const root = parseHtml(await readCorporatePage(file));
+    const scroll = findByClass(root, "data-scroll");
+    const table = findOne(
+      root,
+      (node) => node.tag === "table" && (!tableClass || hasClass(node, tableClass)),
+      `${file} table`,
+    );
+    assert.ok(isDescendant(scroll, table), `${file} table is inside .data-scroll`);
+  }
+});
+
+test("corporate evidence and interactive forms keep structural grouping", async () => {
+  const diffRoot = parseHtml(await readCorporatePage("diff.html"));
+  const diffForm = findById(diffRoot, "diff-form");
+  assert.ok(hasClass(diffForm, "form-stack"), "diff form uses form-stack");
+  const radios = allElements(
+    diffForm,
+    (node) => isDescendant(diffForm, node) &&
+      node.tag === "input" &&
+      node.attributes.get("type") === "radio",
+  );
+  assert.equal(radios.length, 3, "diff form keeps three choices");
+  for (const radio of radios) {
+    const label = nearestAncestor(radio, (node) => node.tag === "label");
+    assert.ok(label, "radio has label ancestor");
+    assert.ok(hasClass(label, "field-group"), "radio label uses field-group");
+    assert.ok(hasClass(label, "choice-field"), "radio label uses choice-field");
+  }
+  const diffActions = assertInClassAncestor(findSubmit(diffForm), "form-actions", "diff submit");
+  assert.equal(
+    assertInClassAncestor(findById(diffRoot, "status"), "form-actions", "diff status"),
+    diffActions,
+    "diff submit and status share form-actions",
+  );
+
+  const directoryRoot = parseHtml(await readCorporatePage("directory.html"));
+  const directoryStack = findByClass(directoryRoot, "section-stack");
+  const directoryEvidence = findByClass(directoryRoot, "evidence");
+  assert.ok(isDescendant(directoryStack, directoryEvidence), "directory evidence follows in section stack");
+
+  const requestRoot = parseHtml(await readCorporatePage("request-log.html"));
+  const filters = findByClass(requestRoot, "record-filters");
+  assert.ok(hasClass(filters, "actions"), "request filters retain actions");
+  const requestForm = findById(requestRoot, "path-form");
+  assert.ok(hasClass(requestForm, "form-stack"), "path form uses form-stack");
+  assertInClassAncestor(findById(requestRoot, "path"), "field-group", "path input");
+  const requestActions = assertInClassAncestor(findSubmit(requestForm), "form-actions", "path submit");
+  assert.equal(
+    assertInClassAncestor(findById(requestRoot, "status"), "form-actions", "path status"),
+    requestActions,
+    "path submit and status share form-actions",
+  );
+});
+
+test("corporate skin owns semantic theme values without reclaiming shared layout", () => {
+  const root = extractRuleBody(corporateCss, ":root");
+  const theme = {
+    "--corp-blue": "#4ac8ff",
+    "--bg": "#07111b",
+    "--panel": "#0c1721",
+    "--panel-2": "#101f2c",
+    "--line": "#254056",
+    "--ink": "#e5eef5",
+    "--muted": "#9bb0bf",
+    "--accent": "var(--corp-blue)",
+  };
+  for (const [property, value] of Object.entries(theme)) {
+    assertDeclaration(root, property, value, `corporate ${property}`);
+  }
+
+  assertDeclaration(
+    extractRuleBody(corporateCss, "body"),
+    "background",
+    "linear-gradient(145deg, #07111b, #0b1824 55%, #061018)",
+  );
+
+  for (const selector of [".corp-nav", ".corp-hero", ".snapshot", ".diff-table", ".terminal"]) {
+    assert.ok(extractRuleBody(corporateCss, selector).trim(), `${selector} keeps corporate styling`);
+  }
+
+  const rules = collectStyleRules(corporateCss);
+  for (const rule of rules) {
+    const values = declarations(rule.body);
+    if (rule.selectors.includes(".archive-shell") || rule.selectors.includes(".corp-section")) {
+      assert.equal(values.has("width"), false, `${rule.selectors.join(", ")} does not own width`);
+      assert.equal(values.has("max-width"), false, `${rule.selectors.join(", ")} does not own max-width`);
+      assert.equal(values.has("margin"), false, `${rule.selectors.join(", ")} does not own margin`);
+    }
+  }
+
+  for (const selector of [".corp-nav", ".snapshot-tabs"]) {
+    assert.match(
+      declarations(extractRuleBody(corporateCss, selector)).get("gap") ?? "",
+      /^var\(--space-\d+\)$/,
+      `${selector} gap uses spacing token`,
+    );
+  }
 });

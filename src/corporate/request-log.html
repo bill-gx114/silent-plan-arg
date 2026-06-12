@@ -2,35 +2,41 @@
 <html lang="zh-CN">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>资源请求日志</title><link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="corporate.css"></head>
 <body>
-  <main class="archive-shell">
-    <div class="topbar"><span class="brand">REQUEST LOG / 2019-11-09</span><a href="diff.html">返回差异报告</a></div>
-    <h1>404 与删除请求</h1>
-    <p>按员工号和删除批次筛选，再按照时间顺序读取请求路径。</p>
-    <div class="actions">
-      <button data-filter="all">全部</button>
-      <button data-filter="CYM-071">仅 CYM-071</button>
-      <button data-filter="DEL-1109">仅 DEL-1109</button>
+  <main class="page page--records archive-shell">
+    <div class="topbar page-header"><span class="brand">REQUEST LOG / 2019-11-09</span><a href="diff.html">返回差异报告</a></div>
+    <header class="page-intro">
+      <h1>404 与删除请求</h1>
+      <p>按员工号和删除批次筛选，再按照时间顺序读取请求路径。</p>
+    </header>
+    <div class="section-stack">
+      <div class="actions record-filters">
+        <button data-filter="all">全部</button>
+        <button data-filter="CYM-071">仅 CYM-071</button>
+        <button data-filter="DEL-1109">仅 DEL-1109</button>
+      </div>
+      <div class="terminal">
+        <div class="data-scroll">
+          <table>
+            <thead><tr><th>时间</th><th>主体</th><th>批次</th><th>请求</th><th>结果</th></tr></thead>
+            <tbody id="log-body">
+              <tr class="log-row" data-tags="SYS-001"><td>23:47:51</td><td>SYS-001</td><td>SYNC</td><td>/assets/team.json</td><td>200</td></tr>
+              <tr class="log-row target" data-tags="CYM-071 DEL-1109"><td>23:48:02</td><td>CYM-071</td><td>DEL-1109</td><td>/legacy/</td><td>404</td></tr>
+              <tr class="log-row target" data-tags="CYM-071 DEL-1109"><td>23:48:06</td><td>CYM-071</td><td>DEL-1109</td><td>/legacy/CYM-071/</td><td>404</td></tr>
+              <tr class="log-row target" data-tags="CYM-071 DEL-1109"><td>23:48:11</td><td>CYM-071</td><td>DEL-1109</td><td>/legacy/CYM-071/DEL-1109/</td><td>404</td></tr>
+              <tr class="log-row target" data-tags="CYM-071 DEL-1109"><td>23:48:16</td><td>CYM-071</td><td>DEL-1109</td><td>/legacy/CYM-071/DEL-1109/testimony.pkg</td><td>302 MIRROR</td></tr>
+              <tr class="log-row" data-tags="LAB-088"><td>23:51:30</td><td>LAB-088</td><td>ARCHIVE</td><td>/papers/acoustics.pdf</td><td>200</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <section class="panel">
+        <form id="path-form" class="form-stack">
+          <label class="field-group">重建完整档案路径<input id="path" placeholder="/legacy/..."></label>
+          <div class="form-actions"><button class="primary" type="submit">验证路径</button><p id="status" class="status"></p></div>
+        </form>
+        <p id="mirror" class="hidden"><a id="archive-link" href="../archive/">打开只读档案镜像 →</a></p>
+      </section>
     </div>
-    <div class="terminal">
-      <table>
-        <thead><tr><th>时间</th><th>主体</th><th>批次</th><th>请求</th><th>结果</th></tr></thead>
-        <tbody id="log-body">
-          <tr class="log-row" data-tags="SYS-001"><td>23:47:51</td><td>SYS-001</td><td>SYNC</td><td>/assets/team.json</td><td>200</td></tr>
-          <tr class="log-row target" data-tags="CYM-071 DEL-1109"><td>23:48:02</td><td>CYM-071</td><td>DEL-1109</td><td>/legacy/</td><td>404</td></tr>
-          <tr class="log-row target" data-tags="CYM-071 DEL-1109"><td>23:48:06</td><td>CYM-071</td><td>DEL-1109</td><td>/legacy/CYM-071/</td><td>404</td></tr>
-          <tr class="log-row target" data-tags="CYM-071 DEL-1109"><td>23:48:11</td><td>CYM-071</td><td>DEL-1109</td><td>/legacy/CYM-071/DEL-1109/</td><td>404</td></tr>
-          <tr class="log-row target" data-tags="CYM-071 DEL-1109"><td>23:48:16</td><td>CYM-071</td><td>DEL-1109</td><td>/legacy/CYM-071/DEL-1109/testimony.pkg</td><td>302 MIRROR</td></tr>
-          <tr class="log-row" data-tags="LAB-088"><td>23:51:30</td><td>LAB-088</td><td>ARCHIVE</td><td>/papers/acoustics.pdf</td><td>200</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <section class="panel">
-      <form id="path-form">
-        <label>重建完整档案路径<input id="path" placeholder="/legacy/..."></label>
-        <button class="primary" type="submit">验证路径</button><p id="status" class="status"></p>
-      </form>
-      <p id="mirror" class="hidden"><a id="archive-link" href="../archive/">打开只读档案镜像 →</a></p>
-    </section>
   </main>
   <script type="module">
     import { archiveUrl, reconstruct } from "./corporate.js";
