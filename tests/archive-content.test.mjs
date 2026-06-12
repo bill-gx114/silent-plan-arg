@@ -33,6 +33,13 @@ test("forensics exposes stereo channel and file-header controls", async () => {
   assert.match(html, /AudioContext/);
 });
 
+test("evidence package offers a WAV-compatible download", async () => {
+  const html = await readFile(new URL("../src/archive/package.html", import.meta.url), "utf8");
+  assert.match(html, /download="testimony\.wav"/);
+  assert.match(html, /无法直接打开/);
+  assert.match(html, /站内取证台/);
+});
+
 test("integrity page contains upload records and digest comparison", async () => {
   const html = await readFile(new URL("../src/archive/integrity.html", import.meta.url), "utf8");
   assert.match(html, /SHA-256/);
@@ -45,4 +52,3 @@ test("switch console emits hidden fragment and token", async () => {
   assert.match(html, /DRYRUN/);
   assert.match(html, /FOLLOW-THE-TIDE/);
 });
-
