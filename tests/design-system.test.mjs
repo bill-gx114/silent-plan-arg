@@ -61,8 +61,13 @@ function parseHtml(source) {
     const closing = match[1] === "/";
     const tag = match[2].toLowerCase();
     if (closing) {
-      while (stack.length > 1 && stack.at(-1).tag !== tag) stack.pop();
-      if (stack.at(-1).tag === tag) stack.pop();
+      assert.notEqual(stack.length, 1, `unexpected closing tag: </${tag}>`);
+      assert.equal(
+        stack.at(-1).tag,
+        tag,
+        `mismatched closing tag: expected </${stack.at(-1).tag}> but found </${tag}>`,
+      );
+      stack.pop();
       continue;
     }
 
@@ -79,6 +84,11 @@ function parseHtml(source) {
     if (!selfClosing && !voidTags.has(tag)) stack.push(node);
   }
 
+  assert.equal(
+    stack.length,
+    1,
+    `unclosed tag: <${stack.at(-1).tag}>`,
+  );
   return root;
 }
 
@@ -166,6 +176,23 @@ function numericLineHeight(body) {
   const match = shorthand.match(/\/\s*(\d+(?:\.\d+)?)/);
   assert.ok(match, "font shorthand has a numeric line-height");
   return Number.parseFloat(match[1]);
+}
+
+function relativeLuminance(hex) {
+  assert.match(hex, /^#[\da-f]{6}$/i, `six-digit hex color: ${hex}`);
+  const channels = hex.slice(1).match(/../g).map((value) => {
+    const channel = Number.parseInt(value, 16) / 255;
+    return channel <= 0.04045
+      ? channel / 12.92
+      : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return (0.2126 * channels[0]) + (0.7152 * channels[1]) + (0.0722 * channels[2]);
+}
+
+function contrastRatio(first, second) {
+  const lighter = Math.max(relativeLuminance(first), relativeLuminance(second));
+  const darker = Math.min(relativeLuminance(first), relativeLuminance(second));
+  return (lighter + 0.05) / (darker + 0.05);
 }
 
 function extractBlockRange(source, startIndex, label) {
@@ -466,6 +493,17 @@ test("HTML structure helper rejects sibling elements", () => {
   assert.equal(isDescendant(scroll, table), false);
 });
 
+test("HTML structure helper rejects malformed nesting", () => {
+  assert.throws(
+    () => parseHtml("<main><section></main></section>"),
+    /mismatched closing tag/,
+  );
+  assert.throws(
+    () => parseHtml("<main><section></section>"),
+    /unclosed tag/,
+  );
+});
+
 test("attachments table is contained by its horizontal data viewport", async () => {
   const root = parseHtml(await readBlogPage("attachments.html"));
   const scroll = findByClass(root, "data-scroll");
@@ -556,8 +594,13 @@ test("case notebook keeps both evidence forms structurally independent", async (
 
   const status = findById(root, "status");
   assert.ok(hasClass(status, "status"), "notebook status keeps status class");
-  assert.ok(isDescendant(fragmentForm, status), "notebook status remains associated with fragment form");
-  assertInClassAncestor(status, "form-actions", "notebook status");
+  assert.equal(isDescendant(fragmentForm, status), false, "status is outside fragment form");
+  assert.equal(isDescendant(tokenForm, status), false, "status is outside token form");
+  assert.equal(status.parent, fragmentForm.parent, "status shares the forms' panel");
+  assert.ok(
+    status.parent.children.indexOf(status) > status.parent.children.indexOf(tokenForm),
+    "status follows both forms",
+  );
 });
 
 test("blog entry, reading, and decision pages nest their shared structures", async () => {
@@ -629,4 +672,38 @@ test("blog skin owns semantic theme values without reclaiming shared layout", ()
       `${selector} gap uses spacing token`,
     );
   }
+});
+
+test("paper theme feedback colors meet text contrast and are consumed", () => {
+  const paper = declarations(extractRuleBody(blogCss, ".paper"));
+  const approved = {
+    "--accent": "#7d332a",
+    "--accent-contrast": "#fffaf2",
+    "--danger": "#7a1f2b",
+    "--warn": "#6b4a00",
+    "--success": "#245c3a",
+  };
+  for (const [property, value] of Object.entries(approved)) {
+    assert.equal(paper.get(property), value, `.paper ${property}`);
+  }
+
+  assert.ok(
+    contrastRatio(approved["--accent"], approved["--accent-contrast"]) >= 4.5,
+    "primary button text contrasts with accent",
+  );
+  for (const property of ["--danger", "--warn", "--success"]) {
+    for (const background of ["#e9e1d4", "#f6f0e7", "#fffaf2"]) {
+      assert.ok(
+        contrastRatio(approved[property], background) >= 4.5,
+        `${property} contrasts with ${background}`,
+      );
+    }
+  }
+
+  const primary = extractRuleBody(blogCss, ".paper button.primary,\n.paper .button.primary");
+  assertDeclaration(primary, "color", "var(--accent-contrast)");
+  assertDeclaration(extractRuleBody(css, ".status"), "color", "var(--warn)");
+  assertDeclaration(extractRuleBody(css, '.status[data-state="success"]'), "color", "var(--success)");
+  assertDeclaration(extractRuleBody(css, '.status[data-state="error"]'), "color", "var(--danger)");
+  assertDeclaration(extractRuleBody(css, ".danger"), "color", "var(--danger)");
 });

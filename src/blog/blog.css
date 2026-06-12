@@ -13,8 +13,17 @@
   --panel-2: #fffaf2;
   --line: #cfc2b3;
   --accent: #7d332a;
+  --accent-contrast: #fffaf2;
+  --danger: #7a1f2b;
+  --warn: #6b4a00;
+  --success: #245c3a;
   background: var(--bg);
   color: var(--ink);
+}
+
+.paper button.primary,
+.paper .button.primary {
+  color: var(--accent-contrast);
 }
 
 .message-layout {
