@@ -886,6 +886,11 @@ test("corporate evidence and interactive forms keep structural grouping", async 
     ["all", "CYM-071", "DEL-1109"],
     "request filter values",
   );
+  assert.deepEqual(
+    filterButtons.map((node) => node.attributes.get("aria-pressed")),
+    ["true", "false", "false"],
+    "request filters expose their initial selected state",
+  );
   const terminal = findByClass(requestRoot, "terminal");
   const requestScroll = findByClass(requestRoot, "data-scroll");
   const requestTable = findOne(requestRoot, (node) => node.tag === "table", "request table");
@@ -908,6 +913,35 @@ test("corporate evidence and interactive forms keep structural grouping", async 
     assertInClassAncestor(findById(requestRoot, "status"), "form-actions", "path status"),
     requestActions,
     "path submit and status share form-actions",
+  );
+});
+
+test("corporate request log bounds table overflow and exposes selected filter behavior", async () => {
+  const terminal = extractRuleBody(corporateCss, ".terminal");
+  assertDeclaration(terminal, "min-width", "0");
+  assert.equal(declarations(terminal).has("overflow"), false, "terminal does not own table scrolling");
+  assert.equal(declarations(terminal).has("overflow-x"), false, "terminal does not own horizontal scrolling");
+
+  const dataScroll = extractRuleBody(css, ".data-scroll");
+  assertDeclaration(dataScroll, "width", "100%");
+  assertDeclaration(dataScroll, "overflow-x", "auto");
+
+  const selected = extractRuleBody(
+    corporateCss,
+    '.record-filters button[aria-pressed="true"]',
+  );
+  assertDeclaration(selected, "background", "var(--corp-blue)");
+  assertDeclaration(selected, "color", "#04101a");
+  assert.ok(
+    contrastRatio("#4ac8ff", "#04101a") >= 4.5,
+    "selected filter text contrasts with its background",
+  );
+
+  const html = await readCorporatePage("request-log.html");
+  assert.match(
+    html,
+    /document\.querySelectorAll\("\[data-filter\]"\)\.forEach\(\(filterButton\) =>\s*filterButton\.setAttribute\("aria-pressed", String\(filterButton === button\)\)\)/,
+    "filter click updates aria-pressed on every filter button",
   );
 });
 
