@@ -8,6 +8,8 @@ const rawBlogCss = await readFile(new URL("../src/blog/blog.css", import.meta.ur
 const blogCss = rawBlogCss.replace(/\/\*[\s\S]*?\*\//g, "");
 const rawCorporateCss = await readFile(new URL("../src/corporate/corporate.css", import.meta.url), "utf8");
 const corporateCss = rawCorporateCss.replace(/\/\*[\s\S]*?\*\//g, "");
+const rawArchiveCss = await readFile(new URL("../src/archive/archive.css", import.meta.url), "utf8");
+const archiveCss = rawArchiveCss.replace(/\/\*[\s\S]*?\*\//g, "");
 const templateMaps = {
   blog: {
     "index.html": "page--reading",
@@ -28,6 +30,14 @@ const templateMaps = {
     "directory.html": "page--records",
     "request-log.html": "page--records",
   },
+  archive: {
+    "index.html": "page--verify",
+    "tree.html": "page--records",
+    "package.html": "page--records",
+    "forensics.html": "page--workspace",
+    "integrity.html": "page--verify",
+    "switch-console.html": "page--decision",
+  },
 };
 
 async function readBlogPage(file) {
@@ -36,6 +46,10 @@ async function readBlogPage(file) {
 
 async function readCorporatePage(file) {
   return readFile(new URL(`../src/corporate/${file}`, import.meta.url), "utf8");
+}
+
+async function readArchivePage(file) {
+  return readFile(new URL(`../src/archive/${file}`, import.meta.url), "utf8");
 }
 
 function classTokens(attributes) {
@@ -993,4 +1007,201 @@ test("corporate skin owns semantic theme values without reclaiming shared layout
       `${selector} gap uses spacing token`,
     );
   }
+});
+
+test("archive pages use their assigned shared page templates and one h1", async () => {
+  for (const [file, template] of Object.entries(templateMaps.archive)) {
+    const root = parseHtml(await readArchivePage(file));
+    const main = findOne(root, (node) => node.tag === "main", `${file} main`);
+    assert.ok(hasClass(main, "page"), `${file} main uses page`);
+    assert.ok(hasClass(main, template), `${file} main uses ${template}`);
+    assert.equal(allElements(root, (node) => node.tag === "h1").length, 1, `${file} has one h1`);
+  }
+});
+
+test("archive entry and tree preserve exact form and mounted-directory structure", async () => {
+  const indexRoot = parseHtml(await readArchivePage("index.html"));
+  const indexMain = findOne(indexRoot, (node) => node.tag === "main", "index main");
+  const indexStack = findByClass(indexRoot, "section-stack");
+  assert.equal(indexStack.parent, indexMain, "entry stack is a direct main child");
+
+  const pathForm = findById(indexRoot, "path-form");
+  assert.ok(hasClass(pathForm, "panel"), "path form keeps panel");
+  assert.ok(hasClass(pathForm, "form-stack"), "path form uses form-stack");
+  assert.equal(pathForm.parent, indexStack, "path form belongs to section stack");
+  const pathInput = findById(indexRoot, "path");
+  assert.ok(isDescendant(pathForm, pathInput), "path input belongs to form");
+  assertInClassAncestor(pathInput, "field-group", "path input");
+  const pathActions = assertInClassAncestor(findSubmit(pathForm), "form-actions", "path submit");
+  assert.equal(
+    assertInClassAncestor(findById(indexRoot, "status"), "form-actions", "path status"),
+    pathActions,
+    "path submit and status share form-actions",
+  );
+
+  const treeRoot = parseHtml(await readArchivePage("tree.html"));
+  const treeIntro = findByClass(treeRoot, "page-intro");
+  for (const node of [
+    findByClass(treeRoot, "eyebrow"),
+    findByClass(treeRoot, "crumb"),
+    findOne(treeRoot, (candidate) => candidate.tag === "h1", "tree h1"),
+  ]) {
+    assert.ok(isDescendant(treeIntro, node), "tree heading material belongs to page intro");
+  }
+  const treeStack = findByClass(treeRoot, "section-stack");
+  assert.equal(findById(treeRoot, "denied").parent, treeStack, "denied panel belongs to stack");
+  assert.equal(findById(treeRoot, "tree-panel").parent, treeStack, "tree panel belongs to stack");
+
+  const treeHtml = await readArchivePage("tree.html");
+  assert.match(treeHtml, /new URLSearchParams\(location\.search\)\.get\("path"\)/, "tree reads path query");
+  assert.match(treeHtml, /href="package\.html"/, "tree keeps package link");
+});
+
+test("archive package and forensics preserve evidence controls and navigation", async () => {
+  const packageRoot = parseHtml(await readArchivePage("package.html"));
+  const packageMain = findOne(packageRoot, (node) => node.tag === "main", "package main");
+  const packageIntro = findByClass(packageRoot, "page-intro");
+  assert.equal(packageIntro.parent, packageMain, "package intro is a direct main child");
+  assert.ok(isDescendant(packageIntro, findByClass(packageRoot, "crumb")), "package breadcrumb is in intro");
+  assert.ok(
+    isDescendant(packageIntro, findOne(packageRoot, (node) => node.tag === "h1", "package h1")),
+    "package heading is in intro",
+  );
+  const packageStack = findByClass(packageRoot, "section-stack");
+  assert.equal(packageStack.parent, packageMain, "package stack is a direct main child");
+  const packagePanels = packageStack.children.filter((node) => hasClass(node, "panel"));
+  assert.equal(packagePanels.length, 2, "package keeps metadata and download panels");
+  assert.ok(hasClass(packagePanels[0], "grid"), "metadata panel keeps grid");
+  const downloads = allElements(
+    packageRoot,
+    (node) => node.tag === "a" && node.attributes.get("href") === "assets/testimony.pkg",
+  );
+  assert.deepEqual(
+    downloads.map((node) => node.attributes.get("download")),
+    ["testimony.pkg", "testimony.wav"],
+    "package keeps exact original and compatible downloads",
+  );
+  assert.equal(
+    allElements(
+      packageRoot,
+      (node) => node.tag === "a" && node.attributes.get("href") === "forensics.html",
+    ).length,
+    1,
+    "package keeps forensics link",
+  );
+
+  const forensicsRoot = parseHtml(await readArchivePage("forensics.html"));
+  const forensicsMain = findOne(forensicsRoot, (node) => node.tag === "main", "forensics main");
+  const header = findByClass(forensicsRoot, "page-header");
+  const intro = findByClass(forensicsRoot, "page-intro");
+  const forensicsStack = findByClass(forensicsRoot, "section-stack");
+  const material = findByClass(forensicsRoot, "workspace-material");
+  assert.equal(header.parent, forensicsMain, "forensics header is a direct main child");
+  assert.equal(intro.parent, forensicsMain, "forensics intro is a direct main child");
+  assert.equal(forensicsStack.parent, forensicsMain, "forensics stack is a direct main child");
+  assert.equal(material.parent, forensicsStack, "waveform material belongs to section stack");
+  assert.ok(isDescendant(material, findById(forensicsRoot, "wave")), "waveform is inside material panel");
+  assert.equal(findByClass(forensicsRoot, "channel-grid").parent, forensicsStack, "channels belong to section stack");
+  for (const id of ["play-left", "play-right", "status"]) findById(forensicsRoot, id);
+  const actions = findByClass(forensicsRoot, "actions");
+  for (const href of ["assets/testimony-transcript.txt", "integrity.html"]) {
+    assert.equal(
+      allElements(
+        actions,
+        (node) => isDescendant(actions, node) && node.tag === "a" && node.attributes.get("href") === href,
+      ).length,
+      1,
+      `forensics keeps ${href} action`,
+    );
+  }
+});
+
+test("archive integrity and switch console preserve verification and decision evidence", async () => {
+  const integrityRoot = parseHtml(await readArchivePage("integrity.html"));
+  const integrityMain = findOne(integrityRoot, (node) => node.tag === "main", "integrity main");
+  const integrityStack = findByClass(integrityRoot, "section-stack");
+  assert.equal(integrityStack.parent, integrityMain, "integrity stack is a direct main child");
+  const integrityPanels = integrityStack.children.filter((node) => hasClass(node, "panel"));
+  assert.equal(integrityPanels.length, 2, "integrity keeps two panels");
+  assert.ok(isDescendant(integrityPanels[0], findById(integrityRoot, "original-hash")), "upload chain is first");
+  for (const id of ["verify", "current-hash", "status", "next"]) {
+    assert.ok(isDescendant(integrityPanels[1], findById(integrityRoot, id)), `#${id} is in verification panel`);
+  }
+  const verifyActions = assertInClassAncestor(findById(integrityRoot, "verify"), "form-actions", "verify button");
+  assert.equal(isDescendant(verifyActions, findById(integrityRoot, "status")), false, "status stays outside action row");
+  assert.ok(hasClass(findById(integrityRoot, "status"), "status"), "integrity status keeps status class");
+  assert.equal(
+    allElements(
+      findById(integrityRoot, "next"),
+      (node) => node.tag === "a" && node.attributes.get("href") === "switch-console.html",
+    ).length,
+    1,
+    "integrity keeps switch-console link",
+  );
+
+  const switchRoot = parseHtml(await readArchivePage("switch-console.html"));
+  const switchMain = findOne(switchRoot, (node) => node.tag === "main", "switch main");
+  assert.equal(findByClass(switchRoot, "page-intro").parent, switchMain, "switch intro is a direct child");
+  const switchStack = findByClass(switchRoot, "section-stack");
+  assert.equal(switchStack.parent, switchMain, "switch stack is a direct child");
+  const switchPanels = switchStack.children.filter((node) => hasClass(node, "panel"));
+  assert.equal(switchPanels.length, 2, "switch keeps log and evidence panels");
+  assert.ok(hasClass(switchPanels[1], "evidence"), "second switch panel keeps evidence");
+  assert.equal(
+    findById(switchRoot, "notebook-link").attributes.get("href"),
+    "../blog/case-notebook.html",
+    "switch keeps notebook fallback link",
+  );
+  const switchHtml = await readArchivePage("switch-console.html");
+  assert.match(switchHtml, /type="module"/, "switch keeps module script");
+  assert.match(switchHtml, /DRYRUN/, "switch keeps fragment");
+  assert.match(switchHtml, /FOLLOW-THE-TIDE/, "switch keeps token");
+});
+
+test("archive skin owns terminal semantics without reclaiming shared layout", () => {
+  const body = extractRuleBody(archiveCss, "body");
+  const theme = {
+    "--bg": "#020504",
+    "--panel": "#050b08",
+    "--panel-2": "#07110b",
+    "--line": "#173823",
+    "--ink": "#cde8d5",
+    "--muted": "#6e9c7b",
+    "--accent": "var(--term)",
+    "--success": "var(--term)",
+  };
+  for (const [property, value] of Object.entries(theme)) {
+    assertDeclaration(body, property, value, `archive body ${property}`);
+  }
+  assertDeclaration(body, "background", "#020504");
+  assertDeclaration(body, "color", "var(--ink)");
+
+  for (const selector of [".tree", ".hex", ".wave", ".channel-grid", ".record", ".hash", ".console-line"]) {
+    assert.ok(extractRuleBody(archiveCss, selector).trim(), `${selector} keeps archive styling`);
+  }
+
+  const rules = collectStyleRules(archiveCss);
+  for (const rule of rules) {
+    const values = declarations(rule.body);
+    if (rule.selectors.includes(".terminal-shell")) {
+      for (const property of ["width", "max-width", "margin", "padding"]) {
+        assert.equal(values.has(property), false, `.terminal-shell does not own ${property}`);
+      }
+    }
+  }
+
+  for (const selector of [".channel-grid", ".hex"]) {
+    assert.match(
+      declarations(extractRuleBody(archiveCss, selector)).get("gap") ?? "",
+      /^var\(--space-\d+\)$/,
+      `${selector} gap uses spacing token`,
+    );
+  }
+
+  assertDeclaration(extractRuleBody(archiveCss, "body"), "font-family", "inherit");
+  const mono = extractRuleBody(
+    archiveCss,
+    "h1,\nh2,\n.crumb,\n.tree,\n.hex,\n.hash,\n.console-line",
+  );
+  assert.match(declarations(mono).get("font-family") ?? "", /ui-monospace/, "terminal material is monospace");
 });
