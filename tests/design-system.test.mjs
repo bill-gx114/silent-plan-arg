@@ -121,6 +121,14 @@ function hasClass(node, className) {
   return new Set((node.attributes.get("class") ?? "").split(/\s+/).filter(Boolean)).has(className);
 }
 
+function assertExactClasses(node, expected, label) {
+  assert.deepEqual(
+    [...classTokens(`class="${node.attributes.get("class") ?? ""}"`)].sort(),
+    [...expected].sort(),
+    `${label} classes`,
+  );
+}
+
 function findOne(root, predicate, label) {
   const matches = allElements(root, predicate);
   assert.equal(matches.length, 1, `${label} count`);
@@ -741,6 +749,70 @@ test("corporate pages use their assigned shared page templates and one h1", asyn
   }
 });
 
+test("corporate marketing and card pages preserve their exact content hierarchy", async () => {
+  const indexRoot = parseHtml(await readCorporatePage("index.html"));
+  const nav = findByClass(indexRoot, "corp-nav");
+  const main = findOne(indexRoot, (node) => node.tag === "main", "index main");
+  assert.equal(isDescendant(main, nav), false, "corporate nav is outside main");
+  assert.equal(nav.parent, main.parent, "corporate nav and main are body siblings");
+  assert.ok(
+    nav.parent.children.indexOf(nav) < nav.parent.children.indexOf(main),
+    "corporate nav precedes main",
+  );
+
+  const mainElements = main.children.filter((node) => node.tag !== "#text");
+  assert.ok(hasClass(mainElements[0], "corp-hero"), "hero is main's first element child");
+  const marketing = findByClass(indexRoot, "marketing-content");
+  assert.equal(marketing.parent, main, "marketing content is a direct main child");
+  assert.ok(
+    mainElements.indexOf(marketing) > mainElements.indexOf(mainElements[0]),
+    "marketing content follows hero",
+  );
+  const cards = findOne(
+    marketing,
+    (node) => isDescendant(marketing, node) && node.tag === "section" && hasClass(node, "cards"),
+    "marketing cards section",
+  );
+  const invitation = findOne(
+    marketing,
+    (node) => isDescendant(marketing, node) &&
+      node.tag === "section" &&
+      allElements(node, (child) => child.tag === "a" && child.attributes.get("href") === "archive.html").length === 1,
+    "archive invitation section",
+  );
+  assert.ok(marketing.children.indexOf(cards) < marketing.children.indexOf(invitation), "cards precede invitation");
+
+  for (const file of ["products.html", "team.html"]) {
+    const root = parseHtml(await readCorporatePage(file));
+    const pageCards = findByClass(root, "cards");
+    assert.equal(pageCards.tag, "section", `${file} cards use section`);
+    assertExactClasses(pageCards, ["cards"], `${file} cards section`);
+  }
+});
+
+test("corporate archive preserves exact snapshot controls and targets", async () => {
+  const root = parseHtml(await readCorporatePage("archive.html"));
+  const buttons = allElements(
+    root,
+    (node) => node.tag === "button" && node.attributes.has("data-year"),
+  );
+  assert.deepEqual(
+    buttons.map((node) => node.attributes.get("data-year")),
+    ["2019", "2020", "current"],
+    "snapshot button values",
+  );
+
+  const snapshots = allElements(
+    root,
+    (node) => node.tag === "section" && node.attributes.has("data-snapshot"),
+  );
+  assert.deepEqual(
+    snapshots.map((node) => node.attributes.get("data-snapshot")),
+    ["2019", "2020", "current"],
+    "snapshot target values",
+  );
+});
+
 test("corporate data tables are nested in horizontal data viewports", async () => {
   for (const [file, tableClass] of [
     ["diff.html", "diff-table"],
@@ -769,6 +841,15 @@ test("corporate evidence and interactive forms keep structural grouping", async 
       node.attributes.get("type") === "radio",
   );
   assert.equal(radios.length, 3, "diff form keeps three choices");
+  assert.deepEqual(
+    radios.map((radio) => [radio.attributes.get("name"), radio.attributes.get("value")]),
+    [
+      ["answer", "resign"],
+      ["answer", "batch"],
+      ["answer", "error"],
+    ],
+    "diff answer names and values",
+  );
   for (const radio of radios) {
     const label = nearestAncestor(radio, (node) => node.tag === "label");
     assert.ok(label, "radio has label ancestor");
@@ -784,15 +865,44 @@ test("corporate evidence and interactive forms keep structural grouping", async 
 
   const directoryRoot = parseHtml(await readCorporatePage("directory.html"));
   const directoryStack = findByClass(directoryRoot, "section-stack");
+  const directoryScroll = findByClass(directoryRoot, "data-scroll");
   const directoryEvidence = findByClass(directoryRoot, "evidence");
-  assert.ok(isDescendant(directoryStack, directoryEvidence), "directory evidence follows in section stack");
+  assert.equal(directoryScroll.parent, directoryStack, "directory viewport belongs to section stack");
+  assert.equal(directoryEvidence.parent, directoryStack, "directory evidence belongs to section stack");
+  assert.ok(
+    directoryStack.children.indexOf(directoryScroll) < directoryStack.children.indexOf(directoryEvidence),
+    "directory evidence follows data viewport",
+  );
 
   const requestRoot = parseHtml(await readCorporatePage("request-log.html"));
   const filters = findByClass(requestRoot, "record-filters");
   assert.ok(hasClass(filters, "actions"), "request filters retain actions");
+  const filterButtons = allElements(
+    filters,
+    (node) => isDescendant(filters, node) && node.tag === "button",
+  );
+  assert.deepEqual(
+    filterButtons.map((node) => node.attributes.get("data-filter")),
+    ["all", "CYM-071", "DEL-1109"],
+    "request filter values",
+  );
+  const terminal = findByClass(requestRoot, "terminal");
+  const requestScroll = findByClass(requestRoot, "data-scroll");
+  const requestTable = findOne(requestRoot, (node) => node.tag === "table", "request table");
+  assert.ok(isDescendant(terminal, requestScroll), "request viewport is inside terminal");
+  assert.ok(isDescendant(requestScroll, requestTable), "request table is inside viewport");
+  const targetRows = allElements(requestTable, (node) => node.tag === "tr" && hasClass(node, "target"));
+  assert.equal(targetRows.length, 4, "request table keeps four target rows");
+  assert.deepEqual(
+    targetRows.map((node) => node.attributes.get("data-tags")),
+    Array(4).fill("CYM-071 DEL-1109"),
+    "target rows keep employee and deletion tags",
+  );
   const requestForm = findById(requestRoot, "path-form");
   assert.ok(hasClass(requestForm, "form-stack"), "path form uses form-stack");
-  assertInClassAncestor(findById(requestRoot, "path"), "field-group", "path input");
+  const path = findById(requestRoot, "path");
+  assert.ok(isDescendant(requestForm, path), "path input belongs to path form");
+  assertInClassAncestor(path, "field-group", "path input");
   const requestActions = assertInClassAncestor(findSubmit(requestForm), "form-actions", "path submit");
   assert.equal(
     assertInClassAncestor(findById(requestRoot, "status"), "form-actions", "path status"),
@@ -803,8 +913,8 @@ test("corporate evidence and interactive forms keep structural grouping", async 
 
 test("corporate skin owns semantic theme values without reclaiming shared layout", () => {
   const root = extractRuleBody(corporateCss, ":root");
+  assertDeclaration(root, "--corp-blue", "#4ac8ff", "corporate --corp-blue");
   const theme = {
-    "--corp-blue": "#4ac8ff",
     "--bg": "#07111b",
     "--panel": "#0c1721",
     "--panel-2": "#101f2c",
@@ -813,12 +923,17 @@ test("corporate skin owns semantic theme values without reclaiming shared layout
     "--muted": "#9bb0bf",
     "--accent": "var(--corp-blue)",
   };
+  for (const property of Object.keys(theme)) {
+    assert.equal(declarations(root).has(property), false, `${property} is not global`);
+  }
+
+  const body = extractRuleBody(corporateCss, "body");
   for (const [property, value] of Object.entries(theme)) {
-    assertDeclaration(root, property, value, `corporate ${property}`);
+    assertDeclaration(body, property, value, `corporate body ${property}`);
   }
 
   assertDeclaration(
-    extractRuleBody(corporateCss, "body"),
+    body,
     "background",
     "linear-gradient(145deg, #07111b, #0b1824 55%, #061018)",
   );

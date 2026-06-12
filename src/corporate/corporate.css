@@ -1,5 +1,7 @@
 :root {
   --corp-blue: #4ac8ff;
+}
+body {
   --bg: #07111b;
   --panel: #0c1721;
   --panel-2: #101f2c;
@@ -7,8 +9,8 @@
   --ink: #e5eef5;
   --muted: #9bb0bf;
   --accent: var(--corp-blue);
+  background: linear-gradient(145deg, #07111b, #0b1824 55%, #061018);
 }
-body { background: linear-gradient(145deg, #07111b, #0b1824 55%, #061018); }
 .corp-nav { position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: var(--space-5); padding: var(--space-4) max(var(--space-5), calc((100vw - var(--width-standard)) / 2)); background: #07111bea; border-bottom: 1px solid #173047; backdrop-filter: blur(12px); }
 .corp-nav nav { display: flex; gap: var(--space-5); }
 .corp-nav a { color: var(--muted); text-decoration: none; }
