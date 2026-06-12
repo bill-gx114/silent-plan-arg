@@ -2,13 +2,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const css = await readFile(new URL("../src/shared/base.css", import.meta.url), "utf8");
+const rawCss = await readFile(new URL("../src/shared/base.css", import.meta.url), "utf8");
+const css = rawCss.replace(/\/\*[\s\S]*?\*\//g, "");
 
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function extractBlock(source, startIndex, label) {
+function extractBlockRange(source, startIndex, label) {
   const openingBrace = source.indexOf("{", startIndex);
   assert.notEqual(openingBrace, -1, `${label} opening brace`);
 
@@ -16,28 +13,53 @@ function extractBlock(source, startIndex, label) {
   for (let index = openingBrace + 1; index < source.length; index += 1) {
     if (source[index] === "{") depth += 1;
     if (source[index] === "}") depth -= 1;
-    if (depth === 0) return source.slice(openingBrace + 1, index);
+    if (depth === 0) {
+      return {
+        body: source.slice(openingBrace + 1, index),
+        endIndex: index + 1,
+      };
+    }
   }
 
   assert.fail(`${label} closing brace`);
 }
 
+function extractBlock(source, startIndex, label) {
+  return extractBlockRange(source, startIndex, label).body;
+}
+
+function normalizeSelector(selector) {
+  return selector.trim().replace(/\s+/g, " ");
+}
+
 function extractRuleBody(source, selector) {
-  const selectorPattern = selector
-    .trim()
-    .split(/\s+/)
-    .map(escapeRegExp)
-    .join("\\s+");
-  const match = new RegExp(`${selectorPattern}\\s*\\{`).exec(source);
-  assert.ok(match, `${selector} rule`);
-  return extractBlock(source, match.index, selector);
+  const target = normalizeSelector(selector);
+  const matches = [];
+  let cursor = 0;
+
+  while (cursor < source.length) {
+    const openingBrace = source.indexOf("{", cursor);
+    if (openingBrace === -1) break;
+
+    const prelude = source.slice(cursor, openingBrace).trim();
+    const block = extractBlockRange(source, openingBrace, prelude || selector);
+    if (!prelude.startsWith("@") && normalizeSelector(prelude) === target) {
+      matches.push(block.body);
+    }
+    cursor = block.endIndex;
+  }
+
+  assert.ok(matches.length, `${selector} rule`);
+  return matches.at(-1);
 }
 
 function extractMediaBody(maxWidth) {
   const label = `@media (max-width: ${maxWidth}px)`;
-  const match = new RegExp(`@media\\s*\\(max-width:\\s*${maxWidth}px\\)\\s*\\{`).exec(css);
-  assert.ok(match, `${label} rule`);
-  return extractBlock(css, match.index, label);
+  const matches = [
+    ...css.matchAll(new RegExp(`@media\\s*\\(max-width:\\s*${maxWidth}px\\)\\s*\\{`, "g")),
+  ];
+  assert.ok(matches.length, `${label} rule`);
+  return extractBlock(css, matches.at(-1).index, label);
 }
 
 function declarations(body) {
@@ -57,6 +79,27 @@ function declarations(body) {
 function assertDeclaration(body, property, value, label = property) {
   assert.equal(declarations(body).get(property), value, label);
 }
+
+function pxValue(body, property, variablesBody) {
+  let value = declarations(body).get(property);
+  const variable = /^var\((--[^)]+)\)$/.exec(value ?? "");
+  if (variable) {
+    assert.ok(variablesBody, `${property} variable source`);
+    value = declarations(variablesBody).get(variable[1]);
+  }
+  assert.match(value ?? "", /^\d+(?:\.\d+)?px$/, `${property} pixel value`);
+  return Number.parseFloat(value);
+}
+
+test("rule extraction ignores comments and resolves the final matching rule", () => {
+  const sample = `
+    /* .sample { width: 999px; } */
+    .sample { width: 12px; }
+    .sample { width: 24px; }
+  `;
+
+  assertDeclaration(extractRuleBody(sample.replace(/\/\*[\s\S]*?\*\//g, ""), ".sample"), "width", "24px");
+});
 
 test("shared design-system tokens live in :root", () => {
   const root = extractRuleBody(css, ":root");
@@ -143,9 +186,25 @@ test("special inputs keep intrinsic sizing and accessible targets", () => {
   assertDeclaration(binaryInputs, "padding", "0");
 
   const range = extractRuleBody(css, 'input[type="range"]');
+  const root = extractRuleBody(css, ":root");
   assertDeclaration(range, "width", "100%");
-  assertDeclaration(range, "min-height", "0");
+  assert.ok(pxValue(range, "min-height", root) >= 44, "range minimum hit area");
   assertDeclaration(range, "padding", "0");
+
+  const webkitTrack = extractRuleBody(css, 'input[type="range"]::-webkit-slider-runnable-track');
+  assert.equal(pxValue(webkitTrack, "height"), 6, "WebKit visual track height");
+
+  const mozTrack = extractRuleBody(css, 'input[type="range"]::-moz-range-track');
+  assert.equal(pxValue(mozTrack, "height"), 6, "Firefox visual track height");
+
+  const webkitThumb = extractRuleBody(css, 'input[type="range"]::-webkit-slider-thumb');
+  assert.ok(pxValue(webkitThumb, "width") >= 24, "WebKit thumb width");
+  assert.ok(pxValue(webkitThumb, "height") >= 24, "WebKit thumb height");
+  assertDeclaration(webkitThumb, "margin-top", "-9px", "WebKit thumb track centering");
+
+  const mozThumb = extractRuleBody(css, 'input[type="range"]::-moz-range-thumb');
+  assert.ok(pxValue(mozThumb, "width") >= 24, "Firefox thumb width");
+  assert.ok(pxValue(mozThumb, "height") >= 24, "Firefox thumb height");
 
   const choiceField = extractRuleBody(css, ".choice-field");
   assertDeclaration(choiceField, "display", "inline-flex");
@@ -169,11 +228,11 @@ test("legacy layouts retain temporary panel separation", () => {
   );
   assertDeclaration(nestedPanels, "margin-top", "0");
 
-  const adjacentPanels = extractRuleBody(
+  assert.doesNotMatch(
     css,
-    ".shell > .panel + .panel,\n.archive-shell > .panel + .panel,\n.terminal-shell > .panel + .panel",
+    /\.shell\s*>\s*\.panel\s*\+\s*\.panel/,
+    "direct legacy panels do not need a redundant adjacent override",
   );
-  assertDeclaration(adjacentPanels, "margin-top", "18px");
 });
 
 test("responsive rules preserve gutters and action targets", () => {
