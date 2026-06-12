@@ -4,8 +4,67 @@ import test from "node:test";
 
 const css = await readFile(new URL("../src/shared/base.css", import.meta.url), "utf8");
 
-test("shared design-system tokens define spacing, widths, and control height", () => {
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function extractBlock(source, startIndex, label) {
+  const openingBrace = source.indexOf("{", startIndex);
+  assert.notEqual(openingBrace, -1, `${label} opening brace`);
+
+  let depth = 1;
+  for (let index = openingBrace + 1; index < source.length; index += 1) {
+    if (source[index] === "{") depth += 1;
+    if (source[index] === "}") depth -= 1;
+    if (depth === 0) return source.slice(openingBrace + 1, index);
+  }
+
+  assert.fail(`${label} closing brace`);
+}
+
+function extractRuleBody(source, selector) {
+  const selectorPattern = selector
+    .trim()
+    .split(/\s+/)
+    .map(escapeRegExp)
+    .join("\\s+");
+  const match = new RegExp(`${selectorPattern}\\s*\\{`).exec(source);
+  assert.ok(match, `${selector} rule`);
+  return extractBlock(source, match.index, selector);
+}
+
+function extractMediaBody(maxWidth) {
+  const label = `@media (max-width: ${maxWidth}px)`;
+  const match = new RegExp(`@media\\s*\\(max-width:\\s*${maxWidth}px\\)\\s*\\{`).exec(css);
+  assert.ok(match, `${label} rule`);
+  return extractBlock(css, match.index, label);
+}
+
+function declarations(body) {
+  return new Map(
+    body
+      .split(";")
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .map((entry) => {
+        const separator = entry.indexOf(":");
+        assert.notEqual(separator, -1, `valid declaration: ${entry}`);
+        return [entry.slice(0, separator).trim(), entry.slice(separator + 1).trim()];
+      }),
+  );
+}
+
+function assertDeclaration(body, property, value, label = property) {
+  assert.equal(declarations(body).get(property), value, label);
+}
+
+test("shared design-system tokens live in :root", () => {
+  const root = extractRuleBody(css, ":root");
   const tokens = {
+    "--bg": "#07090c",
+    "--panel": "#11161d",
+    "--panel-2": "#171e27",
+    "--success": "#69c98a",
     "--space-1": "4px",
     "--space-2": "8px",
     "--space-3": "12px",
@@ -20,58 +79,120 @@ test("shared design-system tokens define spacing, widths, and control height", (
     "--width-data": "1120px",
     "--width-verify": "640px",
     "--control-height": "44px",
-    "--success": "#69c98a",
     "--radius-sm": "8px",
     "--radius-md": "12px",
     "--radius-lg": "18px",
+    "--shadow-panel": "0 18px 48px rgba(0, 0, 0, .18)",
   };
 
   for (const [token, value] of Object.entries(tokens)) {
-    assert.match(css, new RegExp(`${token}:\\s*${value.replace(".", "\\.")}\\s*;`), token);
+    assertDeclaration(root, token, value, token);
   }
+  assert.doesNotMatch(root, /--color-/, "duplicate color aliases");
 });
 
-test("shared layouts use the reviewed desktop and responsive dimensions", () => {
-  assert.match(
-    css,
-    /\.page\s*\{[^}]*width:\s*min\(var\(--page-width,\s*var\(--width-standard\)\),\s*calc\(100%\s*-\s*64px\)\);[^}]*padding-block:\s*var\(--space-6\)\s+var\(--space-9\);/s,
-    ".page desktop gutters and padding",
+test("shared layouts use the reviewed dimensions", () => {
+  const page = extractRuleBody(css, ".page");
+  assertDeclaration(
+    page,
+    "width",
+    "min(var(--page-width, var(--width-standard)), calc(100% - 64px))",
+    ".page desktop gutter",
   );
-  assert.match(
+  assertDeclaration(page, "padding-block", "var(--space-6) var(--space-9)");
+
+  const dataPages = extractRuleBody(css, ".page--workspace,\n.page--records");
+  assertDeclaration(dataPages, "--page-width", "var(--width-data)");
+
+  const panel = extractRuleBody(css, ".panel");
+  assertDeclaration(panel, "margin", "0");
+  assertDeclaration(panel, "padding", "var(--space-5)");
+
+  const status = extractRuleBody(css, ".status");
+  assertDeclaration(status, "min-height", "3.4em");
+  assertDeclaration(status, "margin", "0");
+});
+
+test("theme-aware surfaces consume semantic theme tokens", () => {
+  assertDeclaration(extractRuleBody(css, ".panel"), "background", "var(--panel)");
+
+  const textFields = extractRuleBody(
     css,
-    /\.page--workspace\s*,\s*\.page--records\s*\{[^}]*--page-width:\s*var\(--width-data\);/s,
-    ".page--workspace and .page--records data width",
+    'input:not([type="radio"]):not([type="checkbox"]):not([type="range"]),\ntextarea,\nselect',
   );
+  assert.match(declarations(textFields).get("background"), /^var\(--(?:panel-2|field)\)$/);
+
+  const evidence = extractRuleBody(css, ".evidence");
   assert.match(
-    css,
-    /\.panel\s*\{[^}]*margin:\s*0;[^}]*padding:\s*var\(--space-5\);/s,
-    ".panel margin and padding",
+    evidence,
+    /background:\s*var\(--panel-2\);[\s\S]*background:\s*color-mix\(/,
+    "evidence fallback precedes color-mix enhancement",
   );
-  assert.match(
+});
+
+test("special inputs keep intrinsic sizing and accessible targets", () => {
+  assert.doesNotMatch(
     css,
-    /\.status\s*\{[^}]*min-height:\s*3\.4em;[^}]*margin:\s*0;/s,
-    ".status stable height",
+    /(?:^|})\s*input\s*,\s*textarea\s*,\s*select\s*\{/m,
+    "generic input selector must not style special inputs as text fields",
   );
-  assert.match(
+
+  const binaryInputs = extractRuleBody(css, 'input[type="radio"],\ninput[type="checkbox"]');
+  assertDeclaration(binaryInputs, "width", "auto");
+  assertDeclaration(binaryInputs, "min-height", "0");
+  assertDeclaration(binaryInputs, "padding", "0");
+
+  const range = extractRuleBody(css, 'input[type="range"]');
+  assertDeclaration(range, "width", "100%");
+  assertDeclaration(range, "min-height", "0");
+  assertDeclaration(range, "padding", "0");
+
+  const choiceField = extractRuleBody(css, ".choice-field");
+  assertDeclaration(choiceField, "display", "inline-flex");
+  assertDeclaration(choiceField, "min-height", "var(--control-height)");
+  assertDeclaration(choiceField, "align-items", "center");
+
+  const fieldControls = extractRuleBody(css, ".field-group input,\n.field-group select,\n.field-group textarea");
+  assertDeclaration(fieldControls, "font-weight", "400");
+});
+
+test("legacy layouts retain temporary panel separation", () => {
+  const legacyPanels = extractRuleBody(
     css,
-    /@media\s*\(max-width:\s*760px\)[\s\S]*?\.page\s*\{[^}]*calc\(100%\s*-\s*36px\)/,
-    "760px page gutter",
+    ".shell > .panel,\n.archive-shell > .panel,\n.terminal-shell > .panel",
   );
-  assert.match(
+  assertDeclaration(legacyPanels, "margin-top", "18px");
+
+  const nestedPanels = extractRuleBody(
     css,
-    /@media\s*\(max-width:\s*760px\)[\s\S]*?\.marketing-content\s*\{[^}]*calc\(100%\s*-\s*36px\)/,
-    "760px marketing gutter",
+    ".grid > .panel,\n.channel-grid > .panel,\n.notebook-grid > .panel",
   );
-  assert.match(
+  assertDeclaration(nestedPanels, "margin-top", "0");
+
+  const adjacentPanels = extractRuleBody(
     css,
-    /@media\s*\(max-width:\s*560px\)[\s\S]*?\.page\s*\{[^}]*calc\(100%\s*-\s*32px\)/,
-    "560px page gutter",
+    ".shell > .panel + .panel,\n.archive-shell > .panel + .panel,\n.terminal-shell > .panel + .panel",
   );
-  assert.match(
-    css,
-    /@media\s*\(max-width:\s*560px\)[\s\S]*?\.form-actions,\s*\.actions\s*\{[^}]*align-items:\s*stretch;[^}]*flex-direction:\s*column;/s,
-    "560px stacked actions",
+  assertDeclaration(adjacentPanels, "margin-top", "18px");
+});
+
+test("responsive rules preserve gutters and action targets", () => {
+  const tablet = extractMediaBody(760);
+  const tabletPage = extractRuleBody(tablet, ".page");
+  assert.match(declarations(tabletPage).get("width"), /calc\(100% - 36px\)/);
+  assertDeclaration(extractRuleBody(tablet, ".marketing-content"), "width", "calc(100% - 36px)");
+
+  const mobile = extractMediaBody(560);
+  const mobilePage = extractRuleBody(mobile, ".page");
+  assertDeclaration(
+    mobilePage,
+    "width",
+    "min(calc(100% - 32px), var(--page-width, var(--width-standard)))",
   );
+
+  const mobileActions = extractRuleBody(mobile, ".form-actions,\n.actions");
+  assertDeclaration(mobileActions, "align-items", "stretch");
+  assertDeclaration(mobileActions, "flex-direction", "column");
 });
 
 test("shared design-system exposes page, layout, form, and feedback selectors", () => {
@@ -86,6 +207,7 @@ test("shared design-system exposes page, layout, form, and feedback selectors", 
     ".section-stack",
     ".workspace-grid",
     ".field-group",
+    ".choice-field",
     ".form-stack",
     ".form-grid",
     ".form-actions",
