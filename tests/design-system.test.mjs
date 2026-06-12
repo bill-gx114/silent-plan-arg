@@ -4,6 +4,8 @@ import test from "node:test";
 
 const rawCss = await readFile(new URL("../src/shared/base.css", import.meta.url), "utf8");
 const css = rawCss.replace(/\/\*[\s\S]*?\*\//g, "");
+const rawBlogCss = await readFile(new URL("../src/blog/blog.css", import.meta.url), "utf8");
+const blogCss = rawBlogCss.replace(/\/\*[\s\S]*?\*\//g, "");
 const templateMaps = {
   blog: {
     "index.html": "page--reading",
@@ -24,6 +26,146 @@ async function readBlogPage(file) {
 function classTokens(attributes) {
   const match = attributes.match(/\bclass\s*=\s*["']([^"']*)["']/i);
   return new Set(match?.[1].trim().split(/\s+/).filter(Boolean) ?? []);
+}
+
+function isDescendant(ancestor, node) {
+  for (let current = node?.parent; current; current = current.parent) {
+    if (current === ancestor) return true;
+  }
+  return false;
+}
+
+function parseAttributes(source) {
+  const attributes = new Map();
+  const pattern = /([^\s=/>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
+
+  for (const match of source.matchAll(pattern)) {
+    attributes.set(match[1].toLowerCase(), match[2] ?? match[3] ?? match[4] ?? "");
+  }
+  return attributes;
+}
+
+function parseHtml(source) {
+  const root = { tag: "#document", attributes: new Map(), children: [], parent: null };
+  const stack = [root];
+  const voidTags = new Set([
+    "area", "base", "br", "col", "embed", "hr", "img", "input",
+    "link", "meta", "param", "source", "track", "wbr",
+  ]);
+  const sanitized = source
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<(script|style)\b([^>]*)>[\s\S]*?<\/\1\s*>/gi, "<$1$2></$1>");
+  const tags = /<(\/?)([a-z][\w:-]*)([^>]*)>/gi;
+
+  for (const match of sanitized.matchAll(tags)) {
+    const closing = match[1] === "/";
+    const tag = match[2].toLowerCase();
+    if (closing) {
+      while (stack.length > 1 && stack.at(-1).tag !== tag) stack.pop();
+      if (stack.at(-1).tag === tag) stack.pop();
+      continue;
+    }
+
+    const parent = stack.at(-1);
+    const node = {
+      tag,
+      attributes: parseAttributes(match[3]),
+      children: [],
+      parent,
+    };
+    parent.children.push(node);
+
+    const selfClosing = /\/\s*$/.test(match[3]);
+    if (!selfClosing && !voidTags.has(tag)) stack.push(node);
+  }
+
+  return root;
+}
+
+function allElements(root, predicate) {
+  const matches = [];
+  const visit = (node) => {
+    if (node.tag !== "#document" && predicate(node)) matches.push(node);
+    for (const child of node.children) visit(child);
+  };
+  visit(root);
+  return matches;
+}
+
+function hasClass(node, className) {
+  return new Set((node.attributes.get("class") ?? "").split(/\s+/).filter(Boolean)).has(className);
+}
+
+function findOne(root, predicate, label) {
+  const matches = allElements(root, predicate);
+  assert.equal(matches.length, 1, `${label} count`);
+  return matches[0];
+}
+
+function findById(root, id) {
+  return findOne(root, (node) => node.attributes.get("id") === id, `#${id}`);
+}
+
+function findByClass(root, className) {
+  return findOne(root, (node) => hasClass(node, className), `.${className}`);
+}
+
+function nearestAncestor(node, predicate) {
+  for (let current = node?.parent; current; current = current.parent) {
+    if (predicate(current)) return current;
+  }
+  return null;
+}
+
+function findSubmit(form) {
+  return findOne(
+    form,
+    (node) => isDescendant(form, node) &&
+      node.tag === "button" &&
+      node.attributes.get("type") === "submit",
+    `submit in #${form.attributes.get("id")}`,
+  );
+}
+
+function assertInClassAncestor(node, className, label) {
+  const ancestor = nearestAncestor(node, (candidate) => hasClass(candidate, className));
+  assert.ok(ancestor, `${label} is inside .${className}`);
+  return ancestor;
+}
+
+function collectStyleRules(source) {
+  const rules = [];
+  let cursor = 0;
+
+  while (cursor < source.length) {
+    const openingBrace = source.indexOf("{", cursor);
+    if (openingBrace === -1) break;
+
+    const prelude = source.slice(cursor, openingBrace).trim();
+    const block = extractBlockRange(source, openingBrace, prelude || "CSS block");
+    if (prelude.startsWith("@")) {
+      rules.push(...collectStyleRules(block.body));
+    } else if (prelude) {
+      rules.push({
+        selectors: prelude.split(",").map(normalizeSelector),
+        body: block.body,
+      });
+    }
+    cursor = block.endIndex;
+  }
+
+  return rules;
+}
+
+function numericLineHeight(body) {
+  const values = declarations(body);
+  const explicit = values.get("line-height");
+  if (explicit) return Number.parseFloat(explicit);
+
+  const shorthand = values.get("font") ?? "";
+  const match = shorthand.match(/\/\s*(\d+(?:\.\d+)?)/);
+  assert.ok(match, "font shorthand has a numeric line-height");
+  return Number.parseFloat(match[1]);
 }
 
 function extractBlockRange(source, startIndex, label) {
@@ -316,20 +458,175 @@ test("blog pages use their assigned shared page templates and one h1", async () 
   }
 });
 
-test("blog records page provides a horizontal data viewport", async () => {
-  const html = await readBlogPage("attachments.html");
-  assert.match(html, /class\s*=\s*["'][^"']*\bdata-scroll\b[^"']*["']/i);
+test("HTML structure helper rejects sibling elements", () => {
+  const root = parseHtml('<div class="data-scroll"></div><table></table>');
+  const scroll = findByClass(root, "data-scroll");
+  const table = findOne(root, (node) => node.tag === "table", "table");
+
+  assert.equal(isDescendant(scroll, table), false);
 });
 
-test("interactive blog pages use shared field, action, and status groups", async () => {
-  for (const file of ["revision.html", "photo-lab.html", "case-notebook.html"]) {
-    const html = await readBlogPage(file);
-    for (const className of ["field-group", "form-actions", "status"]) {
-      assert.match(
-        html,
-        new RegExp(`class\\s*=\\s*["'][^"']*\\b${className}\\b[^"']*["']`, "i"),
-        `${file} uses ${className}`,
-      );
+test("attachments table is contained by its horizontal data viewport", async () => {
+  const root = parseHtml(await readBlogPage("attachments.html"));
+  const scroll = findByClass(root, "data-scroll");
+  const table = findOne(root, (node) => node.tag === "table", "attachments table");
+
+  assert.ok(isDescendant(scroll, table), "attachments table is inside .data-scroll");
+});
+
+test("revision workspace preserves comparison and form grouping", async () => {
+  const root = parseHtml(await readBlogPage("revision.html"));
+  const revisionRow = findByClass(root, "revision-row");
+  assert.ok(hasClass(revisionRow, "workspace-material"), "revision row is workspace material");
+
+  const form = findById(root, "revision-form");
+  assert.ok(hasClass(form, "form-grid"), "revision form uses form-grid");
+  for (const id of ["place", "date", "case-id", "intent"]) {
+    const control = findById(root, id);
+    assert.ok(isDescendant(form, control), `#${id} belongs to revision form`);
+    assertInClassAncestor(control, "field-group", `#${id}`);
+  }
+
+  const submit = findSubmit(form);
+  const status = findById(root, "status");
+  const submitActions = assertInClassAncestor(submit, "form-actions", "revision submit");
+  const statusActions = assertInClassAncestor(status, "form-actions", "revision status");
+  assert.equal(statusActions, submitActions, "revision submit and status share form-actions");
+});
+
+test("photo lab separates material, analysis, evidence form, and memo actions", async () => {
+  const root = parseHtml(await readBlogPage("photo-lab.html"));
+  const workspace = findByClass(root, "workspace-grid");
+  const photo = findById(root, "photo");
+  const material = nearestAncestor(photo, (node) => node.parent === workspace);
+  const analysis = findOne(
+    workspace,
+    (node) => node.parent === workspace && node.tag === "aside",
+    "photo analysis aside",
+  );
+  assert.ok(material, "photo material is a direct workspace child");
+  assert.ok(hasClass(material, "panel"), "photo material uses panel");
+  assert.ok(hasClass(analysis, "panel"), "photo analysis uses panel");
+  assert.ok(
+    workspace.children.indexOf(material) < workspace.children.indexOf(analysis),
+    "photo material precedes analysis",
+  );
+
+  const form = findById(root, "photo-form");
+  assert.ok(hasClass(form, "form-stack"), "photo form uses form-stack");
+  for (const id of ["brightness", "contrast", "proof"]) {
+    assertInClassAncestor(findById(root, id), "field-group", `#${id}`);
+  }
+
+  const submit = findSubmit(form);
+  const status = findById(root, "status");
+  const submitActions = assertInClassAncestor(submit, "form-actions", "photo submit");
+  const statusActions = assertInClassAncestor(status, "form-actions", "photo status");
+  assert.equal(statusActions, submitActions, "photo submit and status share form-actions");
+
+  const memo = findById(root, "memo");
+  const hint = findById(root, "hint");
+  const memoActions = assertInClassAncestor(memo, "secondary-actions", "memo button");
+  const hintActions = assertInClassAncestor(hint, "secondary-actions", "memo hint");
+  assert.equal(hintActions, memoActions, "memo and hint share secondary actions");
+  assert.notEqual(memoActions, submitActions, "memo actions are separate from submit actions");
+  assert.equal(
+    nearestAncestor(memoActions, (node) => node.tag === "form"),
+    null,
+    "memo actions are outside the photo form",
+  );
+});
+
+test("case notebook keeps both evidence forms structurally independent", async () => {
+  const root = parseHtml(await readBlogPage("case-notebook.html"));
+  const fragmentForm = findById(root, "fragment-form");
+  const tokenForm = findById(root, "token-form");
+
+  for (const form of [fragmentForm, tokenForm]) {
+    assert.ok(hasClass(form, "form-stack"), `#${form.attributes.get("id")} uses form-stack`);
+    assertInClassAncestor(findSubmit(form), "form-actions", `#${form.attributes.get("id")} submit`);
+  }
+
+  const fragmentInput = findById(root, "fragment-input");
+  const tokenInput = findById(root, "token-input");
+  assert.ok(isDescendant(fragmentForm, fragmentInput), "fragment input belongs to fragment form");
+  assert.ok(isDescendant(tokenForm, tokenInput), "token input belongs to token form");
+  assertInClassAncestor(fragmentInput, "field-group", "fragment input");
+  assertInClassAncestor(tokenInput, "field-group", "token input");
+
+  const status = findById(root, "status");
+  assert.ok(hasClass(status, "status"), "notebook status keeps status class");
+  assert.ok(isDescendant(fragmentForm, status), "notebook status remains associated with fragment form");
+  assertInClassAncestor(status, "form-actions", "notebook status");
+});
+
+test("blog entry, reading, and decision pages nest their shared structures", async () => {
+  const indexRoot = parseHtml(await readBlogPage("index.html"));
+  const indexMain = findOne(indexRoot, (node) => node.tag === "main", "index main");
+  assert.ok(isDescendant(indexMain, findByClass(indexRoot, "phone")), "phone is nested in shared main");
+
+  for (const file of ["blog.html", "report.html"]) {
+    const root = parseHtml(await readBlogPage(file));
+    const main = findOne(root, (node) => node.tag === "main", `${file} main`);
+    assert.ok(isDescendant(main, findByClass(root, "page-intro")), `${file} has nested page-intro`);
+  }
+
+  const deadSwitchRoot = parseHtml(await readBlogPage("dead-switch.html"));
+  const deadSwitchMain = findOne(deadSwitchRoot, (node) => node.tag === "main", "dead-switch main");
+  const sectionStack = findByClass(deadSwitchRoot, "section-stack");
+  assert.ok(isDescendant(deadSwitchMain, sectionStack), "dead-switch uses a nested section-stack");
+  assert.ok(isDescendant(sectionStack, findById(deadSwitchRoot, "title")), "decision title is in stack");
+  assert.ok(isDescendant(sectionStack, findById(deadSwitchRoot, "content")), "decision content is in stack");
+});
+
+test("blog skin owns semantic theme values without reclaiming shared layout", () => {
+  const paper = extractRuleBody(blogCss, ".paper");
+  const theme = {
+    "--bg": "var(--paper)",
+    "--ink": "var(--paper-ink)",
+    "--muted": "var(--paper-muted)",
+    "--panel": "#f6f0e7",
+    "--panel-2": "#fffaf2",
+    "--line": "#cfc2b3",
+    "--accent": "#7d332a",
+  };
+  for (const [property, value] of Object.entries(theme)) {
+    assertDeclaration(paper, property, value, `.paper ${property}`);
+  }
+
+  assert.ok(numericLineHeight(extractRuleBody(blogCss, ".article")) >= 1.8, "article line-height");
+  assertDeclaration(extractRuleBody(blogCss, ".article p"), "margin-block", "1.2em");
+
+  for (const selector of [
+    ".phone",
+    ".chat",
+    ".bubble",
+    ".revision-row",
+    ".lab-photo",
+    ".notebook-grid",
+    ".fragment-chip",
+  ]) {
+    assert.ok(extractRuleBody(blogCss, selector).trim(), `${selector} keeps a blog-only rule`);
+  }
+
+  const rules = collectStyleRules(blogCss);
+  for (const rule of rules) {
+    const values = declarations(rule.body);
+    if (rule.selectors.includes(".shell") || rule.selectors.includes(".page")) {
+      assert.equal(values.has("width"), false, `${rule.selectors.join(", ")} does not own width`);
+      assert.equal(values.has("max-width"), false, `${rule.selectors.join(", ")} does not own max-width`);
     }
+    if (rule.selectors.includes(".panel")) {
+      assert.equal(values.has("padding"), false, ".panel padding remains shared");
+      assert.equal(values.has("margin"), false, ".panel margin remains shared");
+    }
+  }
+
+  for (const selector of [".chat", ".revision-row", ".notebook-grid"]) {
+    assert.match(
+      declarations(extractRuleBody(blogCss, selector)).get("gap") ?? "",
+      /^var\(--space-\d+\)$/,
+      `${selector} gap uses spacing token`,
+    );
   }
 });
