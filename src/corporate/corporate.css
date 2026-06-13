@@ -1,0 +1,38 @@
+:root {
+  --corp-blue: #4ac8ff;
+}
+body {
+  --bg: #07111b;
+  --panel: #0c1721;
+  --panel-2: #101f2c;
+  --line: #254056;
+  --ink: #e5eef5;
+  --muted: #9bb0bf;
+  --accent: var(--corp-blue);
+  background: linear-gradient(145deg, #07111b, #0b1824 55%, #061018);
+}
+.corp-nav { position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: var(--space-5); padding: var(--space-4) max(var(--space-5), calc((100vw - var(--width-standard)) / 2)); background: #07111bea; border-bottom: 1px solid #173047; backdrop-filter: blur(12px); }
+.corp-nav nav { display: flex; gap: var(--space-5); }
+.corp-nav a { color: var(--muted); text-decoration: none; }
+.logo { font: 800 18px/1 ui-monospace, monospace; letter-spacing: .12em; }
+.logo span { color: var(--corp-blue); }
+.corp-hero { min-height: 480px; display: grid; align-content: center; padding: var(--space-9) max(var(--space-5), calc((100vw - var(--width-standard)) / 2)); background: radial-gradient(circle at 75% 25%, #123e55, transparent 36%); }
+.corp-hero h1 { max-width: 700px; margin: .15em 0; font-size: clamp(48px, 9vw, 94px); line-height: .95; }
+.corp-hero > p:not(.eyebrow) { max-width: 620px; color: var(--muted); font-size: 18px; }
+.notice { border-left: 3px solid var(--warn); padding-left: var(--space-3); }
+.corp-section { padding-block: var(--space-5); }
+.snapshot-tabs { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.snapshot-tabs button[aria-pressed="true"] { background: var(--corp-blue); color: #04101a; }
+.record-filters button[aria-pressed="true"] { background: var(--corp-blue); color: #04101a; }
+.snapshot { border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--panel); padding: var(--space-5); }
+.snapshot del { color: #e88787; }
+.snapshot ins { color: #87dda5; text-decoration: none; }
+.diff-table { background: var(--panel); }
+.diff-table td:nth-child(2) { background: #251619; }
+.diff-table td:nth-child(3) { background: #11251a; }
+.terminal { min-width: 0; background: #03070a; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: var(--space-4); font-family: ui-monospace, monospace; color: #9fd9b9; }
+.log-row.hidden-row { display: none; }
+@media (max-width: 620px) {
+  .corp-nav { align-items: flex-start; flex-direction: column; }
+  .corp-hero { min-height: 390px; }
+}

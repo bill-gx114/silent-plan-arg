@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回声科技 Echo Technologies — 智能声学解决方案</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:-apple-system,"Microsoft YaHei",Arial,sans-serif; color:#2c3e50; background:#fff; line-height:1.6; }
+  /* 档案馆横幅 */
+  .archive-bar{ background:#222; color:#cfcfcf; font-size:12.5px; padding:8px 16px; text-align:center; border-bottom:2px solid #f0b429; }
+  .archive-bar b{ color:#f0b429; }
+  .nav{ display:flex; align-items:center; justify-content:space-between; padding:18px 40px; border-bottom:1px solid #e6eaef; }
+  .logo{ display:flex; align-items:center; gap:10px; font-size:20px; font-weight:700; color:#1a5276; }
+  .logo .mark{ width:30px; height:30px; border-radius:50%; border:3px solid #2980b9; position:relative; }
+  .logo .mark::after{ content:""; position:absolute; inset:5px; border-radius:50%; border:2px solid #5dade2; }
+  .nav ul{ display:flex; gap:26px; list-style:none; font-size:14px; }
+  .nav a{ color:#566; text-decoration:none; }
+  .hero{ background:linear-gradient(135deg,#1a5276,#2980b9); color:#fff; padding:80px 40px; text-align:center; }
+  .hero h1{ font-size:38px; font-weight:700; margin-bottom:16px; }
+  .hero p{ font-size:17px; opacity:.9; max-width:640px; margin:0 auto; }
+  .section{ max-width:1000px; margin:0 auto; padding:60px 40px; }
+  .section h2{ font-size:26px; color:#1a5276; margin-bottom:10px; text-align:center; }
+  .section .lead{ text-align:center; color:#7f8c8d; margin-bottom:40px; }
+  .cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  @media(max-width:760px){ .cards{ grid-template-columns:1fr; } .nav{padding:16px;} .nav ul{display:none;} }
+  .card{ border:1px solid #e6eaef; border-radius:10px; padding:26px; }
+  .card .ic{ font-size:28px; margin-bottom:12px; }
+  .card h3{ font-size:17px; color:#1a5276; margin-bottom:8px; }
+  .card p{ font-size:14px; color:#667; }
+  .team{ background:#f7f9fb; }
+  .members{ display:flex; justify-content:center; gap:40px; flex-wrap:wrap; }
+  .member{ text-align:center; }
+  .member .ph{ width:84px; height:84px; border-radius:50%; background:#d6dde4; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; color:#8a99a8; font-size:24px; }
+  .member b{ display:block; font-size:15px; color:#2c3e50; }
+  .member span{ font-size:12.5px; color:#90a0b0; }
+  footer{ background:#1c2833; color:#aeb9c4; font-size:13px; padding:40px; }
+  .foot-grid{ max-width:1000px; margin:0 auto; display:flex; justify-content:space-between; flex-wrap:wrap; gap:20px; }
+  footer a{ color:#7f8c9a; text-decoration:none; }
+  .emp{ color:#3a4a59 !important; font-size:11px; }
+  .emp:hover{ color:#7f8c9a !important; }
+</style>
+</head>
+<body>
+  <div class="archive-bar">
+    📁 本页面由 <b>网络档案馆 (web.archive.snapshot)</b> 自动存档于 <b>2020-09-14</b>。原站点 echotech.example.com 已不可访问（公司已于 2020 年注销）。
+  </div>
+
+  <div class="nav">
+    <div class="logo"><span class="mark"></span> 回声科技</div>
+    <ul>
+      <li><a href="#about">关于我们</a></li>
+      <li><a href="#products">产品</a></li>
+      <li><a href="#team">团队</a></li>
+      <li><a href="#contact">联系</a></li>
+    </ul>
+  </div>
+
+  <div class="hero">
+    <h1>让世界，安静下来</h1>
+    <p>回声科技专注于智能声学与主动降噪技术，为城市公共空间、住宅社区与工业环境提供下一代声环境解决方案。</p>
+  </div>
+
+  <div class="section" id="products">
+    <h2>我们的技术</h2>
+    <div class="lead">以声制声，重新定义安静。</div>
+    <div class="cards">
+      <div class="card"><div class="ic">🔇</div><h3>主动降噪阵列</h3><p>针对社区低频噪声的分布式声波对消系统，已在多个试点社区部署。</p></div>
+      <div class="card"><div class="ic">📡</div><h3>声环境监测</h3><p>7×24 小时声场监测与建模，精确到单栋建筑的声压分布。</p></div>
+      <div class="card"><div class="ic">🌊</div><h3>频率同步技术</h3><p>核心专利。通过精确调制的声波频率，实现对目标区域声环境的主动干预。<em>（详情仅对授权方开放）</em></p></div>
+    </div>
+  </div>
+
+  <div class="section team" id="team">
+    <h2>核心团队</h2>
+    <div class="lead">由声学、信号处理与神经科学背景的研究者组成。</div>
+    <div class="members">
+      <div class="member"><div class="ph">👤</div><b>陈砚明</b><span>首席研究员</span></div>
+      <div class="member"><div class="ph">👤</div><b>（已隐去）</b><span>项目总监</span></div>
+      <div class="member"><div class="ph">👤</div><b>（已隐去）</b><span>声学工程负责人</span></div>
+    </div>
+  </div>
+
+  <div class="section" id="contact">
+    <h2>联系我们</h2>
+    <div class="lead">echotech.example.com · 城市声环境，交给我们。</div>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <div>© 2014–2020 回声科技 Echo Technologies<br>本快照为历史存档，仅供参考。</div>
+      <div>
+        关于 · 产品 · 团队 · 隐私政策<br>
+        <a class="emp" href="echo-portal.html">· 员工入口 ·</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

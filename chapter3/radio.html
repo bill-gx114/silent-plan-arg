@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海宁人民广播电台 · 《海风》节目存档</title>
+<style>
+  :root{ --bg:#0b1118; --panel:#111a23; --line:#1e2c38; --ink:#e2ebf2; --soft:#9fb1bf; --muted:#637585; --acc:#46c7d8; --warn:#e0a35c; --bad:#e06a6a; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:-apple-system,"Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); line-height:1.65; }
+  .nav{ background:linear-gradient(180deg,#13202b,#0b1118); border-bottom:1px solid var(--line); padding:18px 28px; display:flex; align-items:center; gap:14px; }
+  .logo{ font-weight:800; font-size:18px; letter-spacing:.04em; }
+  .logo span{ color:var(--acc); }
+  .live{ margin-left:auto; font-size:12px; color:var(--bad); display:flex; align-items:center; gap:6px; }
+  .live .d{ width:8px;height:8px;border-radius:50%;background:var(--bad);animation:pl 1.4s infinite; } @keyframes pl{50%{opacity:.3}}
+  .hero{ padding:42px 28px 26px; max-width:900px; margin:0 auto; }
+  .hero .show{ font-size:13px; color:var(--acc); letter-spacing:.2em; }
+  .hero h1{ font-size:30px; margin:6px 0 8px; }
+  .hero p{ color:var(--soft); font-size:14.5px; max-width:600px; }
+  .wrap{ max-width:900px; margin:0 auto; padding:0 28px 100px; }
+  h2{ font-size:18px; margin:30px 0 6px; }
+  .lead{ color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .tablewrap{ border:1px solid var(--line); border-radius:10px; overflow:auto; }
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; white-space:nowrap; }
+  th{ background:#0e1620; color:var(--muted); text-align:left; padding:11px 14px; font-weight:600; border-bottom:1px solid var(--line); }
+  td{ padding:11px 14px; border-bottom:1px solid #182430; color:var(--soft); }
+  tr:last-child td{ border-bottom:none; }
+  tr.ep:hover{ background:#13202b; }
+  .diff-ok{ color:var(--muted); }
+  .diff-bad{ color:var(--bad); font-weight:600; }
+  .play{ color:var(--acc); cursor:pointer; font-weight:600; }
+  .play:hover{ text-decoration:underline; }
+  .reviews{ margin-top:36px; }
+  .rev{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:12px; font-size:13.5px; }
+  .rev .who{ color:var(--acc); font-size:12px; margin-bottom:4px; }
+  .rev .body{ color:var(--soft); }
+  .help{ margin-top:26px; font-size:13px; color:var(--muted); }
+  .help summary{ cursor:pointer; color:#566; }
+  .help p{ margin-top:8px; padding-left:10px; border-left:2px solid var(--line); }
+  .toast{ position:fixed; left:50%; bottom:30px; transform:translateX(-50%); background:#13202b; border:1px solid var(--bad); color:var(--warn); font-size:13px; padding:10px 16px; border-radius:8px; opacity:0; transition:opacity .3s; pointer-events:none; }
+  .toast.on{ opacity:1; }
+  .fx-grain,.fx-vignette{ position:fixed; inset:0; pointer-events:none; z-index:90; }
+  .fx-vignette{ box-shadow:inset 0 0 200px 50px rgba(0,0,0,.55); }
+  .fx-grain{ opacity:.03; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation:grain .5s steps(3) infinite; }
+  @keyframes grain{0%{transform:translate(0,0)}33%{transform:translate(-5px,3px)}66%{transform:translate(4px,-4px)}100%{transform:translate(0,0)}}
+</style>
+</head>
+<body>
+  <div class="fx-vignette"></div>
+  <div class="fx-grain"></div>
+  <div class="nav">
+    <div class="logo">海宁人民广播 <span>FM 97.4</span></div>
+    <div class="live"><span class="d"></span> 正在直播：《海风》</div>
+  </div>
+
+  <div class="hero">
+    <div class="show">深夜电台 · 每晚 23:00</div>
+    <h1>《海风》节目存档</h1>
+    <p>主播：苏黎。陪你度过海宁的每一个失眠的夜。所有节目均提供重播回放。</p>
+  </div>
+
+  <div class="wrap">
+    <h2>节目回放</h2>
+    <div class="lead">苏黎说："每期我都亲手剪辑，原始时长我记得一清二楚。重播本该和原播<strong>一模一样</strong>——你帮我看看，有没有哪一期对不上。"</div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>日期</th><th>期目</th><th>原始时长</th><th>重播时长</th><th>差异</th><th></th></tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+
+    <div class="reviews">
+      <h2>听众留言板</h2>
+      <div class="rev"><div class="who">@海港新村_老K</div><div class="body">苏黎晚上好。问个怪事：上周那场台风预警，后来怎么没下雨也没风？我们整栋楼都记得你节目里播了预警，让大家关窗收衣服……是我们记错了吗？一整栋楼一起记错？</div></div>
+      <div class="rev"><div class="who">@失眠的鱼</div><div class="body">我也是！我清楚记得那晚听到预警，还半夜起来收了阳台。可天气 App 显示那几天一直是晴。细思极恐。</div></div>
+      <div class="rev"><div class="who">@匿名</div><div class="body">苏老师，重播里有段话我反复听了很多次……那不是你平时的语气。而且背景有一种"滴滴答答"的电流声，像是有人在底下发报。你们重播是不是串台了？</div></div>
+      <div class="rev"><div class="who">@夜航船</div><div class="body">楼上+1，就那一期特别长，背景一直有怪声。其他期都正常。</div></div>
+    </div>
+
+    <details class="help">
+      <summary>⚿ 不知道该看哪一期？</summary>
+      <p>苏黎说重播本该和原播时长完全一致。逐行对比「原始时长」和「重播时长」两列——只有一期对不上，重播比原始<b>长了好几分钟</b>。那多出来的几分钟，就是被人塞进去的东西。点那一期的「分析重播」。</p>
+    </details>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  // 多数期：原始==重播；唯一异常：重播更长
+  const eps=[
+    {d:'11-02',t:'夜读：海边的卡夫卡',o:'58:12',r:'58:12',bad:false},
+    {d:'11-05',t:'点歌：给晚归的人',o:'61:40',r:'61:40',bad:false},
+    {d:'11-08',t:'夜话：关于遗忘',o:'56:05',r:'56:05',bad:false},
+    {d:'11-12',t:'天气特辑：台风季的尾巴',o:'59:18',r:'1:04:50',bad:true},
+    {d:'11-15',t:'夜读：海明威',o:'60:22',r:'60:22',bad:false},
+    {d:'11-19',t:'点歌：深夜食堂',o:'57:44',r:'57:44',bad:false},
+    {d:'11-22',t:'夜话：声音的重量',o:'62:03',r:'62:03',bad:false},
+  ];
+  function toSec(s){ const p=s.split(':').map(Number); return p.length===3? p[0]*3600+p[1]*60+p[2] : p[0]*60+p[1]; }
+  document.getElementById('tb').innerHTML=eps.map(e=>{
+    const diff=toSec(e.r)-toSec(e.o);
+    const dtxt = diff===0 ? '—' : '+'+Math.floor(diff/60)+'分'+(diff%60)+'秒';
+    return `<tr class="ep"><td>${e.d}</td><td>${e.t}</td><td>${e.o}</td><td>${e.r}</td><td class="${diff>0?'diff-bad':'diff-ok'}">${dtxt}</td><td><span class="play" onclick="pick(${e.bad})">分析重播 →</span></td></tr>`;
+  }).join('');
+
+  function pick(bad){
+    if(bad){ location.href='decode.html'; return; }
+    const t=document.getElementById('toast');
+    t.textContent='这期重播和原播完全一致，没有异常。换一期——找时长对不上的那个。';
+    t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),3200);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>e2ee · 加密会话</title>
+<!-- 入口不写在明面上。每个前端都把它落在同一个地方。 -->
+<style>
+  :root{ --bg:#0a0e12; --panel:#11161d; --in:#161c25; --text:#dbe2ea; --muted:#6b7480; --acc:#3ad1c4; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{ background:var(--bg); color:var(--text); font-family:"SF Mono","Menlo","Roboto Mono",monospace; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:16px; }
+  .win{ width:100%; max-width:480px; height:min(86vh,780px); background:var(--panel); border:1px solid #1d242d; border-radius:14px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.6); }
+  .bar{ padding:14px 18px; border-bottom:1px solid #1d242d; display:flex; align-items:center; gap:10px; background:#0d1218; }
+  .dot{ width:9px; height:9px; border-radius:50%; background:var(--acc); box-shadow:0 0 8px var(--acc); }
+  .bar .t{ font-size:13px; letter-spacing:.05em; }
+  .bar .lock{ margin-left:auto; font-size:11px; color:var(--muted); }
+  .feed{ flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:12px; }
+  .msg{ max-width:86%; padding:10px 13px; border-radius:11px; font-size:14px; line-height:1.6; background:var(--in); border-top-left-radius:3px; opacity:0; transform:translateY(8px); animation:rise .45s forwards; }
+  .msg.link{ background:transparent; border:1px solid var(--acc); }
+  .msg a{ color:var(--acc); text-decoration:none; }
+  .sys{ align-self:center; font-size:11px; color:var(--muted); background:none; text-align:center; max-width:92%; }
+  @keyframes rise{ to{opacity:1;transform:translateY(0);} }
+  .typing-bubble{ background:var(--in); border-top-left-radius:3px; max-width:60px; display:flex; gap:5px; align-items:center; padding:13px; }
+  .typing-bubble span{ width:6px; height:6px; border-radius:50%; background:var(--muted); animation:td 1.3s infinite; }
+  .typing-bubble span:nth-child(2){animation-delay:.2s;} .typing-bubble span:nth-child(3){animation-delay:.4s;}
+  @keyframes td{0%,60%,100%{opacity:.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-4px);}}
+  .hint{ text-align:center; font-size:11px; color:#3a424c; padding:10px; }
+  .fx-grain,.fx-vignette{ position:fixed; inset:0; pointer-events:none; z-index:99; }
+  .fx-vignette{ box-shadow:inset 0 0 180px 40px rgba(0,0,0,.7); }
+  .fx-grain{ opacity:.04; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation:grain .5s steps(3) infinite; }
+  @keyframes grain{0%{transform:translate(0,0)}33%{transform:translate(-5px,3px)}66%{transform:translate(4px,-4px)}100%{transform:translate(0,0)}}
+</style>
+</head>
+<body>
+  <div class="fx-vignette"></div>
+  <div class="fx-grain"></div>
+  <div class="win">
+    <div class="bar">
+      <div class="dot"></div>
+      <div class="t">未知联系人</div>
+      <div class="lock">🔒 端到端加密</div>
+    </div>
+    <div class="feed" id="feed"></div>
+    <div class="hint">本会话不留存记录。</div>
+  </div>
+<script>
+  const feed=document.getElementById('feed');
+  const script=[
+    {t:'sys',x:'— 对方通过一次性链接发起了加密会话 —'},
+    {t:'in',x:'你不认识我。但我看过你公开的那些东西——钟楼街，回声科技，林知秋。'},
+    {t:'in',x:'大部分人当成都市传说划走了。我没有。因为我手上也有一件，说不通的事。'},
+    {t:'in',x:'我叫程野，是个外包程序员。给一个叫「安眠岛」的助眠 App 做后端维护。'},
+    {t:'in',x:'上百万人开着它睡觉。包括，可能也包括你。'},
+    {t:'in',x:'上个月我清理旧代码，翻到一段定时任务。每天凌晨两点，它给一小撮特定用户推一段音频。'},
+    {t:'in',x:'不是助眠白噪音。是别的东西。我把推送日志拖出来扫了一眼就关掉了——我怕。'},
+    {t:'in',x:'我不敢在公司网络里深挖。但我把路给你铺好了。'},
+    {t:'in',x:'官网你能搜到。后台入口不会写在明面上——做我们这行的都知道，它永远落在页面的同一个地方。'},
+    {t:'in',x:'进后台要内测邀请码。我不能直接发给你，他们在盯我的账号。'},
+    {t:'in',x:'但我在 App 的用户评论里留了记号，用的老马甲。你看过林知秋的东西，应该能认出，哪一条是冲着你来的。'},
+    {t:'link',x:'→ 打开「安眠岛」官网',href:'sleepisle.html'},
+    {t:'in',x:'快一点。我不知道这个号还能撑多久。'},
+    {t:'sys',x:'对方正在保持在线…'},
+  ];
+  let i=0;
+  function render(m){
+    const el=document.createElement('div');
+    if(m.t==='sys'){el.className='msg sys';el.textContent=m.x;}
+    else if(m.t==='link'){el.className='msg link';el.innerHTML='<a href="'+m.href+'">'+m.x+'</a>';}
+    else{el.className='msg';el.textContent=m.x;}
+    feed.appendChild(el); feed.scrollTop=feed.scrollHeight;
+  }
+  function showTyping(cb,dur){
+    const t=document.createElement('div'); t.className='msg typing-bubble';
+    t.innerHTML='<span></span><span></span><span></span>';
+    feed.appendChild(t); feed.scrollTop=feed.scrollHeight;
+    setTimeout(()=>{t.remove();cb();},dur);
+  }
+  function next(){
+    if(i>=script.length)return;
+    const m=script[i++];
+    if(m.t==='in'){ showTyping(()=>{render(m);setTimeout(next,480);}, Math.min(1700,600+m.x.length*30)); }
+    else{ render(m); setTimeout(next,m.t==='link'?900:1000); }
+  }
+  setTimeout(next,700);
+</script>
+</body>
+</html>

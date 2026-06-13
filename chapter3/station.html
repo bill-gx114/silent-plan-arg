@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海宁中央调制站 · 接入</title>
+<style>
+  :root{ --bg:#070c10; --panel:#0e161d; --line:#1a2933; --ink:#d4e4ea; --soft:#8ba3ae; --muted:#5a6e78; --acc:#3be0c0; --warn:#e0a35c; --bad:#e06a6a; --hi:#46c7d8; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:"SF Mono","Menlo",monospace; background:var(--bg); color:var(--ink); line-height:1.6; }
+  /* 登录 */
+  .login{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .login .box{ width:100%; max-width:390px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:30px; }
+  .login h1{ font-size:15px; color:var(--acc); letter-spacing:.12em; margin-bottom:4px; }
+  .login .sub{ font-size:11.5px; color:var(--muted); margin-bottom:22px; line-height:1.6; }
+  .login label{ font-size:12px; color:var(--soft); display:block; margin-bottom:6px; }
+  .login input{ width:100%; padding:11px 12px; background:#060b0e; border:1px solid var(--line); color:var(--ink); border-radius:7px; font-size:16px; letter-spacing:.3em; text-transform:uppercase; font-family:inherit; }
+  .login button{ margin-top:14px; width:100%; padding:12px; background:var(--acc); color:#04110e; font-weight:700; border:none; border-radius:7px; cursor:pointer; letter-spacing:.1em; }
+  .login .err{ color:var(--bad); font-size:12px; min-height:16px; margin-top:10px; }
+  .login .tip{ font-size:11.5px; color:#3a4a52; margin-top:14px; line-height:1.6; }
+  /* 系统 */
+  #app{ display:none; max-width:860px; margin:0 auto; padding:24px 18px 100px; }
+  .top{ display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--line); padding-bottom:14px; margin-bottom:20px; flex-wrap:wrap; gap:6px; }
+  .top .t{ color:var(--acc); font-size:15px; letter-spacing:.08em; }
+  .top .u{ font-size:11.5px; color:var(--muted); }
+  .brief{ background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--hi); border-radius:8px; padding:14px 16px; font-size:13px; color:#bcd0d6; margin-bottom:20px; line-height:1.75; }
+  .brief b{ color:var(--hi); }
+  h2{ font-size:14px; color:var(--soft); margin:24px 0 10px; letter-spacing:.05em; }
+  .lib{ border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .row{ display:flex; align-items:center; gap:12px; padding:13px 16px; border-bottom:1px solid var(--line); font-size:13px; }
+  .row:last-child{ border-bottom:none; }
+  .row .id{ color:var(--muted); width:78px; flex-shrink:0; }
+  .row .nm{ flex:1; }
+  .row .nm small{ display:block; color:var(--muted); font-size:11px; }
+  .row .tag{ font-size:10.5px; padding:2px 8px; border-radius:4px; white-space:nowrap; }
+  .tag.pub{ background:#16242c; color:var(--muted); }
+  .tag.hi{ background:#3a2a16; color:var(--warn); }
+  .tag.lock{ background:#2a1414; color:var(--bad); }
+  .row .pp{ color:var(--acc); cursor:pointer; font-size:18px; flex-shrink:0; }
+  .row.target{ background:#0c1a18; }
+  .player{ background:#060b0e; border:1px dashed var(--line); border-radius:8px; padding:14px 16px; margin-top:6px; font-size:12.5px; color:var(--soft); display:none; }
+  .player.on{ display:block; }
+  .player .line{ color:var(--ink); margin-top:6px; }
+  .doc{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:18px; margin-top:24px; font-size:12.5px; color:var(--soft); }
+  .doc .stamp{ display:inline-block; margin-top:10px; color:var(--bad); border:2px solid var(--bad); border-radius:6px; padding:6px 12px; transform:rotate(-7deg); font-size:12px; letter-spacing:.05em; opacity:.85; }
+  .next{ display:none; margin-top:26px; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:20px; text-align:center; }
+  .next.on{ display:block; }
+  .next p{ font-size:13px; color:#bcd0d6; margin-bottom:14px; }
+  .next a{ display:inline-block; background:var(--bad); color:#fff; text-decoration:none; padding:12px 28px; border-radius:7px; font-size:14px; letter-spacing:.08em; }
+  .fx-grain,.fx-vignette{ position:fixed; inset:0; pointer-events:none; z-index:90; }
+  .fx-vignette{ box-shadow:inset 0 0 200px 50px rgba(0,0,0,.62); }
+  .fx-grain{ opacity:.035; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation:grain .5s steps(3) infinite; }
+  @keyframes grain{0%{transform:translate(0,0)}33%{transform:translate(-5px,3px)}66%{transform:translate(4px,-4px)}100%{transform:translate(0,0)}}
+</style>
+</head>
+<body>
+<div class="fx-vignette"></div>
+<div class="fx-grain"></div>
+
+<div class="login" id="login">
+  <div class="box">
+    <h1>海宁中央调制站 // 远程接入</h1>
+    <div class="sub">SILENT TIDE · CENTRAL MODULATION · 仅限授权终端</div>
+    <label>接入码</label>
+    <input id="code" type="text" placeholder="ACCESS KEY" autocomplete="off" maxlength="8">
+    <button onclick="tryLogin()">接 入</button>
+    <div class="err" id="err"></div>
+    <div class="tip">接入码 = 你在电波取证台解出的那段电报。（正常情况下，在取证台解出后会自动接入，无需在此重复输入。）</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="top">
+    <div class="t">海宁中央调制站 <span style="color:var(--bad)">● LIVE</span></div>
+    <div class="u">未授权会话 · 行为留痕</div>
+  </div>
+
+  <div class="brief">
+    海宁对外是个港口；对内，是整张网络的<b>信号枢纽</b>。钟楼街的设备、安眠岛的推送，源头都在这里被<b>调制、分发</b>。<br>这里不再是某个实验室的"项目"——它已经长成了一座城市的<b>基础设施</b>。<br>下面是声纹样本库：所有被用作"载体"的人声素材。<b>找到那个属于你一路在追的人的样本。</b>
+  </div>
+
+  <h2>// 声纹样本库（节选 · 共 2,140 条）</h2>
+  <div class="lib" id="lib"></div>
+
+  <div class="doc">
+    📄 调制站建设审批存根（节选）<br>
+    项目名称：城市声环境协同调制中心（一期）<br>
+    建设主体：静潮资本管理（海宁）有限公司<br>
+    用途备案：「公共应急广播与心理健康干预试点」<br>
+    审批与监管单位：<b style="color:var(--warn)">鹿原市 · ████ 协调办公室</b>
+    <div class="stamp">█ 鹿原市 ████办 · 审批专用章 █</div>
+  </div>
+
+  <div class="next" id="next">
+    <p>样本 L 确认无误——林知秋还活着。她被关在这里，她的声音正被用作新的载体。<br>而审批这一切的章，盖在<strong>鹿原</strong>。</p>
+    <a href="end.html">→ 看清全部真相</a>
+  </div>
+</div>
+
+<script>
+  function tryLogin(){
+    const v=(document.getElementById('code').value||'').trim().toUpperCase().replace(/[^A-Z]/g,'');
+    if(v==='TIDE'){
+      document.getElementById('login').style.display='none';
+      document.getElementById('app').style.display='block';
+      window.scrollTo(0,0); renderLib();
+    } else {
+      document.getElementById('err').textContent='接入码错误。回电波取证台，把那段电报读完整。';
+    }
+  }
+  document.getElementById('code').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
+
+  const samples=[
+    {id:'S-0419', nm:'苏黎', sub:'采集自 FM97.4《海风》公开节目 · 已建模', tag:['hi','高价值'], say:'各位听众晚上好，今晚海港新村区域将有台风预警，请大家关好门窗，收回阳台衣物。', note:'⚠ 注意：这句话，苏黎坚称自己从未录过。她的声音，已经能被系统"说出"她没说过的话。'},
+    {id:'M-1130', nm:'（公交报站员）', sub:'采集自 17 路公交 · 报站循环', tag:['pub','基础语料'], say:'下一站，海港新村。请提前做好下车准备。', note:''},
+    {id:'M-2207', nm:'（商场广播）', sub:'采集自 滨海万象城 · 背景循环', tag:['pub','基础语料'], say:'尊敬的顾客，商场即将闭店，感谢您的光临。', note:''},
+    {id:'L-0001', nm:'林知秋', sub:'高价值目标 · 受控采集中 · 禁止外泄', tag:['lock','受控'], say:'是我，林知秋。如果你听到这段，说明你顺着海风找到了这里。他们没有杀我……他们在让我，一个字一个字地，把自己交出去。别停下。往鹿原去。', note:'她还活着。但她的每一句话，都在被录进这台机器。'},
+    {id:'M-3001', nm:'（地铁报站）', sub:'采集自 1 号线 · 全程', tag:['pub','基础语料'], say:'列车即将启动，请勿倚靠车门。', note:''},
+  ];
+  function renderLib(){
+    document.getElementById('lib').innerHTML=samples.map((s,i)=>`
+      <div class="row ${s.id.startsWith('L')?'target':''}">
+        <span class="id">${s.id}</span>
+        <span class="nm">${s.nm}<small>${s.sub}</small></span>
+        <span class="tag ${s.tag[0]}">${s.tag[1]}</span>
+        <span class="pp" onclick="playS(${i})">▶</span>
+      </div>
+      <div class="player" id="pl${i}"></div>`).join('');
+  }
+  let voices=[];
+  function loadV(){ voices=(window.speechSynthesis?speechSynthesis.getVoices():[]).filter(v=>/zh|Chinese/i.test(v.lang)); }
+  if(window.speechSynthesis){ loadV(); speechSynthesis.onvoiceschanged=loadV; }
+  function playS(i){
+    const s=samples[i], pl=document.getElementById('pl'+i);
+    document.querySelectorAll('.player').forEach(p=>{ if(p!==pl) p.classList.remove('on'); });
+    pl.classList.add('on');
+    pl.innerHTML='▶ 正在回放 '+s.id+' …<div class="line">「'+s.say+'」</div>'+(s.note?'<div style="color:#e0a35c;margin-top:8px">'+s.note+'</div>':'');
+    if(window.speechSynthesis){
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(s.say);
+      u.lang='zh-CN'; u.rate=0.92; u.pitch= s.nm==='林知秋'?1.05:0.95;
+      if(voices[0]) u.voice=voices[0];
+      speechSynthesis.speak(u);
+    }
+    if(s.id.startsWith('L')){
+      setTimeout(()=>document.getElementById('next').classList.add('on'),800);
+    }
+  }
+
+  // 从取证台解出电报后自动接入（密钥只在取证台输一次，此处不重复）
+  if(new URLSearchParams(location.search).get('k')==='tide'){
+    document.getElementById('login').style.display='none';
+    document.getElementById('app').style.display='block';
+    renderLib();
+  }
+</script>
+</body>
+</html>

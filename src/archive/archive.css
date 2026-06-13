@@ -1,0 +1,115 @@
+:root {
+  --term: #8affb2;
+  --term-dim: #4f8b65;
+}
+
+body {
+  --bg: #020504;
+  --panel: #050b08;
+  --panel-2: #07110b;
+  --line: #173823;
+  --ink: #cde8d5;
+  --muted: #6e9c7b;
+  --accent: var(--term);
+  --success: var(--term);
+  background: #020504;
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+h1,
+h2,
+.crumb,
+.tree,
+.hex,
+.hash,
+.console-line,
+.record {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+h1 {
+  color: var(--term);
+}
+
+.crumb {
+  color: var(--term-dim);
+  overflow-wrap: anywhere;
+}
+
+.tree {
+  list-style: none;
+  padding: 0;
+}
+
+.tree li {
+  padding: var(--space-2) 0 var(--space-2) var(--space-5);
+  border-left: 1px solid #184128;
+}
+
+.tree a {
+  color: var(--term);
+}
+
+.hex {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: #010302;
+  color: #68b984;
+  font-size: 12px;
+}
+
+.wave {
+  width: 100%;
+  height: 150px;
+  border: 1px solid var(--line);
+  background: #010302;
+}
+
+.channel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.record {
+  margin: var(--space-5) 0;
+  border-left: 3px solid var(--term-dim);
+  padding-left: var(--space-4);
+}
+
+.record:first-child {
+  margin-top: 0;
+}
+
+.record:last-child {
+  margin-bottom: 0;
+}
+
+.record.alert {
+  border-color: var(--danger);
+}
+
+.hash {
+  color: var(--term);
+  overflow-wrap: anywhere;
+}
+
+.console-line {
+  opacity: 0;
+  animation: reveal .4s forwards;
+}
+
+@keyframes reveal {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 650px) {
+  .channel-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>完整性核验</title><link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="archive.css"></head>
+<body>
+  <main class="page page--verify terminal-shell">
+    <div class="page-header"><span class="brand">INTEGRITY CHECK</span><a href="forensics.html">返回音频取证</a></div>
+    <div class="page-intro">
+      <h1>上传链与 SHA-256</h1>
+    </div>
+    <div class="section-stack">
+      <section class="panel">
+        <div class="record"><strong>2019-11-09 23:41</strong><p>CYM-071 上传 testimony.wav。摘要记录为 <span class="hash" id="original-hash">载入中</span></p></div>
+        <div class="record alert"><strong>2019-11-09 23:48</strong><p>DEL-1109 修改文件名为 testimony.pkg；容器数据未重写。</p></div>
+        <div class="record"><strong>2024-11-09 22:16</strong><p>LZQ-EXT 执行只读校验，并上传右声道测试标记。</p></div>
+      </section>
+      <section class="panel form-stack">
+        <div class="form-actions">
+          <button id="verify" class="primary">计算镜像文件 SHA-256</button>
+        </div>
+        <p>当前摘要：<span class="hash" id="current-hash">尚未计算</span></p>
+        <p id="status" class="status" role="status"></p>
+        <p id="next" class="hidden"><a href="switch-console.html">打开死人开关测试日志 →</a></p>
+      </section>
+    </div>
+  </main>
+  <script type="module">
+    import { sha256 } from "./archive.js";
+    const manifest = await fetch("assets/evidence-manifest.json").then((response) => response.json());
+    document.querySelector("#original-hash").textContent = manifest.testimonySha256;
+    const status = document.querySelector("#status");
+    document.querySelector("#verify").addEventListener("click", async () => {
+      try {
+        const buffer = await fetch("assets/testimony.pkg").then((response) => response.arrayBuffer());
+        const digest = await sha256(buffer);
+        document.querySelector("#current-hash").textContent = digest;
+        const ok = digest === manifest.testimonySha256;
+        status.textContent = ok ? "摘要一致：删除批次只改了文件名，核心音频可验证。" : "摘要不一致：不能把这份材料当作原始证据。";
+        status.dataset.state = ok ? "success" : "error";
+        document.querySelector("#next").classList.toggle("hidden", !ok);
+      } catch {
+        status.textContent = "兼容模式：无法计算摘要。请对照 manifest.sha256 中的预生成记录。";
+        status.dataset.state = "error";
+      }
+    });
+  </script>
+</body>
+</html>

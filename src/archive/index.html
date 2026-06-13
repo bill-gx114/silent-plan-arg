@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>legacy.echo-mirror</title><link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="archive.css"></head>
+<body>
+  <main class="page page--verify terminal-shell">
+    <div class="page-intro">
+      <p class="eyebrow">unofficial read-only mirror / node hN-04</p>
+      <h1>legacy.echo-mirror</h1>
+      <p>此镜像不提供搜索。请输入你从原服务器请求序列中重建的完整路径。</p>
+    </div>
+    <div class="section-stack">
+      <form id="path-form" class="panel form-stack">
+        <label class="field-group">镜像路径<input id="path" class="mono" placeholder="/legacy/..."></label>
+        <div class="form-actions">
+          <button class="primary" type="submit">挂载路径</button>
+          <p id="status" class="status" role="status"></p>
+        </div>
+      </form>
+    </div>
+  </main>
+  <script>
+    document.querySelector("#path-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const value = document.querySelector("#path").value.trim();
+      const expected = "/legacy/CYM-071/DEL-1109/testimony.pkg";
+      const status = document.querySelector("#status");
+      if (value === expected) location.href = `tree.html?path=${encodeURIComponent(value)}`;
+      else {
+        status.textContent = "镜像索引中不存在这条路径。路径区分层级与顺序。";
+        status.dataset.state = "error";
+      }
+    });
+  </script>
+</body>
+</html>

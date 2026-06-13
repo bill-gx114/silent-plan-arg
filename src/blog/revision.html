@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>修订记录 · 第 7 次保存</title>
+  <link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="blog.css">
+</head>
+<body class="paper">
+  <main class="page page--workspace">
+    <header class="page-header"><span class="brand">文章修订取证</span><a href="report.html">返回报道</a></header>
+    <div class="section-stack">
+      <section class="panel">
+        <p class="eyebrow">revision 7 / autosave 8</p>
+        <h1>公开稿与自动保存稿</h1>
+        <p class="muted">不要找暗号。判断被删掉的信息为什么会同时包含地点、日期和案件编号。</p>
+        <div class="revision-row workspace-material">
+          <article class="card"><h2>公开稿</h2><p>那条街上有一栋没有出现在危房名单里的旧楼。</p><p>我原本打算在这里写下门牌号，以及第一起记录发生的日子。</p></article>
+          <article class="card"><h2>自动保存稿</h2><p>那条街上有一栋没有出现在危房名单里的旧楼。</p><p class="added">位置：钟楼街 29 号。首个可核验日期：2019-03-15。案件号：ZL-0315。</p><p class="deleted">先不要公开。把三项交给能复核它们的人。</p></article>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>提交你的结论</h2>
+        <form id="revision-form" class="form-grid">
+          <label class="field-group">地点<input id="place" required></label>
+          <label class="field-group">日期<input id="date" required></label>
+          <label class="field-group">案件号<input id="case-id" required></label>
+          <label class="field-group">删除性质<select id="intent"><option value="">选择</option><option value="accident">误删</option><option value="censor">外部审查</option><option value="route">主动拆分路线</option></select></label>
+          <div class="form-actions form-grid-actions">
+            <button class="primary" type="submit">记录结论</button>
+            <p class="status" id="status" role="status"></p>
+          </div>
+        </form>
+      </section>
+      <section class="panel hidden" id="fragment">
+        <p class="eyebrow">hidden review anomaly</p>
+        <p>自动保存稿的文件创建时间是 22:16，比公开页面标注的发布时间晚两分钟。这份“旧草稿”其实是发布后才生成的。</p>
+        <p>证据片段：<span class="fragment-chip">AFTERIMAGE</span></p>
+      </section>
+    </div>
+  </main>
+  <script type="module">
+    import { completePuzzle, useMemo } from "./blog.js";
+    document.querySelector("#revision-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const placeValue = document.querySelector("#place").value;
+      const dateValue = document.querySelector("#date").value;
+      const caseValue = document.querySelector("#case-id").value;
+      const intentValue = document.querySelector("#intent").value;
+      const ok = placeValue.includes("29") && dateValue.replace(/\D/g, "") === "20190315" &&
+        caseValue.toUpperCase().replace(/[^A-Z0-9]/g, "") === "ZL0315" && intentValue === "route";
+      const status = document.querySelector("#status");
+      status.textContent = ok ? "结论成立：林知秋主动拆分了路线。继续核验照片与时间线。" : "至少有一项证据无法支持这个结论。";
+      status.dataset.state = ok ? "success" : "error";
+      if (ok) { completePuzzle("p1"); document.querySelector("#fragment").classList.remove("hidden"); }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>消息</title>
+<!-- 她总说，故事的答案藏在每一段的起点。 -->
+<style>
+  :root { --bg:#0b0d10; --bubble:#15181d; --bubble2:#1f6feb; --text:#e6e9ef; --muted:#7b828c; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    display:flex; align-items:center; justify-content:center; min-height:100vh; padding:16px;
+  }
+  .phone {
+    width:100%; max-width:420px; height:min(85vh,760px);
+    background:#0e1116; border:1px solid #20242b; border-radius:28px;
+    display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.6);
+  }
+  .bar {
+    padding:18px 20px; border-bottom:1px solid #20242b;
+    display:flex; align-items:center; gap:12px; background:#10141a;
+  }
+  .avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#2b3340,#3a4554); display:flex; align-items:center; justify-content:center; font-weight:600; color:#cfd6e0; }
+  .who { line-height:1.3; }
+  .who b { font-size:15px; }
+  .who span { font-size:12px; color:var(--muted); }
+  .feed { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:14px; }
+  .day { text-align:center; font-size:12px; color:var(--muted); margin:4px 0; }
+  .msg {
+    max-width:82%; padding:11px 14px; border-radius:16px; font-size:15px; line-height:1.55;
+    background:var(--bubble); border-top-left-radius:4px; opacity:0; transform:translateY(8px);
+    animation:rise .5s forwards;
+  }
+  .msg.link { cursor:pointer; }
+  .msg a { color:#58a6ff; text-decoration:none; word-break:break-all; }
+  .sys { align-self:center; font-size:12px; color:var(--muted); font-style:italic; background:none; max-width:90%; text-align:center; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+  .typing-bubble { background:var(--bubble); border-top-left-radius:4px; max-width:64px; display:flex; gap:5px; align-items:center; padding:14px; }
+  .typing-bubble span { width:7px; height:7px; border-radius:50%; background:var(--muted); animation:td 1.3s infinite; }
+  .typing-bubble span:nth-child(2){ animation-delay:.2s; }
+  .typing-bubble span:nth-child(3){ animation-delay:.4s; }
+  @keyframes td { 0%,60%,100%{ opacity:.3; transform:translateY(0);} 30%{ opacity:1; transform:translateY(-4px);} }
+  .hint { text-align:center; font-size:12px; color:#454b54; padding:10px; }
+  /* 胶片颗粒 + 暗角 */
+  .fx-grain,.fx-vignette{ position:fixed; inset:0; pointer-events:none; z-index:99; }
+  .fx-vignette{ box-shadow:inset 0 0 180px 40px rgba(0,0,0,.75); }
+  .fx-grain{ opacity:.045; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation:grain .5s steps(3) infinite; }
+  @keyframes grain{ 0%{transform:translate(0,0)} 33%{transform:translate(-5px,3px)} 66%{transform:translate(4px,-4px)} 100%{transform:translate(0,0)} }
+</style>
+</head>
+<body>
+  <div class="fx-vignette"></div>
+  <div class="fx-grain"></div>
+  <div class="phone">
+    <div class="bar">
+      <div class="avatar">林</div>
+      <div class="who"><b>林知秋</b><br><span>最后在线：3 天前</span></div>
+    </div>
+    <div class="feed" id="feed"></div>
+    <div class="hint">这是一条自动发送的消息。</div>
+  </div>
+
+<script>
+  const feed = document.getElementById('feed');
+  const script = [
+    {t:'sys', x:'⚠ 此消息由「死人开关」自动触发'},
+    {t:'in', x:'是我，知秋。'},
+    {t:'in', x:'如果你收到这条消息，说明我已经连续 72 小时没有登录了。'},
+    {t:'in', x:'我不知道还能不能回来。所以我把这件事，交给你。'},
+    {t:'in', x:'不要报警——他们有人在里面。我是认真的。'},
+    {t:'in', x:'去看看我的博客，从我写的最后一篇文章开始。'},
+    {t:'in', x:'你会知道该怎么做的。你一直比我细心。'},
+    {t:'link', x:'→ 打开「看见缝隙的人」', href:'blog.html'},
+    {t:'sys', x:'对方已离线'},
+  ];
+  let i = 0;
+  function render(m){
+    const el = document.createElement('div');
+    if(m.t==='sys'){ el.className='msg sys'; el.textContent=m.x; }
+    else if(m.t==='link'){ el.className='msg link'; el.innerHTML='<a href="'+m.href+'">'+m.x+'</a>'; }
+    else { el.className='msg'; el.textContent=m.x; }
+    feed.appendChild(el);
+    feed.scrollTop = feed.scrollHeight;
+  }
+  function showTyping(cb, dur){
+    const t = document.createElement('div');
+    t.className = 'msg typing-bubble';
+    t.innerHTML = '<span></span><span></span><span></span>';
+    feed.appendChild(t); feed.scrollTop = feed.scrollHeight;
+    setTimeout(()=>{ t.remove(); cb(); }, dur);
+  }
+  function next(){
+    if(i>=script.length) return;
+    const m = script[i++];
+    if(m.t==='in'){
+      const dur = Math.min(1700, 600 + m.x.length*32);
+      showTyping(()=>{ render(m); setTimeout(next, 520); }, dur);
+    } else {
+      render(m);
+      setTimeout(next, m.t==='link'?800:1000);
+    }
+  }
+  setTimeout(next, 700);
+</script>
+</body>
+</html>

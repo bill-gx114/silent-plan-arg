@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>final_testimony_CYM.mp3</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:-apple-system,"Microsoft YaHei",monospace,sans-serif; background:#0a0b0d; color:#cdd3da; line-height:1.8; min-height:100vh; }
+  .wrap{ max-width:680px; margin:0 auto; padding:40px 22px 100px; }
+  .dir{ font-size:12px; color:#566; font-family:monospace; margin-bottom:24px; }
+  .dir a{ color:#789; text-decoration:none; }
+  .player{ background:#111418; border:1px solid #232a32; border-radius:10px; padding:24px; margin-bottom:30px; }
+  .player .fn{ font-family:monospace; font-size:14px; color:#8fb3d9; margin-bottom:4px; }
+  .player .meta{ font-size:12px; color:#5a646e; margin-bottom:18px; }
+  .controls{ display:flex; align-items:center; gap:14px; }
+  .play-btn{ width:54px; height:54px; border-radius:50%; background:#1f6feb; border:none; color:#fff; font-size:20px; cursor:pointer; flex-shrink:0; }
+  .play-btn:disabled{ opacity:.5; }
+  .wavewrap{ flex:1; }
+  .bar-track{ height:6px; background:#232a32; border-radius:3px; overflow:hidden; }
+  .bar-fill{ height:100%; width:0; background:#1f6feb; transition:width .3s linear; }
+  .time{ font-size:11px; color:#5a646e; margin-top:6px; display:flex; justify-content:space-between; }
+  .status{ font-size:12px; color:#6a93c0; margin-top:14px; min-height:16px; }
+  .transcript{ background:#0e1115; border:1px solid #1c222a; border-radius:10px; padding:24px; }
+  .transcript h3{ font-size:14px; color:#8fb3d9; margin-bottom:16px; letter-spacing:.05em; }
+  .line{ margin-bottom:16px; font-size:15.5px; color:#bcc4cd; opacity:.4; transition:opacity .4s, color .4s; }
+  .line.active{ opacity:1; color:#eaf0f6; }
+  .line .stage{ color:#6a737d; font-style:italic; }
+  .next{ margin-top:30px; background:#101418; border:1px solid #232a32; border-radius:10px; padding:22px; }
+  .next h4{ color:#8fb3d9; font-size:14px; margin-bottom:8px; }
+  .next p{ font-size:13.5px; color:#9aa4ae; margin-bottom:14px; }
+  .next .field{ display:flex; gap:8px; flex-wrap:wrap; }
+  .next input{ flex:1; min-width:200px; padding:11px 12px; background:#0a0d10; border:1px solid #232a32; color:#dfe6ee; border-radius:5px; font-size:15px; }
+  .next button{ padding:11px 18px; background:#1f6feb; color:#fff; border:none; border-radius:5px; cursor:pointer; }
+  .next .err{ width:100%; color:#d08a5a; font-size:12.5px; min-height:16px; margin-top:8px; }
+  .hint-fallback{ color:#566; font-size:11.5px; margin-top:12px; }
+  .fx-grain,.fx-vignette{ position:fixed; inset:0; pointer-events:none; z-index:99; }
+  .fx-vignette{ box-shadow:inset 0 0 200px 50px rgba(0,0,0,.7); }
+  .fx-grain{ opacity:.04; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation:grain .5s steps(3) infinite; }
+  @keyframes grain{ 0%{transform:translate(0,0)} 33%{transform:translate(-5px,3px)} 66%{transform:translate(4px,-4px)} 100%{transform:translate(0,0)} }
+</style>
+</head>
+<body>
+<div class="fx-vignette"></div>
+<div class="fx-grain"></div>
+<div class="wrap">
+  <div class="dir"><a href="echo-portal.html">← 返回内部系统</a> &nbsp;|&nbsp; 路径：/archive/legacy/</div>
+
+  <div class="player">
+    <div class="fn">🎙 final_testimony_CYM.mp3</div>
+    <div class="meta">时长 02:31 · 上传于 2019-11-09 · 上传者：CYM</div>
+    <div class="controls">
+      <button class="play-btn" id="play">▶</button>
+      <div class="wavewrap">
+        <div class="bar-track"><div class="bar-fill" id="fill"></div></div>
+        <div class="time"><span id="cur">00:00</span><span>02:31</span></div>
+      </div>
+    </div>
+    <div class="status" id="status">点击播放。建议同时阅读下方文字稿。</div>
+  </div>
+
+  <div class="transcript">
+    <h3>— 录音文字稿 —</h3>
+    <div id="lines"></div>
+  </div>
+
+  <div class="next">
+    <h4>→ 最后一层：死人开关</h4>
+    <p>陈砚明把最后的密钥留在了录音结尾——「把我的名字，倒过来」。想清楚，那是哪三个字。<br>但真正的门不在这里。它在知秋的博客首页，那个一直在角落等人发现的小图标背后。带上密钥，回去亲手打开它。</p>
+    <button onclick="location.href='blog.html?ds=1'">→ 回到博客 · 启动死人开关</button>
+  </div>
+</div>
+
+<script>
+  // 文字稿（带朗读文本与时间点）
+  const script = [
+    {st:false, t:"（录音环境嘈杂，像是在行驶的车里）", say:""},
+    {st:false, t:"我是陈砚明。如果有人在听这段录音，说明我的账号已经很久没有活动了。", say:"我是陈砚明。如果有人在听这段录音，说明我的账号已经很久没有活动了。"},
+    {st:false, t:"我需要把事情说清楚。", say:"我需要把事情说清楚。"},
+    {st:false, t:"「频率同步」最初确实是降噪项目。我们发现，18.9 赫兹的次声波，能在特定条件下干扰海马体的记忆编码过程。", say:"频率同步最初确实是降噪项目。我们发现，18.9赫兹的次声波，能在特定条件下干扰海马体的记忆编码过程。"},
+    {st:false, t:"本来这是个意外发现，应该写进论文然后束之高阁。但是，资方看到了别的可能性。", say:"本来这是个意外发现，应该写进论文然后束之高阁。但是，资方看到了别的可能性。"},
+    {st:false, t:"他们要求我们反向研究——不是消除干扰，而是精确控制干扰窗口，在记忆空白期，植入预设的「替代记忆」。", say:"他们要求我们反向研究。不是消除干扰，而是精确控制干扰窗口，在记忆空白期，植入预设的替代记忆。"},
+    {st:false, t:"你能想象吗？让一个人忘记昨晚发生了什么，然后让她「记住」一个从未发生的昨晚。", say:"你能想象吗？让一个人忘记昨晚发生了什么，然后让她记住一个从未发生的昨晚。"},
+    {st:false, t:"钟楼街的社区测试，不是实验事故——是产品演示。他们在向买家证明，这套系统可以规模化部署。", say:"钟楼街的社区测试，不是实验事故，是产品演示。他们在向买家证明，这套系统可以规模化部署。"},
+    {st:false, t:"我不知道买家是谁。我只知道一个代号：「寂静计划」。", say:"我不知道买家是谁。我只知道一个代号：寂静计划。"},
+    {st:true,  t:"（停顿）", say:""},
+    {st:false, t:"我把所有原始数据，备份在了一个地方。如果你在听这段录音，说明你需要找到它。", say:"我把所有原始数据，备份在了一个地方。如果你在听这段录音，说明你需要找到它。"},
+    {st:false, t:"密钥是我女儿的名字——我在通讯录里留过。不……等等。通讯录可能会被清理。", say:"密钥是我女儿的名字，我在通讯录里留过。不，等等，通讯录可能会被清理。"},
+    {st:false, t:"这样吧。我们公司叫什么？回声。声音撞到墙上，会回来——但回来的时候，是反的。", say:"这样吧。我们公司叫什么？回声。声音撞到墙上，会回来。但回来的时候，是反的。"},
+    {st:false, t:"密钥就是我的名字。让它……像回声一样，回来。", say:"密钥就是我的名字。让它，像回声一样，回来。"},
+    {st:false, t:"（录音结束）", say:""},
+  ];
+
+  const linesEl = document.getElementById('lines');
+  script.forEach((l,i)=>{
+    const d=document.createElement('div');
+    d.className='line'; d.id='ln'+i;
+    d.innerHTML = l.st ? '<span class="stage">'+l.t+'</span>' : l.t;
+    linesEl.appendChild(d);
+  });
+
+  const playBtn=document.getElementById('play');
+  const fill=document.getElementById('fill');
+  const curEl=document.getElementById('cur');
+  const statusEl=document.getElementById('status');
+  let playing=false, idx=0, totalSec=151;
+
+  function fmt(s){ s=Math.floor(s); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+  function highlight(i){
+    document.querySelectorAll('.line').forEach(e=>e.classList.remove('active'));
+    const el=document.getElementById('ln'+i); if(el){ el.classList.add('active'); el.scrollIntoView({block:'center',behavior:'smooth'}); }
+    fill.style.width=((i+1)/script.length*100)+'%';
+    curEl.textContent=fmt((i+1)/script.length*totalSec);
+  }
+
+  const hasTTS = 'speechSynthesis' in window;
+  function speakLine(i){
+    if(i>=script.length){ finish(); return; }
+    highlight(i);
+    const l=script[i];
+    if(hasTTS && l.say){
+      const u=new SpeechSynthesisUtterance(l.say);
+      u.lang='zh-CN'; u.rate=0.95; u.pitch=0.9;
+      const vs=speechSynthesis.getVoices().filter(v=>/zh|Chinese/i.test(v.lang));
+      if(vs[0]) u.voice=vs[0];
+      u.onend=()=>{ if(playing) speakLine(i+1); };
+      u.onerror=()=>{ if(playing) setTimeout(()=>speakLine(i+1), 600); };
+      speechSynthesis.speak(u);
+    } else {
+      // 无语音合成时，按字数估算停留时间，纯文字推进
+      const dur = l.t ? Math.max(1500, l.t.length*180) : 1200;
+      setTimeout(()=>{ if(playing) speakLine(i+1); }, dur);
+    }
+  }
+  function finish(){
+    playing=false; playBtn.textContent='▶';
+    statusEl.textContent='播放结束。注意他最后说的那句话。';
+  }
+  playBtn.onclick=()=>{
+    if(playing){ playing=false; playBtn.textContent='▶'; if(hasTTS)speechSynthesis.cancel(); statusEl.textContent='已暂停。'; return; }
+    playing=true; playBtn.textContent='⏸';
+    statusEl.textContent = hasTTS ? '正在播放…（如听不到声音，可直接阅读文字稿）' : '本浏览器不支持语音播放，正在逐句显示文字稿…';
+    if(hasTTS) speechSynthesis.cancel();
+    speakLine(0);
+  };
+  if(hasTTS) speechSynthesis.onvoiceschanged=()=>{};
+
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>听见深夜旋律的人 — 看见缝隙的人</title>
+<!--
+  编辑部的老周问过她，为什么每篇稿子都要反复改开头。
+  她说：开头即答案。
+  当时没有人懂这句话。
+-->
+<style>
+  :root{ --paper:#f6f3ec; --ink:#2a2622; --muted:#8a8378; --line:#e3ddd0; --accent:#9c5b3b; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ background:var(--paper); color:var(--ink); font-family:Georgia,"Songti SC","STSong",serif; line-height:1.95; }
+  .wrap{ max-width:680px; margin:0 auto; padding:0 24px 90px; }
+  .top{ padding:26px 0; border-bottom:1px solid var(--line); }
+  .top a{ color:var(--accent); text-decoration:none; font-size:14px; font-family:-apple-system,sans-serif; }
+  article{ padding-top:38px; }
+  h1{ font-size:30px; line-height:1.4; margin-bottom:12px; }
+  .meta{ color:var(--muted); font-size:13px; font-family:-apple-system,sans-serif; letter-spacing:.05em; margin-bottom:30px; }
+  article p{ font-size:17px; color:#3a352e; margin-bottom:22px; }
+  .end{ margin-top:40px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:14px; font-style:italic; }
+  .nav-next{ margin-top:30px; background:#efe9dd; border:1px solid var(--line); border-radius:6px; padding:18px 20px; font-family:-apple-system,sans-serif; }
+  .nav-next h4{ font-size:14px; margin-bottom:8px; color:var(--accent); }
+  .nav-next p{ font-size:14px; color:#5a544b; margin:0 0 12px; }
+  .nav-next form{ display:flex; gap:8px; flex-wrap:wrap; }
+  .nav-next input{ flex:1; min-width:200px; padding:10px 12px; border:1px solid var(--line); border-radius:4px; font-size:15px; background:#fff; color:var(--ink); }
+  .nav-next button{ padding:10px 18px; background:var(--accent); color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:14px; }
+  .nav-next .err{ color:#b5482e; font-size:13px; min-height:18px; margin-top:8px; width:100%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="blog.html">← 返回「看见缝隙的人」</a></div>
+
+  <article>
+    <h1>听见深夜旋律的人</h1>
+    <div class="meta">2024 年 11 月 18 日 · 调查手记 · 阅读约 6 分钟</div>
+
+    <p>回到钟楼街的那个晚上，我才第一次真切地听人说起「那段旋律」。受访的老周把茶杯转了好几圈，才低声告诉我：不是耳鸣，不是楼上装修，是一段有调子的声音，钻进脑子里，然后整个人就「断片」了。</p>
+
+    <p>声音究竟从哪里来，没有一个人能说清。有人说像从地底，有人说像从墙缝，还有人坚持那是从自家空调出风口飘出来的。唯一的共同点是——它总在凌晨两点到三点之间出现。</p>
+
+    <p>在我前后采访的七位居民里，描述惊人地一致：先是那段旋律，接着是一段空白，醒来时表已经走了十五分钟到半个小时。他们不记得这中间自己做了什么，去过哪里。</p>
+
+    <p>旧楼林立的这片社区，入夜后安静得不像在城市里。我特意在凌晨去走了一趟，路灯坏了一半，楼道声控灯也不亮。黑暗里，我第一次理解了他们说的那种「被什么东西包住」的感觉。</p>
+
+    <p>楼与楼之间的间距很窄，抬头只剩一道细长的天。我数了数，出过事的住户，几乎都集中在钟楼街靠中段的几栋老楼里，再往外走，反而没人提起过旋律。</p>
+
+    <p>醒来之后的人，大多选择不再提。一位姓陈的女士说得最直白：「说了也没人信，社区医生还让我去查睡眠。可我活了五十年，从没在半夜准时断过片。」她说这话时，手一直在抖。</p>
+
+    <p>来这里之前，我以为这顶多是个能写成趣闻的都市传说。三周之后，我不这么想了。太多细节对得上，太多人不约而同地选择闭嘴——这不像幻觉，这像有人在掩盖什么。</p>
+
+    <p>了结这件事的唯一办法，是找到声音的源头。我已经把所有病例的位置标在了地图上，那张图指向同一个圆心。下一步我要去那里。完整的调查记录，我锁在了另一个地方——你知道该怎么读我的文字。</p>
+
+    <div class="end">（本文为系列调查第一篇。后续记录见我的田野笔记。）</div>
+
+    <div class="nav-next">
+      <h4>→ 田野笔记（已加密）</h4>
+      <p>「我的读者只有一个。她知道我把话藏在哪里。」—— 知秋</p>
+      <form onsubmit="return go(event)">
+        <input id="pw" type="text" placeholder="输入那句话" autocomplete="off">
+        <button type="submit">解锁笔记</button>
+        <div class="err" id="err"></div>
+      </form>
+    </div>
+  </article>
+</div>
+
+<script>
+  const norm = s => (s||'').trim().replace(/\s+/g,'').replace(/[，。、？！,.\?!]/g,'');
+  let tries = 0;
+  function go(e){
+    e.preventDefault();
+    const v = norm(document.getElementById('pw').value);
+    const err = document.getElementById('err');
+    if(v==='回声在旧楼醒来了'){ location.href='blog-notes.html'; return false; }
+    if(v==='回声在旧楼醒来了知'){
+      err.textContent='几乎对了——最后那个「知」不是她写的正文。去掉它。';
+      return false;
+    }
+    tries++;
+    if(tries<3){ err.textContent='不对。她说过：你一直比她细心。再读一遍这篇文章。'; }
+    else if(tries<5){ err.textContent='不对。她的博客简介里写着她的习惯——「总能在开头找到答案」。'; }
+    else { err.textContent='提示：取正文每一段的第一个字，从上往下连成一句话（共 8 个字）。'; }
+    return false;
+  }
+</script>
+</body>
+</html>

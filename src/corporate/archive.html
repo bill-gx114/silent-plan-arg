@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>网页存档 · Echo Technologies</title><link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="corporate.css"></head>
+<body>
+  <main class="page page--workspace archive-shell">
+    <div class="topbar page-header"><span class="brand">ECHO WEB ARCHIVE</span><a href="index.html">返回当前网站</a></div>
+    <header class="page-intro">
+      <h1>历史快照比较</h1>
+      <p>同一个名字、项目和声明，在什么时候同时消失？</p>
+    </header>
+    <div class="section-stack">
+      <div class="snapshot-tabs" role="group" aria-label="选择网页快照">
+        <button data-year="2019" aria-pressed="true">2019-11-02</button>
+        <button data-year="2020" aria-pressed="false">2020-09-14</button>
+        <button data-year="current" aria-pressed="false">当前缓存</button>
+      </div>
+      <section class="snapshot" data-snapshot="2019">
+        <p class="eyebrow">2019 snapshot</p><h2>频率同步项目完成社区试验</h2>
+        <p>项目负责人：<strong>陈砚明</strong>，首席研究员。</p>
+        <p>公司内部已收到陈博士提交的《社区测试异议声明》，管理层将在一周内正式回复。</p>
+      </section>
+      <section class="snapshot hidden" data-snapshot="2020">
+        <p class="eyebrow">2020 snapshot</p><h2>低频声场项目完成技术归档</h2>
+        <p><del>项目负责人：陈砚明，首席研究员。</del></p>
+        <p><del>社区测试异议声明</del> · 文件不存在。</p>
+        <p>页面变更时间：2019-11-09 23:48。</p>
+      </section>
+      <section class="snapshot hidden" data-snapshot="current">
+        <p class="eyebrow">current cached page</p><h2>公共声环境项目</h2>
+        <p>团队历史、频率参数与异议记录均已移除。</p>
+        <p>资产受让方：静潮资本。</p>
+      </section>
+      <p><a href="diff.html">生成跨版本差异报告 →</a></p>
+    </div>
+  </main>
+  <script type="module">
+    import { selectSnapshot } from "./corporate.js";
+    document.querySelectorAll("[data-year]").forEach((button) => button.addEventListener("click", () => selectSnapshot(button.dataset.year)));
+  </script>
+</body>
+</html>

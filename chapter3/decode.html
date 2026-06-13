@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电波取证台 · 重播片段</title>
+<style>
+  :root{ --bg:#070b0d; --panel:#0d141a; --line:#1b2730; --ink:#d6e6ea; --soft:#8fa6b0; --muted:#5d7078; --acc:#3be0c0; --warn:#e0a35c; --bad:#e06a6a; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:"SF Mono","Menlo",monospace; background:var(--bg); color:var(--ink); line-height:1.6; }
+  .wrap{ max-width:820px; margin:0 auto; padding:24px 18px 100px; }
+  .top{ display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--line); padding-bottom:14px; margin-bottom:20px; flex-wrap:wrap; gap:6px; }
+  .top a{ color:var(--acc); text-decoration:none; font-size:13px; }
+  h1{ font-size:19px; letter-spacing:.03em; }
+  .sub{ font-size:12px; color:var(--muted); }
+  .intro{ background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--acc); border-radius:8px; padding:14px 16px; font-size:13px; color:#bcd0d6; margin-bottom:20px; line-height:1.75; }
+  .scope{ background:#050809; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:16px; }
+  canvas{ display:block; width:100%; height:150px; background:#040607; border-radius:6px; }
+  .scope .axis{ display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted); margin-top:6px; }
+  .controls{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
+  .pbtn{ width:48px;height:48px;border-radius:50%;background:var(--acc);border:none;color:#04110e;font-size:18px;cursor:pointer; flex-shrink:0; }
+  .pbtn:active{ transform:scale(.95); }
+  .slider-box{ flex:1; min-width:220px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 14px; }
+  .slider-box label{ font-size:12px; color:var(--soft); display:flex; justify-content:space-between; margin-bottom:6px; }
+  .slider-box input{ width:100%; accent-color:var(--acc); }
+  .status{ font-size:12px; color:var(--acc); min-height:16px; }
+  .ref{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-bottom:18px; }
+  .ref h3{ font-size:13px; color:var(--soft); margin-bottom:10px; }
+  .morse-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(78px,1fr)); gap:6px 12px; font-size:12px; color:var(--soft); }
+  .morse-grid b{ color:var(--ink); display:inline-block; width:14px; }
+  .morse-grid .c{ color:var(--acc); }
+  .next{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:20px; }
+  .next h4{ color:var(--acc); font-size:14px; margin-bottom:8px; }
+  .next p{ font-size:13px; color:#bcd0d6; margin-bottom:14px; line-height:1.7; }
+  .next .field{ display:flex; gap:8px; flex-wrap:wrap; }
+  .next input{ flex:1; min-width:200px; padding:11px 12px; background:#050809; border:1px solid var(--line); color:var(--ink); border-radius:6px; font-size:16px; letter-spacing:.3em; text-transform:uppercase; font-family:inherit; }
+  .next button{ padding:11px 20px; background:var(--acc); color:#04110e; font-weight:700; border:none; border-radius:6px; cursor:pointer; }
+  .next .err{ width:100%; color:var(--warn); font-size:12.5px; min-height:16px; margin-top:8px; }
+  .help{ margin-top:14px; font-size:12px; color:var(--muted); }
+  .help summary{ cursor:pointer; }
+  .help p{ margin-top:6px; padding-left:10px; border-left:2px solid var(--line); line-height:1.7; }
+  .fx-grain,.fx-vignette{ position:fixed; inset:0; pointer-events:none; z-index:90; }
+  .fx-vignette{ box-shadow:inset 0 0 200px 50px rgba(0,0,0,.6); }
+  .fx-grain{ opacity:.035; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation:grain .5s steps(3) infinite; }
+  @keyframes grain{0%{transform:translate(0,0)}33%{transform:translate(-5px,3px)}66%{transform:translate(4px,-4px)}100%{transform:translate(0,0)}}
+</style>
+</head>
+<body>
+<div class="fx-vignette"></div>
+<div class="fx-grain"></div>
+<div class="wrap">
+  <div class="top"><a href="radio.html">← 返回存档</a><span class="sub">片段：11-12「台风特辑」· 多出的 05:32</span></div>
+  <h1>📡 电波取证台</h1>
+  <div class="intro">这是苏黎从那期异常重播里截出的、被塞进去的片段。表面听全是电流底噪——但她说，底噪下面"有结构"。<br><b>拖动「降噪」滑块，把高频底噪滤掉</b>，藏在下面的信号就会从噪点里显影出来。然后对照右边的<b>摩尔斯电码表</b>，把它读成字母。</div>
+
+  <div class="scope">
+    <canvas id="cv" width="780" height="150"></canvas>
+    <div class="axis"><span>0:00</span><span>信号示波 · 时间轴</span><span>0:03</span></div>
+  </div>
+
+  <div class="controls">
+    <button class="pbtn" id="play" title="播放/停止">▶</button>
+    <div class="slider-box">
+      <label><span>降噪滤波（滤掉高频底噪）</span><span id="cutVal">底噪：强</span></label>
+      <input type="range" id="cut" min="500" max="6000" value="6000">
+    </div>
+  </div>
+  <div class="status" id="status">点击播放。先什么都听不清——把降噪滑块往左拉。</div>
+
+  <div class="ref" style="margin-top:18px">
+    <h3>📻 国际摩尔斯电码对照表</h3>
+    <div class="morse-grid" id="morseRef"></div>
+  </div>
+
+  <div class="next">
+    <h4>→ 读出那段电报</h4>
+    <p>降噪到底，信号会清晰地分成<strong>几组长短不一的脉冲</strong>——长的是「—」(划)，短的是「·」(点)，组与组之间的空隙分隔字母。对照上表，把它拼成一个英文单词。</p>
+    <div class="field">
+      <input id="ans" type="text" placeholder="解出的单词" autocomplete="off" maxlength="12">
+      <button onclick="check()">确认</button>
+      <div class="err" id="err"></div>
+    </div>
+    <details class="help">
+      <summary>⚿ 实在读不出？逐层提示</summary>
+      <p>① 把降噪滑块拉到最左，示波器上会清晰显出 4 组脉冲 = 4 个字母。<br>② 第一组：一个长划 = <b>—</b>。第二组：两个短点 = <b>· ·</b>。<br>③ 对照表：— 是 T，·· 是 I……把四个字母连起来，是一个和"海宁、港口、潮水"有关的英文词。</p>
+    </details>
+  </div>
+</div>
+
+<script>
+  /* ---------- 摩尔斯数据 ---------- */
+  const MORSE={A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..'};
+  document.getElementById('morseRef').innerHTML=Object.entries(MORSE).map(([k,v])=>`<div><b>${k}</b> <span class="c">${v.replace(/\./g,'·').replace(/-/g,'—')}</span></div>`).join('');
+
+  // 隐藏词 TIDE → 生成脉冲时间轴（单位 u）
+  const WORD='TIDE';
+  const U=0.12; // 秒/单位
+  let tones=[], cur=1; // 前导静音 1u
+  for(const ch of WORD){
+    const code=MORSE[ch];
+    for(let k=0;k<code.length;k++){
+      const dur = code[k]==='-'?3:1;
+      tones.push({s:cur,d:dur});
+      cur += dur + 1;          // 符号内间隔 1u
+    }
+    cur += 2;                  // 字母间隔（已含1，补2=3）
+  }
+  const totalU = cur + 1;
+  const totalSec = totalU*U;
+
+  /* ---------- 可视化 ---------- */
+  const cv=document.getElementById('cv'), g=cv.getContext('2d');
+  const CUTMIN=500, CUTMAX=6000;
+  function noiseLevel(){ const c=+document.getElementById('cut').value; return Math.max(0,Math.min(1,(c-CUTMIN)/(CUTMAX-CUTMIN))); }
+  function draw(playSec){
+    const W=cv.width,H=cv.height;
+    g.clearRect(0,0,W,H);
+    g.fillStyle='#040607'; g.fillRect(0,0,W,H);
+    // 中线网格
+    g.strokeStyle='#0e1a1f'; g.lineWidth=1;
+    for(let i=1;i<8;i++){ g.beginPath(); g.moveTo(W*i/8,0); g.lineTo(W*i/8,H); g.stroke(); }
+    g.beginPath(); g.moveTo(0,H/2); g.lineTo(W,H/2); g.stroke();
+    // 信号块（摩尔斯）
+    const x=u=>u/totalU*W;
+    g.fillStyle='#3be0c0';
+    tones.forEach(t=>{ const bx=x(t.s), bw=x(t.s+t.d)-bx; g.fillRect(bx,H/2-26,Math.max(2,bw),52); });
+    // 底噪遮罩：noiseLevel 越高，噪点越密越亮，盖住信号
+    const lvl=noiseLevel();
+    if(lvl>0.02){
+      const n=Math.floor(lvl*520);
+      for(let i=0;i<n;i++){
+        const px=Math.random()*W, ph=(Math.random()*0.9+0.1)*H;
+        g.strokeStyle='rgba(150,180,190,'+(lvl*0.85)+')';
+        g.beginPath(); g.moveTo(px,(H-ph)/2); g.lineTo(px,(H+ph)/2); g.stroke();
+      }
+    }
+    // 播放头
+    if(playSec!=null){
+      const hx=playSec/totalSec*W;
+      g.strokeStyle='#e06a6a'; g.lineWidth=2;
+      g.beginPath(); g.moveTo(hx,0); g.lineTo(hx,H); g.stroke();
+    }
+  }
+  draw(null);
+
+  /* ---------- 音频 ---------- */
+  let ctx, noiseFilter, playing=false, startT=0, raf=null;
+  function makeNoiseBuffer(c){
+    const buf=c.createBuffer(1, c.sampleRate*2, c.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+    return buf;
+  }
+  document.getElementById('cut').addEventListener('input',()=>{
+    const c=+document.getElementById('cut').value;
+    const lvl=noiseLevel();
+    document.getElementById('cutVal').textContent = lvl>0.66?'底噪：强' : lvl>0.25?'底噪：减弱中' : '底噪：已滤净';
+    if(noiseFilter) noiseFilter.frequency.value=c;
+    if(!playing) draw(null);
+  });
+
+  function stop(){
+    playing=false; document.getElementById('play').textContent='▶';
+    if(raf) cancelAnimationFrame(raf);
+    if(ctx){ try{ctx.close();}catch(e){} ctx=null; noiseFilter=null; }
+    draw(null);
+  }
+  document.getElementById('play').onclick=()=>{
+    if(playing){ stop(); document.getElementById('status').textContent='已停止。'; return; }
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    // 底噪：白噪 → 高通(只留高频"嘶嘶") → 降噪滤波(lowpass,玩家控制) → 输出
+    const noise=ctx.createBufferSource(); noise.buffer=makeNoiseBuffer(ctx); noise.loop=true;
+    const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=1400;
+    noiseFilter=ctx.createBiquadFilter(); noiseFilter.type='lowpass'; noiseFilter.frequency.value=+document.getElementById('cut').value;
+    const ng=ctx.createGain(); ng.gain.value=0.32;
+    noise.connect(hp); hp.connect(noiseFilter); noiseFilter.connect(ng); ng.connect(ctx.destination);
+    // 摩尔斯：600Hz 方波蜂鸣（不经降噪，始终在底下），按时序开关
+    const osc=ctx.createOscillator(); osc.type='square'; osc.frequency.value=600;
+    const mg=ctx.createGain(); mg.gain.value=0;
+    osc.connect(mg); mg.connect(ctx.destination);
+    const t0=ctx.currentTime+0.05;
+    tones.forEach(t=>{
+      mg.gain.setValueAtTime(0.0001, t0+t.s*U);
+      mg.gain.exponentialRampToValueAtTime(0.18, t0+t.s*U+0.01);
+      mg.gain.setValueAtTime(0.18, t0+(t.s+t.d)*U-0.01);
+      mg.gain.exponentialRampToValueAtTime(0.0001, t0+(t.s+t.d)*U);
+    });
+    noise.start(); osc.start();
+    playing=true; startT=t0; document.getElementById('play').textContent='⏸';
+    document.getElementById('status').textContent='播放中…把降噪滑块往左拉，听底噪消失、滴答声浮现。';
+    const tick=()=>{
+      if(!playing||!ctx) return;
+      const el=ctx.currentTime-startT;
+      if(el>=totalSec){ stop(); document.getElementById('status').textContent='片段结束。看示波器上的长短脉冲，对照摩尔斯表。'; return; }
+      draw(Math.max(0,el));
+      raf=requestAnimationFrame(tick);
+    };
+    raf=requestAnimationFrame(tick);
+    // 自动停止兜底
+    noise.stop(t0+totalSec+0.1); osc.stop(t0+totalSec+0.1);
+  };
+
+  /* ---------- 出口判定 ---------- */
+  let tries=0;
+  function check(){
+    const v=(document.getElementById('ans').value||'').trim().toUpperCase().replace(/[^A-Z]/g,'');
+    const err=document.getElementById('err');
+    if(v==='TIDE'){ location.href='station.html?k=tide'; return; }
+    tries++;
+    if(tries<3){ err.textContent='不对。先把降噪拉到底让信号显影，数清楚有几组长短脉冲。'; }
+    else if(tries<5){ err.textContent='不对。四组脉冲：—／··／—··／·。逐组查摩尔斯表。'; }
+    else { err.textContent='提示：— ·· —·· · 对应 T-I-D-E，潮水的意思。'; }
+  }
+  document.getElementById('ans').addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>锦屿网络 · 运营后台</title>
+<style>
+  :root{ --bg:#0c1018; --panel:#141a24; --line:#222b38; --ink:#dde4ee; --muted:#727d8c; --acc:#7c83ff; --ok:#52e0d0; --warn:#e0a35c; --bad:#e06a6a; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ font-family:-apple-system,"Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); line-height:1.65; }
+  /* 登录 */
+  .login{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .login .box{ width:100%; max-width:380px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:32px; }
+  .brand{ display:flex; align-items:center; gap:9px; font-weight:700; font-size:17px; margin-bottom:4px; }
+  .moon{ width:22px; height:22px; border-radius:50%; background:radial-gradient(circle at 32% 32%,#fff,#7c83ff); }
+  .login .sub{ font-size:12px; color:var(--muted); margin-bottom:24px; }
+  .login label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; }
+  .login input{ width:100%; padding:11px 12px; background:#0e131c; border:1px solid var(--line); color:var(--ink); border-radius:7px; font-size:15px; }
+  .login button{ margin-top:16px; width:100%; padding:12px; background:linear-gradient(135deg,var(--acc),var(--ok)); color:#0c1018; font-weight:700; border:none; border-radius:7px; cursor:pointer; }
+  .login .err{ color:var(--bad); font-size:12.5px; min-height:16px; margin-top:10px; }
+  .login .note{ font-size:11.5px; color:#3f4956; margin-top:16px; line-height:1.6; }
+  /* 后台 */
+  #app{ display:none; max-width:880px; margin:0 auto; padding:24px 20px 90px; }
+  .top{ display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:16px; margin-bottom:24px; flex-wrap:wrap; gap:8px; }
+  .top .who{ font-size:12px; color:var(--muted); }
+  .top .who b{ color:var(--ok); }
+  .kpis{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:22px; }
+  @media(max-width:680px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+  .kpi{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .kpi b{ display:block; font-size:22px; }
+  .kpi span{ font-size:11.5px; color:var(--muted); }
+  .menu{ background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .mrow{ display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid var(--line); font-size:14px; }
+  .mrow:last-child{ border-bottom:none; }
+  .mrow .ic{ width:22px; text-align:center; }
+  .mrow .nm{ flex:1; }
+  .mrow .tag{ font-size:11px; padding:2px 8px; border-radius:4px; }
+  .tag.dim{ background:#1c2430; color:var(--muted); }
+  .tag.hot{ background:#3a2a16; color:var(--warn); }
+  .mrow.clickable{ cursor:pointer; }
+  .mrow.clickable:hover{ background:#171f2b; }
+  .mrow.locked{ opacity:.5; }
+  .banner{ background:#2a1c16; border:1px solid #4a3220; color:var(--warn); font-size:12.5px; padding:10px 14px; border-radius:8px; margin-bottom:18px; }
+</style>
+</head>
+<body>
+<div class="login" id="login">
+  <div class="box">
+    <div class="brand"><span class="moon"></span> 锦屿网络 · 运营后台</div>
+    <div class="sub">SleepIsle Operations · 内测通道</div>
+    <label>内测邀请码</label>
+    <input id="code" type="text" placeholder="INVITE CODE" autocomplete="off">
+    <button onclick="tryLogin()">进入后台</button>
+    <div class="err" id="err"></div>
+    <div class="note">本通道仅对持有有效邀请码的内测成员开放。访问行为已记录。</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="top">
+    <div class="brand"><span class="moon"></span> 运营后台</div>
+    <div class="who">登录身份：<b>访客（借用程野自设的邀请码）</b> · IP 已记录</div>
+  </div>
+
+  <div class="banner">⚠ 检测到本次登录使用的邀请码属于已停用账号「程野 / cy」。系统已上报。请相关人员尽快处理。</div>
+
+  <div class="kpis">
+    <div class="kpi"><b>1.28M</b><span>累计用户</span></div>
+    <div class="kpi"><b>982k</b><span>昨夜活跃</span></div>
+    <div class="kpi"><b style="color:var(--warn)">3,300</b><span>「个性化推送」覆盖</span></div>
+    <div class="kpi"><b style="color:var(--ok)">4.8</b><span>商店评分</span></div>
+  </div>
+
+  <div class="menu">
+    <div class="mrow locked"><span class="ic">📊</span><span class="nm">用户增长看板</span><span class="tag dim">正常</span></div>
+    <div class="mrow locked"><span class="ic">💬</span><span class="nm">评价与反馈管理</span><span class="tag dim">正常</span></div>
+    <div class="mrow clickable" onclick="location.href='data.html'">
+      <span class="ic">🌙</span>
+      <span class="nm">深度睡眠期个性化音频推送 · 任务日志</span>
+      <span class="tag hot">v3.7 内测 · 点击导出</span>
+    </div>
+    <div class="mrow locked"><span class="ic">⚙️</span><span class="nm">系统设置</span><span class="tag dim">无权限</span></div>
+  </div>
+
+  <p style="font-size:12px;color:var(--muted);margin-top:16px;">提示：程野说"不是助眠白噪音，是别的东西"——指的就是上面那条标红的推送任务。点开它，把日志导出来看。</p>
+</div>
+
+<script>
+  let tries=0;
+  function tryLogin(){
+    const raw=(document.getElementById('code').value||'').trim();
+    const digits=raw.replace(/[^0-9]/g,'');
+    const err=document.getElementById('err');
+    // 版本号 3.7 + 整点 02:00 → 接受 3.7-0200 / 37-0200 / 3.7-02 / 3.7-2 等写法
+    const ok = digits.startsWith('37') && ['0200','200','02','2'].includes(digits.slice(2));
+    if(ok){
+      document.getElementById('login').style.display='none';
+      document.getElementById('app').style.display='block';
+      window.scrollTo(0,0); return;
+    }
+    tries++;
+    if(tries<3){ err.textContent='邀请码无效。程野说它由两部分组成：一个版本号 ＋ 一个整点时刻。'; }
+    else if(tries<5){ err.textContent='邀请码无效。版本号去更新日志里找那个内测功能（第几版？），时刻是程野说的"每天凌晨两点"。'; }
+    else { err.textContent='邀请码无效。格式是「版本号-四位时刻」，例如 X.X-0200。'; }
+  }
+  document.getElementById('code').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
+</script>
+</body>
+</html>

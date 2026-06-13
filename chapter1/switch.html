@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>死人开关 · 最终层</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{ background:#08090b; color:#d6dae0; font-family:Georgia,"Songti SC",serif; line-height:1.9; }
+  .wrap{ max-width:680px; margin:0 auto; padding:50px 24px 110px; }
+  .tag{ font-family:monospace; font-size:12px; color:#c0392b; letter-spacing:.2em; text-transform:uppercase; border:1px solid #5a1e18; display:inline-block; padding:4px 10px; border-radius:3px; margin-bottom:24px; }
+  h1{ font-size:26px; color:#eef; margin-bottom:6px; }
+  .sub{ font-family:monospace; font-size:12.5px; color:#5a646e; margin-bottom:34px; }
+  .letter{ background:#0e1013; border:1px solid #1c2026; border-radius:8px; padding:30px; font-size:16.5px; color:#cfd5dc; }
+  .letter p{ margin-bottom:18px; }
+  .letter .sig{ text-align:right; color:#9aa4ae; font-style:italic; margin-top:26px; }
+  .cities{ margin:30px 0; background:#0c0e11; border:1px solid #1c2026; border-radius:8px; padding:22px; font-family:monospace; }
+  .cities h3{ color:#8fb3d9; font-size:13px; margin-bottom:14px; letter-spacing:.05em; font-family:Georgia,serif; }
+  .city{ display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px dashed #1c2026; font-size:13.5px; }
+  .city:last-child{ border-bottom:none; }
+  .city .dot{ width:8px; height:8px; border-radius:50%; background:#c0392b; box-shadow:0 0 8px #c0392b; }
+  .city .nm{ color:#dfe6ee; width:70px; }
+  .city .dir{ color:#5a646e; }
+  .decision{ margin-top:36px; text-align:center; }
+  .decision p{ color:#9aa4ae; font-size:14px; margin-bottom:20px; }
+  .pub-btn{ background:#c0392b; color:#fff; border:none; padding:16px 40px; font-size:16px; border-radius:6px; cursor:pointer; letter-spacing:.15em; font-family:inherit; transition:transform .15s, background .3s; }
+  .pub-btn:hover{ background:#a93226; transform:translateY(-1px); }
+  /* 结局 */
+  #ending{ display:none; text-align:center; padding-top:30px; }
+  #ending .pulse{ font-size:40px; margin-bottom:20px; animation:p 2s infinite; } @keyframes p{50%{opacity:.4}}
+  #ending h2{ font-size:24px; color:#eef; margin-bottom:24px; letter-spacing:.05em; }
+  #ending .body{ font-size:16px; color:#bcc4cd; line-height:2; }
+  #ending .body em{ color:#c0392b; font-style:normal; }
+  #ending .chapter{ margin-top:40px; font-family:monospace; color:#5a646e; letter-spacing:.4em; font-size:14px; }
+  #ending .hook{ margin-top:30px; padding:20px; border:1px solid #1c2026; border-radius:8px; background:#0c0e11; color:#8a94a0; font-size:14px; }
+  .fade{ animation:fade 1.4s forwards; opacity:0; } @keyframes fade{to{opacity:1}}
+  .fx-grain,.fx-vignette{ position:fixed; inset:0; pointer-events:none; z-index:99; }
+  .fx-vignette{ box-shadow:inset 0 0 200px 50px rgba(0,0,0,.78); }
+  .fx-grain{ opacity:.045; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation:grain .5s steps(3) infinite; }
+  @keyframes grain{ 0%{transform:translate(0,0)} 33%{transform:translate(-5px,3px)} 66%{transform:translate(4px,-4px)} 100%{transform:translate(0,0)} }
+</style>
+</head>
+<body>
+<div class="fx-vignette"></div>
+<div class="fx-grain"></div>
+<div class="wrap">
+  <div id="content">
+    <span class="tag">● Dead Man's Switch · 已触发</span>
+    <h1>给你的最后一封信</h1>
+    <div class="sub">解密成功 · 密钥 [ 明砚陈 ] · 来自 林知秋</div>
+
+    <div class="letter">
+      <p>如果你走到了这里，说明你把所有碎片都拼上了。谢谢你。我就知道会是你。</p>
+      <p>下面是我整理的全部证据。我不知道发布它是否安全，所以我把选择权，留给你。</p>
+      <p>但在你决定之前，有些事你需要知道：</p>
+      <p>回声科技 2020 年注销了，可「频率同步」这项技术没有消失。我追踪到，至少有三个城市出现了和钟楼街一样的症状集群。每个城市，都有一栋「废弃建筑」；每栋建筑，都曾属于一家看起来毫不相关的公司。</p>
+      <p>但这些公司的注册地址、法人关联、资金流向——最终都指向同一个实体。我还没来得及查清那个实体是什么。我只给它起了个临时代号，沿用陈砚明的说法：<strong>「寂静计划」</strong>。</p>
+      <p>我现在要去见一个人。他说他手里有「寂静计划」的内部名单。如果一切顺利，72 小时后，我会自己回来关掉这个开关。</p>
+      <p>如果你正在读这封信——</p>
+      <p>说明一切，没有顺利。</p>
+      <p>接下来的路，得你来走了。</p>
+      <div class="sig">—— 知秋</div>
+    </div>
+
+    <div class="cities">
+      <h3>📍 她追踪到的三个城市</h3>
+      <div class="city"><span class="dot"></span><span class="nm">锦城</span><span class="dir">西南 · 症状集群 · 一栋「废弃」声学实验楼</span></div>
+      <div class="city"><span class="dot"></span><span class="nm">海宁</span><span class="dir">东部沿海 · 信号异常 · 资金链指向地</span></div>
+      <div class="city"><span class="dot"></span><span class="nm">鹿原</span><span class="dir">北方工业城 · 「便民服务」 · 审批源头</span></div>
+    </div>
+
+    <div class="decision">
+      <p>全部证据已加密打包。现在，决定权在你手里。</p>
+      <button class="pub-btn" onclick="publish()">发 布 证 据</button>
+    </div>
+  </div>
+
+  <!-- 结局 -->
+  <div id="ending">
+    <div class="pulse">📡</div>
+    <h2 class="fade">证据已发布。</h2>
+    <div class="body fade" style="animation-delay:.6s">
+      <p>数据包已发送至 3 个预设的安全邮箱<br>与 2 个匿名信息平台。</p>
+      <p style="margin-top:24px">林知秋的调查，不会消失。</p>
+      <p style="margin-top:24px">但故事还没有结束——<br><em>锦城、海宁、鹿原……</em><br>还有人，在听到那段旋律。</p>
+      <p style="margin-top:24px"><em>「寂静计划」仍在运行。</em></p>
+    </div>
+    <div class="chapter fade" style="animation-delay:1.4s">— 第 一 章 · 完 —</div>
+    <div class="hook fade" style="animation-delay:2.2s">
+      你以为这是结束。<br>
+      第二天，你的手机震了一下。<br>
+      一条来自陌生账号的消息：<br><br>
+      <span style="color:#c0392b;font-family:monospace">「如果你收到这条消息，说明我已经 72 小时没有登录了……」</span><br><br>
+      死人开关，又一次被触发。
+      <div style="margin-top:22px;text-align:center;">
+        <a href="https://iqeu3tfm6w.aiforce.cloud/app/app_4kby25g2um93y" style="display:inline-block;color:#c0392b;border:1px solid #5a1e18;border-radius:4px;padding:10px 22px;text-decoration:none;font-family:monospace;font-size:13px;letter-spacing:.1em;">▷ 接听这条消息 · 第二章《助眠的代价》</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function publish(){
+    const btn=document.querySelector('.pub-btn');
+    btn.textContent='正在发布…'; btn.disabled=true;
+    setTimeout(()=>{
+      document.getElementById('content').style.display='none';
+      document.getElementById('ending').style.display='block';
+      window.scrollTo(0,0);
+    }, 1400);
+  }
+</script>
+</body>
+</html>

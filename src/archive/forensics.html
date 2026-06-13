@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>音频取证台</title><link rel="stylesheet" href="../shared/base.css"><link rel="stylesheet" href="archive.css"></head>
+<body>
+  <main class="page page--workspace terminal-shell">
+    <div class="page-header"><span class="brand">AUDIO FORENSICS</span><a href="package.html">返回证词包</a></div>
+    <div class="page-intro">
+      <h1>RIFF / WAVE · 2 channels</h1>
+      <p>系统识别到 RIFF 文件头。左右声道不是同一录音，混合播放会互相遮蔽。</p>
+    </div>
+    <div class="section-stack">
+      <section class="panel workspace-material">
+        <canvas id="wave" class="wave" width="900" height="150" aria-label="双声道示意波形"></canvas>
+      </section>
+      <section class="channel-grid">
+        <article class="panel"><p class="eyebrow">左声道 / CYM-071</p><h2>陈砚明证词</h2><button id="play-left">播放左声道</button><p>“频率同步不是事故。钟楼街是产品演示。11 月 9 日，他们删除了我的异议。”</p></article>
+        <article class="panel"><p class="eyebrow">右声道 / unknown</p><h2>林知秋测试录音</h2><button id="play-right">播放右声道</button><p>“如果你能把两个声音分开，就不要急着公开。先确认这个包有没有被动过。”</p></article>
+      </section>
+      <p id="status" class="status" role="status"></p>
+      <div class="actions">
+        <a href="assets/testimony-transcript.txt">无法使用 AudioContext？打开分轨文字稿</a>
+        <a href="integrity.html">核对上传日志与 SHA-256 →</a>
+      </div>
+    </div>
+  </main>
+  <script type="module">
+    import { playChannel } from "./archive.js";
+    const canvas = document.querySelector("#wave"), context = canvas.getContext("2d");
+    context.strokeStyle = "#69c98a"; context.lineWidth = 2;
+    for (let row = 0; row < 2; row += 1) {
+      context.beginPath();
+      for (let x = 0; x < canvas.width; x += 4) {
+        const y = 40 + row * 70 + Math.sin(x / (13 + row * 7)) * (10 + Math.sin(x / 43) * 12);
+        if (x === 0) context.moveTo(x, y); else context.lineTo(x, y);
+      }
+      context.stroke();
+    }
+    const status = document.querySelector("#status");
+    for (const side of ["left", "right"]) {
+      document.querySelector(`#play-${side}`).addEventListener("click", async () => {
+        try {
+          const result = await playChannel(side);
+          status.textContent = `正在播放${side === "left" ? "左" : "右"}声道，时长 ${result.duration.toFixed(1)} 秒。`;
+          status.dataset.state = "success";
+        } catch {
+          status.textContent = "浏览器未能启动音频。请使用分轨文字稿继续。";
+          status.dataset.state = "error";
+        }
+      });
+    }
+  </script>
+</body>
+</html>
