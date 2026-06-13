@@ -1020,26 +1020,46 @@ test("archive pages use their assigned shared page templates and one h1", async 
 });
 
 test("archive entry and tree preserve exact form and mounted-directory structure", async () => {
-  const indexRoot = parseHtml(await readArchivePage("index.html"));
+  const indexHtml = await readArchivePage("index.html");
+  const indexRoot = parseHtml(indexHtml);
   const indexMain = findOne(indexRoot, (node) => node.tag === "main", "index main");
   const indexStack = findByClass(indexRoot, "section-stack");
   assert.equal(indexStack.parent, indexMain, "entry stack is a direct main child");
 
   const pathForm = findById(indexRoot, "path-form");
-  assert.ok(hasClass(pathForm, "panel"), "path form keeps panel");
-  assert.ok(hasClass(pathForm, "form-stack"), "path form uses form-stack");
+  assertExactClasses(pathForm, ["panel", "form-stack"], "path form");
   assert.equal(pathForm.parent, indexStack, "path form belongs to section stack");
   const pathInput = findById(indexRoot, "path");
+  assertExactClasses(pathInput, ["mono"], "path input");
+  assert.equal(pathInput.attributes.get("placeholder"), "/legacy/...", "path input keeps placeholder");
   assert.ok(isDescendant(pathForm, pathInput), "path input belongs to form");
   assertInClassAncestor(pathInput, "field-group", "path input");
-  const pathActions = assertInClassAncestor(findSubmit(pathForm), "form-actions", "path submit");
+  const pathSubmit = findSubmit(pathForm);
+  const pathActions = assertInClassAncestor(pathSubmit, "form-actions", "path submit");
   assert.equal(
     assertInClassAncestor(findById(indexRoot, "status"), "form-actions", "path status"),
     pathActions,
     "path submit and status share form-actions",
   );
+  assert.match(indexHtml, /<label\b[^>]*>\s*镜像路径\s*<input\b/i, "entry keeps path label");
+  assert.match(indexHtml, /<button\b[^>]*type=["']submit["'][^>]*>\s*挂载路径\s*<\/button>/i, "entry keeps mount action");
+  assert.match(
+    indexHtml,
+    /const\s+expected\s*=\s*["']\/legacy\/CYM-071\/DEL-1109\/testimony\.pkg["']/,
+    "entry keeps expected archive path",
+  );
+  assert.match(
+    indexHtml,
+    /if\s*\(\s*value\s*===\s*expected\s*\)\s*location\.href\s*=\s*`tree\.html\?path=\$\{encodeURIComponent\(value\)\}`/,
+    "entry keeps exact path verification redirect",
+  );
+  assert.ok(
+    indexHtml.includes("镜像索引中不存在这条路径。路径区分层级与顺序。"),
+    "entry keeps exact failure status",
+  );
 
-  const treeRoot = parseHtml(await readArchivePage("tree.html"));
+  const treeHtml = await readArchivePage("tree.html");
+  const treeRoot = parseHtml(treeHtml);
   const treeIntro = findByClass(treeRoot, "page-intro");
   for (const node of [
     findByClass(treeRoot, "eyebrow"),
@@ -1049,12 +1069,34 @@ test("archive entry and tree preserve exact form and mounted-directory structure
     assert.ok(isDescendant(treeIntro, node), "tree heading material belongs to page intro");
   }
   const treeStack = findByClass(treeRoot, "section-stack");
-  assert.equal(findById(treeRoot, "denied").parent, treeStack, "denied panel belongs to stack");
-  assert.equal(findById(treeRoot, "tree-panel").parent, treeStack, "tree panel belongs to stack");
-
-  const treeHtml = await readArchivePage("tree.html");
-  assert.match(treeHtml, /new URLSearchParams\(location\.search\)\.get\("path"\)/, "tree reads path query");
-  assert.match(treeHtml, /href="package\.html"/, "tree keeps package link");
+  const denied = findById(treeRoot, "denied");
+  const treePanel = findById(treeRoot, "tree-panel");
+  assert.equal(denied.parent, treeStack, "denied panel belongs to stack");
+  assert.equal(treePanel.parent, treeStack, "tree panel belongs to stack");
+  assert.ok(hasClass(denied, "hidden"), "denied panel starts hidden");
+  assert.ok(hasClass(treePanel, "hidden"), "tree panel starts hidden");
+  assert.match(
+    treeHtml,
+    /import\s*\{\s*isExpectedPath\s*\}\s*from\s*["']\.\/archive\.js["']/,
+    "tree keeps path verifier import",
+  );
+  assert.match(
+    treeHtml,
+    /isExpectedPath\(\s*new URLSearchParams\(\s*location\.search\s*\)\.get\(\s*["']path["']\s*\)\s*\)/,
+    "tree keeps expected-path query logic",
+  );
+  assert.match(
+    treeHtml,
+    /document\.querySelector\(\s*ok\s*\?\s*["']#tree-panel["']\s*:\s*["']#denied["']\s*\)\.classList\.remove\(\s*["']hidden["']\s*\)/,
+    "tree keeps conditional visibility toggle",
+  );
+  for (const href of ["index.html", "package.html"]) {
+    assert.equal(
+      allElements(treeRoot, (node) => node.tag === "a" && node.attributes.get("href") === href).length,
+      1,
+      `tree keeps ${href} link`,
+    );
+  }
 });
 
 test("archive package and forensics preserve evidence controls and navigation", async () => {
@@ -1090,7 +1132,8 @@ test("archive package and forensics preserve evidence controls and navigation", 
     "package keeps forensics link",
   );
 
-  const forensicsRoot = parseHtml(await readArchivePage("forensics.html"));
+  const forensicsHtml = await readArchivePage("forensics.html");
+  const forensicsRoot = parseHtml(forensicsHtml);
   const forensicsMain = findOne(forensicsRoot, (node) => node.tag === "main", "forensics main");
   const header = findByClass(forensicsRoot, "page-header");
   const intro = findByClass(forensicsRoot, "page-intro");
@@ -1114,10 +1157,38 @@ test("archive package and forensics preserve evidence controls and navigation", 
       `forensics keeps ${href} action`,
     );
   }
+  assert.match(
+    forensicsHtml,
+    /import\s*\{\s*playChannel\s*\}\s*from\s*["']\.\/archive\.js["']/,
+    "forensics keeps channel player import",
+  );
+  assert.match(
+    forensicsHtml,
+    /for\s*\(\s*const\s+side\s+of\s+\[\s*["']left["']\s*,\s*["']right["']\s*\]\s*\)/,
+    "forensics binds both channel sides",
+  );
+  assert.match(
+    forensicsHtml,
+    /document\.querySelector\(\s*`#play-\$\{side\}`\s*\)\.addEventListener\(\s*["']click["']/,
+    "forensics keeps channel click bindings",
+  );
+  assert.match(forensicsHtml, /playChannel\(\s*side\s*\)/, "forensics passes selected side");
+  assert.ok(
+    forensicsHtml.includes('`正在播放${side === "left" ? "左" : "右"}声道，时长 ${result.duration.toFixed(1)} 秒。`'),
+    "forensics keeps exact playback status",
+  );
+  assert.ok(
+    forensicsHtml.includes("浏览器未能启动音频。请使用分轨文字稿继续。"),
+    "forensics keeps exact fallback status",
+  );
+  for (const marker of ["AudioContext", 'canvas.getContext("2d")']) {
+    assert.ok(forensicsHtml.includes(marker), `forensics keeps ${marker} marker`);
+  }
 });
 
 test("archive integrity and switch console preserve verification and decision evidence", async () => {
-  const integrityRoot = parseHtml(await readArchivePage("integrity.html"));
+  const integrityHtml = await readArchivePage("integrity.html");
+  const integrityRoot = parseHtml(integrityHtml);
   const integrityMain = findOne(integrityRoot, (node) => node.tag === "main", "integrity main");
   const integrityStack = findByClass(integrityRoot, "section-stack");
   assert.equal(integrityStack.parent, integrityMain, "integrity stack is a direct main child");
@@ -1138,6 +1209,43 @@ test("archive integrity and switch console preserve verification and decision ev
     1,
     "integrity keeps switch-console link",
   );
+  assert.match(
+    integrityHtml,
+    /import\s*\{\s*sha256\s*\}\s*from\s*["']\.\/archive\.js["']/,
+    "integrity keeps digest import",
+  );
+  assert.match(
+    integrityHtml,
+    /fetch\(\s*["']assets\/evidence-manifest\.json["']\s*\)\.then\(\s*\(response\)\s*=>\s*response\.json\(\)\s*\)/,
+    "integrity keeps manifest fetch",
+  );
+  assert.match(
+    integrityHtml,
+    /document\.querySelector\(\s*["']#verify["']\s*\)\.addEventListener\(\s*["']click["']/,
+    "integrity keeps verify binding",
+  );
+  assert.match(
+    integrityHtml,
+    /fetch\(\s*["']assets\/testimony\.pkg["']\s*\)\.then\(\s*\(response\)\s*=>\s*response\.arrayBuffer\(\)\s*\)/,
+    "integrity keeps evidence fetch",
+  );
+  assert.match(
+    integrityHtml,
+    /digest\s*===\s*manifest\.testimonySha256/,
+    "integrity compares digest with manifest",
+  );
+  for (const status of [
+    "摘要一致：删除批次只改了文件名，核心音频可验证。",
+    "摘要不一致：不能把这份材料当作原始证据。",
+    "兼容模式：无法计算摘要。请对照 manifest.sha256 中的预生成记录。",
+  ]) {
+    assert.ok(integrityHtml.includes(status), `integrity keeps status: ${status}`);
+  }
+  assert.match(
+    integrityHtml,
+    /document\.querySelector\(\s*["']#next["']\s*\)\.classList\.toggle\(\s*["']hidden["']\s*,\s*!ok\s*\)/,
+    "integrity keeps next-step visibility logic",
+  );
 
   const switchRoot = parseHtml(await readArchivePage("switch-console.html"));
   const switchMain = findOne(switchRoot, (node) => node.tag === "main", "switch main");
@@ -1154,6 +1262,16 @@ test("archive integrity and switch console preserve verification and decision ev
   );
   const switchHtml = await readArchivePage("switch-console.html");
   assert.match(switchHtml, /type="module"/, "switch keeps module script");
+  assert.match(
+    switchHtml,
+    /import\s*\{\s*blogNotebookUrl\s*\}\s*from\s*["']\.\/archive\.js["']/,
+    "switch keeps notebook URL import",
+  );
+  assert.match(
+    switchHtml,
+    /document\.querySelector\(\s*["']#notebook-link["']\s*\)\.href\s*=\s*blogNotebookUrl\(\s*\)/,
+    "switch keeps notebook URL assignment",
+  );
   assert.match(switchHtml, /DRYRUN/, "switch keeps fragment");
   assert.match(switchHtml, /FOLLOW-THE-TIDE/, "switch keeps token");
 });
@@ -1201,7 +1319,7 @@ test("archive skin owns terminal semantics without reclaiming shared layout", ()
   assertDeclaration(extractRuleBody(archiveCss, "body"), "font-family", "inherit");
   const mono = extractRuleBody(
     archiveCss,
-    "h1,\nh2,\n.crumb,\n.tree,\n.hex,\n.hash,\n.console-line",
+    "h1,\nh2,\n.crumb,\n.tree,\n.hex,\n.hash,\n.console-line,\n.record",
   );
   assert.match(declarations(mono).get("font-family") ?? "", /ui-monospace/, "terminal material is monospace");
 });

@@ -23,7 +23,8 @@ h2,
 .tree,
 .hex,
 .hash,
-.console-line {
+.console-line,
+.record {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
