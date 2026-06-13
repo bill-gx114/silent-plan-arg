@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import test from "node:test";
 
 const rawCss = await readFile(new URL("../src/shared/base.css", import.meta.url), "utf8");
@@ -47,6 +47,17 @@ const validTemplates = [
   "page--decision",
   "page--marketing",
 ];
+const sharedPrimitiveClasses = new Set([
+  "page",
+  "panel",
+  "field-group",
+  "choice-field",
+  "form-stack",
+  "form-grid",
+  "form-actions",
+  "data-scroll",
+]);
+const sharedPrimitiveTypes = new Set(["button", "input", "select", "textarea"]);
 const siteReaders = {
   blog: readBlogPage,
   corporate: readCorporatePage,
@@ -319,6 +330,63 @@ function mediaBodies(source) {
     bodies.push(extractBlock(source, match.index, match[0]));
   }
   return bodies;
+}
+
+function withoutAttributeSelectors(selector) {
+  let output = "";
+  let bracketDepth = 0;
+  let quote = null;
+  let escaped = false;
+
+  for (const character of selector) {
+    if (escaped) {
+      if (bracketDepth === 0) output += character;
+      escaped = false;
+      continue;
+    }
+    if (character === "\\") {
+      if (bracketDepth === 0) output += character;
+      escaped = true;
+      continue;
+    }
+    if (quote) {
+      if (character === quote) quote = null;
+      continue;
+    }
+    if (bracketDepth > 0 && (character === '"' || character === "'")) {
+      quote = character;
+      continue;
+    }
+    if (character === "[") {
+      bracketDepth += 1;
+      continue;
+    }
+    if (character === "]" && bracketDepth > 0) {
+      bracketDepth -= 1;
+      continue;
+    }
+    if (bracketDepth === 0) output += character;
+  }
+
+  return output;
+}
+
+function sharedPrimitiveTargets(selector) {
+  const source = withoutAttributeSelectors(selector);
+  const targets = new Set();
+
+  for (const match of source.matchAll(/(?<!\\)\.(-?[_a-zA-Z][\w-]*)/g)) {
+    if (sharedPrimitiveClasses.has(match[1])) targets.add(`.${match[1]}`);
+  }
+
+  const typeSelector =
+    /(^|[\s>+~,(])(?:[_a-zA-Z][\w-]*\|)?(button|input|select|textarea)(?=$|[\s.#:[>+~),])/gi;
+  for (const match of source.matchAll(typeSelector)) {
+    const type = match[2].toLowerCase();
+    if (sharedPrimitiveTypes.has(type)) targets.add(type);
+  }
+
+  return [...targets].sort();
 }
 
 function declarations(body) {
@@ -1403,6 +1471,18 @@ test("all 21 pages declare exactly their mapped semantic template and one h1", a
   assert.equal(pageCount, 21, "first chapter page count");
 });
 
+test("template maps cover every source HTML page", async () => {
+  for (const [site, pages] of Object.entries(templateMaps)) {
+    const directory = new URL(`../src/${site}/`, import.meta.url);
+    const sourcePages = (await readdir(directory, { withFileTypes: true }))
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".html"))
+      .map((entry) => entry.name)
+      .sort();
+
+    assert.deepEqual(sourcePages, Object.keys(pages).sort(), `${site} template map coverage`);
+  }
+});
+
 test("every source table is nested in a data-scroll viewport", async () => {
   for (const [site, pages] of Object.entries(templateMaps)) {
     for (const file of Object.keys(pages)) {
@@ -1494,10 +1574,27 @@ test("all scripted feedback regions are announced without duplicating shared not
   }
 
   const notebookRoot = parseHtml(await readBlogPage("case-notebook.html"));
+  const fragmentForm = findById(notebookRoot, "fragment-form");
+  const tokenForm = findById(notebookRoot, "token-form");
+  const notebookStatus = findById(notebookRoot, "status");
   assert.equal(
     allElements(notebookRoot, (node) => hasClass(node, "status")).length,
     1,
     "notebook shares one status region after both forms",
+  );
+  assert.equal(isDescendant(fragmentForm, notebookStatus), false, "notebook status is outside fragment form");
+  assert.equal(isDescendant(tokenForm, notebookStatus), false, "notebook status is outside token form");
+  assert.equal(notebookStatus.parent, fragmentForm.parent, "notebook status shares fragment form parent");
+  assert.equal(notebookStatus.parent, tokenForm.parent, "notebook status shares token form parent");
+  assert.ok(
+    notebookStatus.parent.children.indexOf(notebookStatus) >
+      notebookStatus.parent.children.indexOf(fragmentForm),
+    "notebook status follows fragment form",
+  );
+  assert.ok(
+    notebookStatus.parent.children.indexOf(notebookStatus) >
+      notebookStatus.parent.children.indexOf(tokenForm),
+    "notebook status follows token form",
   );
 });
 
@@ -1532,21 +1629,6 @@ test("shared CSS enforces motion, responsive data, title, action, and focus cont
 });
 
 test("site media queries only adjust site-owned components", () => {
-  const sharedSelectors = new Set([
-    ".page",
-    ".panel",
-    ".field-group",
-    ".choice-field",
-    ".form-stack",
-    ".form-grid",
-    ".form-actions",
-    ".data-scroll",
-    "button",
-    "input",
-    "select",
-    "textarea",
-  ]);
-
   for (const [site, source] of [
     ["blog", blogCss],
     ["corporate", corporateCss],
@@ -1555,13 +1637,39 @@ test("site media queries only adjust site-owned components", () => {
     for (const body of mediaBodies(source)) {
       for (const rule of collectStyleRules(body)) {
         for (const selector of rule.selectors) {
-          assert.equal(
-            sharedSelectors.has(selector),
-            false,
-            `${site} media query does not override shared ${selector}`,
+          assert.deepEqual(
+            sharedPrimitiveTargets(selector),
+            [],
+            `${site} media query does not target shared primitives in ${selector}`,
           );
         }
       }
     }
+  }
+});
+
+test("shared media selector detection catches primitives inside complex selectors", () => {
+  const rejected = new Map([
+    [".paper .page", [".page"]],
+    [".panel:hover .site-copy", [".panel"]],
+    [".form-actions > *", [".form-actions"]],
+    ["button.primary", ["button"]],
+    ['input[type="radio"]:focus-visible', ["input"]],
+    [".site-controls:is(select, textarea)", ["select", "textarea"]],
+  ]);
+  for (const [selector, targets] of rejected) {
+    assert.deepEqual(sharedPrimitiveTargets(selector), targets, selector);
+  }
+
+  for (const selector of [
+    ".page-specific",
+    ".panelized",
+    ".site-button",
+    ".input-hint",
+    ".selectable",
+    ".textarea-copy",
+    '[data-control="button"]',
+  ]) {
+    assert.deepEqual(sharedPrimitiveTargets(selector), [], selector);
   }
 });
