@@ -1041,6 +1041,11 @@ test("archive entry and tree preserve exact form and mounted-directory structure
     pathActions,
     "path submit and status share form-actions",
   );
+  assert.equal(
+    findById(indexRoot, "status").attributes.get("role"),
+    "status",
+    "entry dynamic status is announced",
+  );
   assert.match(indexHtml, /<label\b[^>]*>\s*镜像路径\s*<input\b/i, "entry keeps path label");
   assert.match(indexHtml, /<button\b[^>]*type=["']submit["'][^>]*>\s*挂载路径\s*<\/button>/i, "entry keeps mount action");
   assert.match(
@@ -1202,6 +1207,11 @@ test("archive integrity and switch console preserve verification and decision ev
   assert.equal(isDescendant(verifyActions, findById(integrityRoot, "status")), false, "status stays outside action row");
   assert.ok(hasClass(findById(integrityRoot, "status"), "status"), "integrity status keeps status class");
   assert.equal(
+    findById(integrityRoot, "status").attributes.get("role"),
+    "status",
+    "integrity dynamic status is announced",
+  );
+  assert.equal(
     allElements(
       findById(integrityRoot, "next"),
       (node) => node.tag === "a" && node.attributes.get("href") === "switch-console.html",
@@ -1316,10 +1326,20 @@ test("archive skin owns terminal semantics without reclaiming shared layout", ()
     );
   }
 
-  assertDeclaration(extractRuleBody(archiveCss, "body"), "font-family", "inherit");
+  assertDeclaration(
+    extractRuleBody(archiveCss, "body"),
+    "font-family",
+    '-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif',
+    "archive body uses shared system sans stack",
+  );
   const mono = extractRuleBody(
     archiveCss,
     "h1,\nh2,\n.crumb,\n.tree,\n.hex,\n.hash,\n.console-line,\n.record",
   );
-  assert.match(declarations(mono).get("font-family") ?? "", /ui-monospace/, "terminal material is monospace");
+  assertDeclaration(
+    mono,
+    "font-family",
+    "ui-monospace, SFMono-Regular, Menlo, monospace",
+    "terminal material remains monospace",
+  );
 });
