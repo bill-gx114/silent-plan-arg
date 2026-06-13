@@ -68,7 +68,9 @@
     document.querySelector("#photo-form").addEventListener("submit", (event) => {
       event.preventDefault();
       const ok = document.querySelector("#proof").value === "exit" && Number(document.querySelector("#brightness").value) >= 75;
-      document.querySelector("#status").textContent = ok ? "证据组合成立。" : "这个细节还不能排除另外三栋建筑。";
+      const status = document.querySelector("#status");
+      status.textContent = ok ? "证据组合成立。" : "这个细节还不能排除另外三栋建筑。";
+      status.dataset.state = ok ? "success" : "error";
       if (ok) { completePuzzle("p2"); document.querySelector("#result").classList.remove("hidden"); }
     });
     document.querySelector("#memo").addEventListener("click", () => {

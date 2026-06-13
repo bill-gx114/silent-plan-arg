@@ -35,13 +35,16 @@
       }
       context.stroke();
     }
+    const status = document.querySelector("#status");
     for (const side of ["left", "right"]) {
       document.querySelector(`#play-${side}`).addEventListener("click", async () => {
         try {
           const result = await playChannel(side);
-          document.querySelector("#status").textContent = `正在播放${side === "left" ? "左" : "右"}声道，时长 ${result.duration.toFixed(1)} 秒。`;
+          status.textContent = `正在播放${side === "left" ? "左" : "右"}声道，时长 ${result.duration.toFixed(1)} 秒。`;
+          status.dataset.state = "success";
         } catch {
-          document.querySelector("#status").textContent = "浏览器未能启动音频。请使用分轨文字稿继续。";
+          status.textContent = "浏览器未能启动音频。请使用分轨文字稿继续。";
+          status.dataset.state = "error";
         }
       });
     }

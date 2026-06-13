@@ -1,7 +1,7 @@
 :root {
   --paper: #e9e1d4;
   --paper-ink: #28231e;
-  --paper-muted: #746b61;
+  --paper-muted: #6b6259;
 }
 
 .paper {
@@ -11,7 +11,7 @@
   --muted: var(--paper-muted);
   --panel: #f6f0e7;
   --panel-2: #fffaf2;
-  --line: #cfc2b3;
+  --line: #887968;
   --accent: #7d332a;
   --accent-contrast: #fffaf2;
   --danger: #7a1f2b;
@@ -203,8 +203,14 @@
   font-weight: 800;
 }
 
+#endings {
+  display: grid;
+  gap: var(--space-3);
+}
+
 .ending {
-  margin-top: var(--space-3);
+  display: block;
+  margin: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   padding: var(--space-4);

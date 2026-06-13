@@ -27,16 +27,19 @@
     import { sha256 } from "./archive.js";
     const manifest = await fetch("assets/evidence-manifest.json").then((response) => response.json());
     document.querySelector("#original-hash").textContent = manifest.testimonySha256;
+    const status = document.querySelector("#status");
     document.querySelector("#verify").addEventListener("click", async () => {
       try {
         const buffer = await fetch("assets/testimony.pkg").then((response) => response.arrayBuffer());
         const digest = await sha256(buffer);
         document.querySelector("#current-hash").textContent = digest;
         const ok = digest === manifest.testimonySha256;
-        document.querySelector("#status").textContent = ok ? "摘要一致：删除批次只改了文件名，核心音频可验证。" : "摘要不一致：不能把这份材料当作原始证据。";
+        status.textContent = ok ? "摘要一致：删除批次只改了文件名，核心音频可验证。" : "摘要不一致：不能把这份材料当作原始证据。";
+        status.dataset.state = ok ? "success" : "error";
         document.querySelector("#next").classList.toggle("hidden", !ok);
       } catch {
-        document.querySelector("#status").textContent = "兼容模式：无法计算摘要。请对照 manifest.sha256 中的预生成记录。";
+        status.textContent = "兼容模式：无法计算摘要。请对照 manifest.sha256 中的预生成记录。";
+        status.dataset.state = "error";
       }
     });
   </script>

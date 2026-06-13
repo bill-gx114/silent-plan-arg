@@ -23,8 +23,12 @@
       event.preventDefault();
       const value = document.querySelector("#path").value.trim();
       const expected = "/legacy/CYM-071/DEL-1109/testimony.pkg";
+      const status = document.querySelector("#status");
       if (value === expected) location.href = `tree.html?path=${encodeURIComponent(value)}`;
-      else document.querySelector("#status").textContent = "镜像索引中不存在这条路径。路径区分层级与顺序。";
+      else {
+        status.textContent = "镜像索引中不存在这条路径。路径区分层级与顺序。";
+        status.dataset.state = "error";
+      }
     });
   </script>
 </body>

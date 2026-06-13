@@ -44,10 +44,12 @@
   <script type="module">
     import { notebookView, submitNotebook } from "./blog.js";
     const params = new URLSearchParams(location.search);
+    const status = document.querySelector("#status");
     if (params.get("fragment")) document.querySelector("#fragment-input").value = params.get("fragment");
     if (params.get("token")) document.querySelector("#token-input").value = params.get("token");
     if (params.get("fragment") || params.get("token")) {
-      document.querySelector("#status").textContent = "档案镜像已把两项材料带回。请逐项确认并提交，系统不会自动替你采信证据。";
+      status.removeAttribute("data-state");
+      status.textContent = "档案镜像已把两项材料带回。请逐项确认并提交，系统不会自动替你采信证据。";
     }
     const render = () => {
       const { state, endings: available } = notebookView();
@@ -65,13 +67,15 @@
       const before = notebookView().state.fragments.length;
       const input = document.querySelector("#fragment-input");
       const state = submitNotebook(input.value, "");
-      document.querySelector("#status").textContent = state.fragments.length > before ? "证据片段已记录。" : "这个片段无法与现有材料对应。";
+      status.textContent = state.fragments.length > before ? "证据片段已记录。" : "这个片段无法与现有材料对应。";
+      status.dataset.state = state.fragments.length > before ? "success" : "error";
       input.value = ""; render();
     });
     document.querySelector("#token-form").addEventListener("submit", (event) => {
       event.preventDefault();
       const state = submitNotebook("", document.querySelector("#token-input").value);
-      document.querySelector("#status").textContent = state.switchToken ? "启动令牌已记录。" : "令牌为空。";
+      status.textContent = state.switchToken ? "启动令牌已记录。" : "令牌为空。";
+      status.dataset.state = state.switchToken ? "success" : "error";
       render();
     });
     render();

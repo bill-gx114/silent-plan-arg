@@ -48,7 +48,9 @@
       event.preventDefault();
       const expected = reconstruct("CYM-071", "DEL-1109");
       const ok = document.querySelector("#path").value.trim() === expected;
-      document.querySelector("#status").textContent = ok ? "路径与请求序列一致。镜像仍可访问。" : "路径顺序与日志不一致。";
+      const status = document.querySelector("#status");
+      status.textContent = ok ? "路径与请求序列一致。镜像仍可访问。" : "路径顺序与日志不一致。";
+      status.dataset.state = ok ? "success" : "error";
       if (ok) {
         document.querySelector("#archive-link").href = archiveUrl(expected);
         document.querySelector("#mirror").classList.remove("hidden");

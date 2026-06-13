@@ -48,7 +48,9 @@
       const intentValue = document.querySelector("#intent").value;
       const ok = placeValue.includes("29") && dateValue.replace(/\D/g, "") === "20190315" &&
         caseValue.toUpperCase().replace(/[^A-Z0-9]/g, "") === "ZL0315" && intentValue === "route";
-      document.querySelector("#status").textContent = ok ? "结论成立：林知秋主动拆分了路线。继续核验照片与时间线。" : "至少有一项证据无法支持这个结论。";
+      const status = document.querySelector("#status");
+      status.textContent = ok ? "结论成立：林知秋主动拆分了路线。继续核验照片与时间线。" : "至少有一项证据无法支持这个结论。";
+      status.dataset.state = ok ? "success" : "error";
       if (ok) { completePuzzle("p1"); document.querySelector("#fragment").classList.remove("hidden"); }
     });
   </script>

@@ -33,7 +33,9 @@
     document.querySelector("#diff-form").addEventListener("submit", (event) => {
       event.preventDefault();
       const answer = new FormData(event.currentTarget).get("answer");
-      document.querySelector("#status").textContent = answer === "batch" ? "结论成立：这是一次有组织的批量删除。" : "这个解释无法说明四类内容为何在同一分钟变化。";
+      const status = document.querySelector("#status");
+      status.textContent = answer === "batch" ? "结论成立：这是一次有组织的批量删除。" : "这个解释无法说明四类内容为何在同一分钟变化。";
+      status.dataset.state = answer === "batch" ? "success" : "error";
       if (answer === "batch") document.querySelector("#next").classList.remove("hidden");
     });
   </script>

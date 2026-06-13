@@ -716,6 +716,7 @@ test("case notebook keeps both evidence forms structurally independent", async (
   const root = parseHtml(await readBlogPage("case-notebook.html"));
   const fragmentForm = findById(root, "fragment-form");
   const tokenForm = findById(root, "token-form");
+  const endings = findById(root, "endings");
 
   for (const form of [fragmentForm, tokenForm]) {
     assert.ok(hasClass(form, "form-stack"), `#${form.attributes.get("id")} uses form-stack`);
@@ -738,6 +739,30 @@ test("case notebook keeps both evidence forms structurally independent", async (
     status.parent.children.indexOf(status) > status.parent.children.indexOf(tokenForm),
     "status follows both forms",
   );
+  assert.equal(endings.parent, status.parent, "endings stay in the notebook panel");
+});
+
+test("case notebook renders every available ending in a vertical token-spaced stack", async () => {
+  const html = await readBlogPage("case-notebook.html");
+  assert.ok(
+    html.includes('available.map((item) => {'),
+    "notebook renders all available endings, including the third unlocked ending",
+  );
+  assert.ok(
+    html.includes('return `<a class="ending" href="dead-switch.html?ending=${item}">${labels[item]}</a>`;'),
+    "every generated ending is a link with the ending class",
+  );
+
+  const endings = extractRuleBody(blogCss, "#endings");
+  assertDeclaration(endings, "display", "grid");
+  assert.match(
+    declarations(endings).get("gap") ?? "",
+    /^var\(--space-\d+\)$/,
+    "#endings gap uses spacing token",
+  );
+  const ending = extractRuleBody(blogCss, ".ending");
+  assertDeclaration(ending, "display", "block");
+  assertDeclaration(ending, "margin", "0");
 });
 
 test("blog entry, reading, and decision pages nest their shared structures", async () => {
@@ -767,7 +792,7 @@ test("blog skin owns semantic theme values without reclaiming shared layout", ()
     "--muted": "var(--paper-muted)",
     "--panel": "#f6f0e7",
     "--panel-2": "#fffaf2",
-    "--line": "#cfc2b3",
+    "--line": "#887968",
     "--accent": "#7d332a",
   };
   for (const [property, value] of Object.entries(theme)) {
@@ -812,18 +837,33 @@ test("blog skin owns semantic theme values without reclaiming shared layout", ()
 });
 
 test("paper theme feedback colors meet text contrast and are consumed", () => {
+  const root = declarations(extractRuleBody(blogCss, ":root"));
   const paper = declarations(extractRuleBody(blogCss, ".paper"));
   const approved = {
+    "--paper-muted": "#6b6259",
+    "--line": "#887968",
     "--accent": "#7d332a",
     "--accent-contrast": "#fffaf2",
     "--danger": "#7a1f2b",
     "--warn": "#6b4a00",
     "--success": "#245c3a",
   };
+  assert.equal(root.get("--paper-muted"), approved["--paper-muted"], ":root --paper-muted");
   for (const [property, value] of Object.entries(approved)) {
+    if (property === "--paper-muted") continue;
     assert.equal(paper.get(property), value, `.paper ${property}`);
   }
 
+  assert.ok(
+    contrastRatio(approved["--paper-muted"], "#e9e1d4") >= 4.5,
+    "paper muted text contrasts with page background",
+  );
+  for (const background of ["#e9e1d4", "#f6f0e7", "#fffaf2"]) {
+    assert.ok(
+      contrastRatio(approved["--line"], background) >= 3,
+      `paper line contrasts with ${background}`,
+    );
+  }
   assert.ok(
     contrastRatio(approved["--accent"], approved["--accent-contrast"]) >= 4.5,
     "primary button text contrasts with accent",
@@ -1620,6 +1660,54 @@ test("all scripted feedback regions are announced", async () => {
       for (const id of ids) {
         const region = findById(root, id);
         assert.equal(region.attributes.get("role"), "status", `${site}/${file} #${id}`);
+      }
+    }
+  }
+});
+
+test("dynamic status branches assign semantic success and error states", async () => {
+  const contracts = {
+    blog: {
+      "revision.html": [
+        'status.dataset.state = ok ? "success" : "error";',
+      ],
+      "photo-lab.html": [
+        'status.dataset.state = ok ? "success" : "error";',
+      ],
+      "case-notebook.html": [
+        'status.removeAttribute("data-state");',
+        'status.dataset.state = state.fragments.length > before ? "success" : "error";',
+        'status.dataset.state = state.switchToken ? "success" : "error";',
+      ],
+    },
+    corporate: {
+      "diff.html": [
+        'status.dataset.state = answer === "batch" ? "success" : "error";',
+      ],
+      "request-log.html": [
+        'status.dataset.state = ok ? "success" : "error";',
+      ],
+    },
+    archive: {
+      "index.html": [
+        'status.dataset.state = "error";',
+      ],
+      "forensics.html": [
+        'status.dataset.state = "success";',
+        'status.dataset.state = "error";',
+      ],
+      "integrity.html": [
+        'status.dataset.state = ok ? "success" : "error";',
+        'status.dataset.state = "error";',
+      ],
+    },
+  };
+
+  for (const [site, pages] of Object.entries(contracts)) {
+    for (const [file, expectedAssignments] of Object.entries(pages)) {
+      const html = await siteReaders[site](file);
+      for (const assignment of expectedAssignments) {
+        assert.ok(html.includes(assignment), `${site}/${file} keeps ${assignment}`);
       }
     }
   }
