@@ -22,3 +22,13 @@ test("complex evidence operations include desktop guidance or fallback", async (
   assert.match(forensics, /分轨文字稿/);
 });
 
+test("every first-chapter page has exactly one h1", async () => {
+  for (const site of ["blog", "corporate", "archive"]) {
+    const directory = new URL(`../src/${site}/`, import.meta.url);
+    const pages = (await readdir(directory)).filter((name) => name.endsWith(".html"));
+    for (const page of pages) {
+      const html = await readFile(new URL(page, directory), "utf8");
+      assert.equal((html.match(/<h1\b/gi) ?? []).length, 1, `${site}/${page}`);
+    }
+  }
+});

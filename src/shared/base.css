@@ -500,6 +500,17 @@ th {
     width: calc(100% - 36px);
   }
 
+  .data-scroll {
+    width: calc(100% + var(--space-6));
+    margin-inline: calc(var(--space-4) * -1);
+    padding-inline: var(--space-4);
+  }
+
+  .page-intro h1,
+  .page-title {
+    font-size: clamp(1.875rem, 10vw, 2.75rem);
+  }
+
   .page-header,
   .topbar {
     align-items: flex-start;
@@ -537,5 +548,16 @@ th {
   .form-actions > *,
   .actions > * {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
   }
 }

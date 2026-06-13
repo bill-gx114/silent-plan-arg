@@ -39,6 +39,19 @@ const templateMaps = {
     "switch-console.html": "page--decision",
   },
 };
+const validTemplates = [
+  "page--reading",
+  "page--workspace",
+  "page--records",
+  "page--verify",
+  "page--decision",
+  "page--marketing",
+];
+const siteReaders = {
+  blog: readBlogPage,
+  corporate: readCorporatePage,
+  archive: readArchivePage,
+};
 
 async function readBlogPage(file) {
   return readFile(new URL(`../src/blog/${file}`, import.meta.url), "utf8");
@@ -287,6 +300,25 @@ function extractMediaBody(maxWidth) {
   ];
   assert.ok(matches.length, `${label} rule`);
   return extractBlock(css, matches.at(-1).index, label);
+}
+
+function extractConditionalMediaBody(source, condition) {
+  const escaped = condition.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const label = `@media (${condition})`;
+  const matches = [
+    ...source.matchAll(new RegExp(`@media\\s*\\(\\s*${escaped}\\s*\\)\\s*\\{`, "g")),
+  ];
+  assert.ok(matches.length, `${label} rule`);
+  return extractBlock(source, matches.at(-1).index, label);
+}
+
+function mediaBodies(source) {
+  const bodies = [];
+  const pattern = /@media\b[^{]*\{/g;
+  for (const match of source.matchAll(pattern)) {
+    bodies.push(extractBlock(source, match.index, match[0]));
+  }
+  return bodies;
 }
 
 function declarations(body) {
@@ -1342,4 +1374,194 @@ test("archive skin owns terminal semantics without reclaiming shared layout", ()
     "ui-monospace, SFMono-Regular, Menlo, monospace",
     "terminal material remains monospace",
   );
+});
+
+test("all 21 pages declare exactly their mapped semantic template and one h1", async () => {
+  let pageCount = 0;
+
+  for (const [site, pages] of Object.entries(templateMaps)) {
+    for (const [file, expectedTemplate] of Object.entries(pages)) {
+      pageCount += 1;
+      const root = parseHtml(await siteReaders[site](file));
+      const main = findOne(root, (node) => node.tag === "main", `${site}/${file} main`);
+      const declaredTemplates = validTemplates.filter((template) => hasClass(main, template));
+
+      assert.ok(hasClass(main, "page"), `${site}/${file} main uses page`);
+      assert.deepEqual(
+        declaredTemplates,
+        [expectedTemplate],
+        `${site}/${file} declares only ${expectedTemplate}`,
+      );
+      assert.equal(
+        allElements(root, (node) => node.tag === "h1").length,
+        1,
+        `${site}/${file} has exactly one h1`,
+      );
+    }
+  }
+
+  assert.equal(pageCount, 21, "first chapter page count");
+});
+
+test("every source table is nested in a data-scroll viewport", async () => {
+  for (const [site, pages] of Object.entries(templateMaps)) {
+    for (const file of Object.keys(pages)) {
+      const root = parseHtml(await siteReaders[site](file));
+      const tables = allElements(root, (node) => node.tag === "table");
+
+      for (const [index, table] of tables.entries()) {
+        assertInClassAncestor(table, "data-scroll", `${site}/${file} table ${index + 1}`);
+      }
+    }
+  }
+});
+
+test("all controls and forms use shared field, action, and feedback structure", async () => {
+  for (const [site, pages] of Object.entries(templateMaps)) {
+    for (const file of Object.keys(pages)) {
+      const root = parseHtml(await siteReaders[site](file));
+      const label = `${site}/${file}`;
+      const controls = allElements(
+        root,
+        (node) => ["input", "select", "textarea"].includes(node.tag) &&
+          node.attributes.get("type") !== "hidden",
+      );
+      for (const control of controls) {
+        assertInClassAncestor(
+          control,
+          "field-group",
+          `${label} #${control.attributes.get("id") ?? control.attributes.get("name") ?? control.tag}`,
+        );
+      }
+
+      const forms = allElements(root, (node) => node.tag === "form");
+      if (forms.length === 0) continue;
+
+      const statuses = allElements(root, (node) => hasClass(node, "status"));
+      assert.ok(statuses.length > 0, `${label} exposes form feedback`);
+      assert.ok(
+        statuses.some((status) => status.attributes.get("role") === "status"),
+        `${label} form feedback is announced`,
+      );
+
+      for (const form of forms) {
+        const formId = form.attributes.get("id") ?? label;
+        assert.ok(
+          hasClass(form, "form-stack") || hasClass(form, "form-grid"),
+          `${formId} uses form-stack or form-grid`,
+        );
+        const submits = allElements(
+          form,
+          (node) => isDescendant(form, node) &&
+            node.tag === "button" &&
+            node.attributes.get("type") === "submit",
+        );
+        assert.ok(submits.length > 0, `${formId} has a submit action`);
+        for (const submit of submits) {
+          assertInClassAncestor(submit, "form-actions", `${formId} submit`);
+        }
+      }
+    }
+  }
+});
+
+test("all scripted feedback regions are announced without duplicating shared notebook status", async () => {
+  const feedbackRegions = {
+    blog: {
+      "revision.html": ["status"],
+      "photo-lab.html": ["status", "hint"],
+      "case-notebook.html": ["status"],
+    },
+    corporate: {
+      "diff.html": ["status"],
+      "request-log.html": ["status"],
+    },
+    archive: {
+      "index.html": ["status"],
+      "forensics.html": ["status"],
+      "integrity.html": ["status"],
+    },
+  };
+
+  for (const [site, pages] of Object.entries(feedbackRegions)) {
+    for (const [file, ids] of Object.entries(pages)) {
+      const root = parseHtml(await siteReaders[site](file));
+      for (const id of ids) {
+        const region = findById(root, id);
+        assert.equal(region.attributes.get("role"), "status", `${site}/${file} #${id}`);
+      }
+    }
+  }
+
+  const notebookRoot = parseHtml(await readBlogPage("case-notebook.html"));
+  assert.equal(
+    allElements(notebookRoot, (node) => hasClass(node, "status")).length,
+    1,
+    "notebook shares one status region after both forms",
+  );
+});
+
+test("shared CSS enforces motion, responsive data, title, action, and focus contracts", () => {
+  const reducedMotion = extractConditionalMediaBody(css, "prefers-reduced-motion: reduce");
+  const reducedElements = extractRuleBody(reducedMotion, "*,\n*::before,\n*::after");
+  assertDeclaration(reducedElements, "scroll-behavior", "auto !important");
+  assertDeclaration(reducedElements, "animation-duration", ".01ms !important");
+  assertDeclaration(reducedElements, "animation-iteration-count", "1 !important");
+  assertDeclaration(reducedElements, "transition-duration", ".01ms !important");
+
+  const tablet = extractMediaBody(760);
+  const tabletData = extractRuleBody(tablet, ".data-scroll");
+  assertDeclaration(tabletData, "margin-inline", "calc(var(--space-4) * -1)");
+  assertDeclaration(tabletData, "width", "calc(100% + var(--space-6))");
+  assertDeclaration(tabletData, "padding-inline", "var(--space-4)");
+  assertDeclaration(
+    extractRuleBody(tablet, ".page-intro h1,\n.page-title"),
+    "font-size",
+    "clamp(1.875rem, 10vw, 2.75rem)",
+  );
+
+  extractMediaBody(560);
+  assertDeclaration(
+    extractRuleBody(
+      css,
+      "button:focus-visible,\ninput:focus-visible,\nselect:focus-visible,\ntextarea:focus-visible,\na:focus-visible",
+    ),
+    "outline",
+    "2px solid var(--accent)",
+  );
+});
+
+test("site media queries only adjust site-owned components", () => {
+  const sharedSelectors = new Set([
+    ".page",
+    ".panel",
+    ".field-group",
+    ".choice-field",
+    ".form-stack",
+    ".form-grid",
+    ".form-actions",
+    ".data-scroll",
+    "button",
+    "input",
+    "select",
+    "textarea",
+  ]);
+
+  for (const [site, source] of [
+    ["blog", blogCss],
+    ["corporate", corporateCss],
+    ["archive", archiveCss],
+  ]) {
+    for (const body of mediaBodies(source)) {
+      for (const rule of collectStyleRules(body)) {
+        for (const selector of rule.selectors) {
+          assert.equal(
+            sharedSelectors.has(selector),
+            false,
+            `${site} media query does not override shared ${selector}`,
+          );
+        }
+      }
+    }
+  }
 });
