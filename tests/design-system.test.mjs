@@ -1517,13 +1517,6 @@ test("all controls and forms use shared field, action, and feedback structure", 
       const forms = allElements(root, (node) => node.tag === "form");
       if (forms.length === 0) continue;
 
-      const statuses = allElements(root, (node) => hasClass(node, "status"));
-      assert.ok(statuses.length > 0, `${label} exposes form feedback`);
-      assert.ok(
-        statuses.some((status) => status.attributes.get("role") === "status"),
-        `${label} form feedback is announced`,
-      );
-
       for (const form of forms) {
         const formId = form.attributes.get("id") ?? label;
         assert.ok(
@@ -1545,7 +1538,65 @@ test("all controls and forms use shared field, action, and feedback structure", 
   }
 });
 
-test("all scripted feedback regions are announced without duplicating shared notebook status", async () => {
+test("interactive forms use their explicitly associated feedback regions", async () => {
+  const sameActionContracts = {
+    blog: {
+      "revision.html": { "revision-form": "status" },
+      "photo-lab.html": { "photo-form": "status" },
+    },
+    corporate: {
+      "diff.html": { "diff-form": "status" },
+      "request-log.html": { "path-form": "status" },
+    },
+    archive: {
+      "index.html": { "path-form": "status" },
+    },
+  };
+
+  for (const [site, pages] of Object.entries(sameActionContracts)) {
+    for (const [file, contracts] of Object.entries(pages)) {
+      const root = parseHtml(await siteReaders[site](file));
+      for (const [formId, statusId] of Object.entries(contracts)) {
+        const form = findById(root, formId);
+        const submit = findSubmit(form);
+        const status = findById(root, statusId);
+        const submitActions = assertInClassAncestor(submit, "form-actions", `${site}/${file} #${formId} submit`);
+        const statusActions = assertInClassAncestor(status, "form-actions", `${site}/${file} #${statusId}`);
+
+        assert.equal(status.attributes.get("role"), "status", `${site}/${file} #${statusId} is announced`);
+        assert.equal(statusActions, submitActions, `${site}/${file} feedback shares the submit action group`);
+        assert.equal(isDescendant(form, status), true, `${site}/${file} feedback belongs to #${formId}`);
+      }
+    }
+  }
+
+  const notebookRoot = parseHtml(await readBlogPage("case-notebook.html"));
+  const fragmentForm = findById(notebookRoot, "fragment-form");
+  const tokenForm = findById(notebookRoot, "token-form");
+  const notebookStatus = findById(notebookRoot, "status");
+  assert.equal(
+    allElements(notebookRoot, (node) => hasClass(node, "status")).length,
+    1,
+    "notebook shares one status region after both forms",
+  );
+  assert.equal(notebookStatus.attributes.get("role"), "status", "notebook shared feedback is announced");
+  assert.equal(isDescendant(fragmentForm, notebookStatus), false, "notebook status is outside fragment form");
+  assert.equal(isDescendant(tokenForm, notebookStatus), false, "notebook status is outside token form");
+  assert.equal(notebookStatus.parent, fragmentForm.parent, "notebook status shares fragment form parent");
+  assert.equal(notebookStatus.parent, tokenForm.parent, "notebook status shares token form parent");
+  assert.ok(
+    notebookStatus.parent.children.indexOf(notebookStatus) >
+      notebookStatus.parent.children.indexOf(fragmentForm),
+    "notebook status follows fragment form",
+  );
+  assert.ok(
+    notebookStatus.parent.children.indexOf(notebookStatus) >
+      notebookStatus.parent.children.indexOf(tokenForm),
+    "notebook status follows token form",
+  );
+});
+
+test("all scripted feedback regions are announced", async () => {
   const feedbackRegions = {
     blog: {
       "revision.html": ["status"],
@@ -1572,30 +1623,6 @@ test("all scripted feedback regions are announced without duplicating shared not
       }
     }
   }
-
-  const notebookRoot = parseHtml(await readBlogPage("case-notebook.html"));
-  const fragmentForm = findById(notebookRoot, "fragment-form");
-  const tokenForm = findById(notebookRoot, "token-form");
-  const notebookStatus = findById(notebookRoot, "status");
-  assert.equal(
-    allElements(notebookRoot, (node) => hasClass(node, "status")).length,
-    1,
-    "notebook shares one status region after both forms",
-  );
-  assert.equal(isDescendant(fragmentForm, notebookStatus), false, "notebook status is outside fragment form");
-  assert.equal(isDescendant(tokenForm, notebookStatus), false, "notebook status is outside token form");
-  assert.equal(notebookStatus.parent, fragmentForm.parent, "notebook status shares fragment form parent");
-  assert.equal(notebookStatus.parent, tokenForm.parent, "notebook status shares token form parent");
-  assert.ok(
-    notebookStatus.parent.children.indexOf(notebookStatus) >
-      notebookStatus.parent.children.indexOf(fragmentForm),
-    "notebook status follows fragment form",
-  );
-  assert.ok(
-    notebookStatus.parent.children.indexOf(notebookStatus) >
-      notebookStatus.parent.children.indexOf(tokenForm),
-    "notebook status follows token form",
-  );
 });
 
 test("shared CSS enforces motion, responsive data, title, action, and focus contracts", () => {
@@ -1603,6 +1630,7 @@ test("shared CSS enforces motion, responsive data, title, action, and focus cont
   const reducedElements = extractRuleBody(reducedMotion, "*,\n*::before,\n*::after");
   assertDeclaration(reducedElements, "scroll-behavior", "auto !important");
   assertDeclaration(reducedElements, "animation-duration", ".01ms !important");
+  assertDeclaration(reducedElements, "animation-delay", "0s !important");
   assertDeclaration(reducedElements, "animation-iteration-count", "1 !important");
   assertDeclaration(reducedElements, "transition-duration", ".01ms !important");
 
