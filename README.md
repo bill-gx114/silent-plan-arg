@@ -35,6 +35,10 @@ npm test
 - `chapter1/`、`chapter2/`、`chapter3/`：原版章节，保留作为历史参考
 - `docs/`：设计、实施计划与部署说明
 
+## Design documentation
+
+- [ARG page design system](docs/superpowers/specs/2026-06-12-arg-page-design-system.md)
+
 ## 游玩提示
 
 新版第一章电脑优先。手机可以阅读全部剧情，并提供降低沉浸感的兼容取证路径。
