@@ -10,13 +10,22 @@ function gh(path, method = "GET", input) {
   const args = ["api", `repos/${repository}/${path}`];
   if (method !== "GET") args.push("--method", method);
   if (input !== undefined) args.push("--input", "-");
-  const result = spawnSync("gh", args, {
-    input: input === undefined ? undefined : JSON.stringify(input),
-    encoding: "utf8",
-    maxBuffer: 20 * 1024 * 1024
-  });
-  if (result.status !== 0) throw new Error(result.stderr || result.stdout);
-  return result.stdout ? JSON.parse(result.stdout) : null;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const result = spawnSync("gh", args, {
+      input: input === undefined ? undefined : JSON.stringify(input),
+      encoding: "utf8",
+      maxBuffer: 20 * 1024 * 1024,
+      timeout: 30_000
+    });
+    if (result.status === 0) {
+      return result.stdout ? JSON.parse(result.stdout) : null;
+    }
+    const timedOut = result.error?.code === "ETIMEDOUT";
+    const message = result.error?.message || result.stderr || result.stdout || "GitHub API request failed";
+    if (!timedOut || attempt === 3) throw new Error(message);
+    console.warn(`GitHub API request timed out; retrying (${attempt}/3): ${path}`);
+  }
+  throw new Error(`GitHub API request failed: ${path}`);
 }
 
 const files = execFileSync("git", ["ls-files", "-z"]).toString("utf8").split("\0").filter(Boolean);
