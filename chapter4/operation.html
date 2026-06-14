@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>协调办公室行动准备</title>
+  <link rel="stylesheet" href="../series/series.css">
+  <link rel="stylesheet" href="chapter4.css">
+  <script src="../series/series.js" defer></script>
+  <style>
+    .operation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.operation-grid>.panel{align-self:start}.timeline{display:grid;gap:8px}.timeline div{display:grid;grid-template-columns:70px 1fr;gap:12px;border-bottom:1px solid var(--line);padding:8px 0}.timeline time{color:var(--accent);font-weight:800}
+    @media(max-width:800px){.operation-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body class="theme-ops" data-chapter="4" data-objective="同时准备不可删除的证据镜像与林知秋营救路线">
+  <main class="chapter-shell">
+    <header class="masthead">
+      <p class="eyebrow">鹿原市协调办公室 · 行动窗口</p>
+      <h1>双线准备</h1>
+      <p class="lead">公开证据会触发档案销毁；进入 B2 会触发样本转移。两条线必须独立准备，再在同一窗口执行。</p>
+    </header>
+
+    <div class="progress-strip"><span class="done">1. 自愿者名单</span><span class="done">2. 审批公示</span><span class="done">3. 听证档案</span><span>4. 双线行动</span></div>
+
+    <section class="panel prerequisite hidden" id="prerequisite">
+      <h2>缺少听证会重建结果</h2>
+      <p>没有 B2 位置和上级授权记录，无法规划行动。</p>
+      <a class="action primary" href="hearing.html">返回听证档案</a>
+    </section>
+
+    <div id="workspace">
+      <div class="operation-grid">
+        <section class="panel">
+          <p class="eyebrow">线路 A</p>
+          <h2>证据镜像</h2>
+          <p>选择构成“强制实验、伪造同意、上级授权”闭环的最小充分证据包。多选无关材料会拖慢镜像并错过窗口。</p>
+          <form id="mirror-form" class="form-stack">
+            <label class="choice"><input type="checkbox" name="evidence" value="volunteers"><span><strong>异常自愿者名单</strong><br>证明部分居民从未提交申请。</span></label>
+            <label class="choice"><input type="checkbox" name="evidence" value="brochure"><span><strong>项目宣传册</strong><br>介绍公益目标与服务流程。</span></label>
+            <label class="choice"><input type="checkbox" name="evidence" value="hearing"><span><strong>伪造听证证明</strong><br>门禁、错别字与发布时间形成完整矛盾链。</span></label>
+            <label class="choice"><input type="checkbox" name="evidence" value="weather"><span><strong>鹿原天气记录</strong><br>行动当夜无降雨。</span></label>
+            <label class="choice"><input type="checkbox" name="evidence" value="white-tower"><span><strong>WHITE-TOWER 上级授权记录</strong><br>证明行动不只是地方工作人员越权。</span></label>
+            <label class="choice"><input type="checkbox" name="evidence" value="receipt"><span><strong>一份普通预约截图</strong><br>来自真实自愿申请者。</span></label>
+            <button class="action primary" type="submit">建立三节点镜像</button>
+            <p class="status" id="mirror-status" role="status"></p>
+          </form>
+        </section>
+
+        <section class="panel">
+          <p class="eyebrow">线路 B</p>
+          <h2>营救路线</h2>
+          <div class="timeline" aria-label="协调办公室行动时刻">
+            <div><time>03:52</time><span>北门保安换岗，访客通道重新核验全部证件。</span></div>
+            <div><time>04:05</time><span>西侧档案通道进入静默巡检，无摄像回传。</span></div>
+            <div><time>04:10</time><span>样本转运电梯从 B2 前往一层，护送组占用东侧走廊。</span></div>
+            <div><time>04:17</time><span>地下层供电切换 93 秒，B2 门锁转为本地维护模式。</span></div>
+            <div><time>04:24</time><span>内部广播恢复，地下层人员点名。</span></div>
+          </div>
+          <form id="rescue-form" class="form-stack" style="margin-top:16px">
+            <label class="field-group">进入通道
+              <select id="route"><option value="">选择路线</option><option value="north">北门访客通道</option><option value="west">西侧档案通道</option><option value="east">东侧转运电梯</option></select>
+            </label>
+            <label class="field-group">需要避开的事件
+              <select id="avoid"><option value="">选择事件</option><option value="shift">03:52 换岗</option><option value="transfer">04:10 样本转运</option><option value="rollcall">04:24 点名</option></select>
+            </label>
+            <label class="field-group">进入 B2 的时间
+              <select id="entry-time"><option value="">选择时间</option><option value="0405">04:05</option><option value="0410">04:10</option><option value="0417">04:17</option></select>
+            </label>
+            <button class="action primary" type="submit">锁定营救路线</button>
+            <p class="status" id="rescue-status" role="status"></p>
+          </form>
+        </section>
+      </div>
+
+      <section class="panel" style="margin-top:16px">
+        <h2>执行条件</h2>
+        <p id="readiness">尚未完成任何行动准备。</p>
+        <p class="lead">完成任意一条线即可执行，但只完成一条会永久失去另一项目标。</p>
+        <div class="actions hidden" id="execute-action"><a class="action primary" href="execute.html">进入同步执行台 →</a></div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import {
+      completeChapter4Step,
+      loadChapter4State,
+      saveChapter4State
+    } from "./chapter4.js";
+
+    const prerequisite = document.querySelector("#prerequisite");
+    const workspace = document.querySelector("#workspace");
+    const mirrorStatus = document.querySelector("#mirror-status");
+    const rescueStatus = document.querySelector("#rescue-status");
+    const readiness = document.querySelector("#readiness");
+    const executeAction = document.querySelector("#execute-action");
+
+    function renderState() {
+      const state = loadChapter4State();
+      if (!state.hearingExposed) {
+        prerequisite.classList.remove("hidden");
+        workspace.classList.add("hidden");
+        return;
+      }
+      if (state.mirrorReady) {
+        mirrorStatus.dataset.state = "success";
+        mirrorStatus.textContent = "证据镜像已就绪：强制名单、伪造听证和上级授权将同步分发。";
+      }
+      if (state.rescueReady) {
+        rescueStatus.dataset.state = "success";
+        rescueStatus.textContent = "营救路线已锁定：西侧档案通道，避开 04:10 转运，04:17 进入 B2。";
+      }
+      if (state.mirrorReady || state.rescueReady) executeAction.classList.remove("hidden");
+      if (state.mirrorReady && state.rescueReady) readiness.textContent = "两条线路均已就绪，可以尝试同步执行。";
+      else if (state.mirrorReady) readiness.textContent = "证据镜像已就绪；营救路线尚未锁定。";
+      else if (state.rescueReady) readiness.textContent = "营救路线已就绪；证据镜像尚未建立。";
+    }
+
+    document.querySelector("#mirror-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const selected = [...new FormData(event.currentTarget).getAll("evidence")].sort();
+      const expected = ["hearing", "volunteers", "white-tower"];
+      if (selected.length !== expected.length || selected.some((item, index) => item !== expected[index])) {
+        mirrorStatus.dataset.state = "error";
+        mirrorStatus.textContent = "这组材料不能在窗口内形成最小充分证据链。需要分别证明强制、伪造同意和上级授权。";
+        return;
+      }
+      let state = loadChapter4State();
+      state = completeChapter4Step(state, "mirrorReady");
+      saveChapter4State(state);
+      renderState();
+    });
+
+    document.querySelector("#rescue-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const correct = document.querySelector("#route").value === "west"
+        && document.querySelector("#avoid").value === "transfer"
+        && document.querySelector("#entry-time").value === "0417";
+      if (!correct) {
+        rescueStatus.dataset.state = "error";
+        rescueStatus.textContent = "这条路线会遇到证件复核、转运护送组或锁闭门禁。重新对照静默通道与供电切换。";
+        return;
+      }
+      let state = loadChapter4State();
+      state = completeChapter4Step(state, "rescueReady");
+      saveChapter4State(state);
+      renderState();
+    });
+
+    renderState();
+  </script>
+</body>
+</html>

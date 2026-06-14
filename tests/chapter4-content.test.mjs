@@ -61,3 +61,35 @@ test("hearing archive supports a multi-source forgery reconstruction", async () 
   assert.match(html, /B2 声纹室/);
   assert.match(html, /href="operation\.html"/);
 });
+
+test("operation page requires sufficient mirror evidence and a viable rescue route", async () => {
+  const html = await read("operation.html");
+  assert.match(html, /异常自愿者名单/);
+  assert.match(html, /伪造听证证明/);
+  assert.match(html, /WHITE-TOWER 上级授权记录/);
+  assert.match(html, /mirrorReady/);
+  assert.match(html, /西侧档案通道/);
+  assert.match(html, /04:10/);
+  assert.match(html, /04:17/);
+  assert.match(html, /rescueReady/);
+  assert.match(html, /href="execute\.html"/);
+});
+
+test("execution resolves prepared lines into explicit endings", async () => {
+  const html = await read("execute.html");
+  assert.match(html, /resolveChapter4Ending/);
+  assert.match(html, /04:17/);
+  assert.match(html, /缺失的准备/);
+  assert.match(html, /end\.html\?ending=/);
+});
+
+test("stage ending closes Luyuan while preserving the White Tower thread", async () => {
+  const html = await read("end.html");
+  assert.match(html, /鹿原篇完成/);
+  assert.match(html, /WHITE-TOWER/);
+  assert.match(html, /林知秋/);
+  assert.match(html, /exposure/);
+  assert.match(html, /rescue/);
+  assert.match(html, /coordinated/);
+  assert.doesNotMatch(html, /chapter5|第五章入口/);
+});

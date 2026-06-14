@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鹿原行动结果</title>
+  <link rel="stylesheet" href="../series/series.css">
+  <link rel="stylesheet" href="chapter4.css">
+  <script src="../series/series.js" defer></script>
+  <style>
+    .ending-mark{display:inline-block;border:1px solid var(--accent);border-radius:999px;padding:5px 11px;color:var(--accent);font-size:.8rem;font-weight:800;letter-spacing:.08em}.quote{border-left:3px solid var(--accent);padding:14px 18px;background:var(--panel-2);font-family:Georgia,"Songti SC",serif;font-size:1.08rem}.city-chain{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.city-chain span{border-top:2px solid var(--success);padding-top:8px;color:var(--muted);font-size:.82rem}.city-chain span:last-child{color:var(--ink);font-weight:800}
+    @media(max-width:650px){.city-chain{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body class="theme-ops" data-chapter="4" data-objective="确认鹿原行动结果与白塔授权线索">
+  <main class="chapter-shell">
+    <div class="reading-column">
+      <header class="masthead">
+        <p class="eyebrow">行动记录 04:17</p>
+        <h1 id="title">鹿原行动结果</h1>
+        <p class="lead" id="subtitle">正在核验本地状态与行动记录。</p>
+      </header>
+
+      <section class="panel" id="ending-content" aria-live="polite"></section>
+
+      <section class="panel" style="margin-top:16px">
+        <h2>调查链条</h2>
+        <div class="city-chain"><span>钟楼街 · 实验存在</span><span>锦城 · 资金流</span><span>海宁 · 技术流</span><span>鹿原 · 权力流</span></div>
+        <p style="margin-top:18px">陈砚明的证词、程野的日志、苏黎保存的电波和林知秋拆分的路线，终于进入同一份可复核记录。</p>
+      </section>
+
+      <div class="actions" style="margin-top:16px"><a class="action" href="operation.html">重新布置行动</a><a class="action" href="index.html">返回鹿原篇入口</a></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { loadChapter4State } from "./chapter4.js";
+
+    const state = loadChapter4State();
+    const requested = new URLSearchParams(location.search).get("ending");
+    const known = new Set(["exposure", "rescue", "coordinated"]);
+    const ending = known.has(requested) && requested === state.ending ? requested : state.ending;
+    const title = document.querySelector("#title");
+    const subtitle = document.querySelector("#subtitle");
+    const content = document.querySelector("#ending-content");
+
+    const endings = {
+      exposure: {
+        title: "证据抵达了，林知秋没有",
+        subtitle: "普通结局 · 公开优先",
+        html: `<span class="ending-mark">EXPOSURE</span>
+          <h2>鹿原无法再否认试点</h2>
+          <p>异常自愿者名单、伪造听证与 WHITE-TOWER 授权记录同时出现在多个公开镜像。鹿原宣布暂停试点，并将责任归咎于“个别执行人员”。</p>
+          <p>但镜像开始后的第 47 秒，B2 样本转运完成。林知秋最后一次门禁记录指向一辆没有城市牌照的车辆。</p>
+          <p class="quote">你保住了真相，但没有保住说出真相的人。</p>`
+      },
+      rescue: {
+        title: "林知秋离开了，档案没有",
+        subtitle: "普通结局 · 营救优先",
+        html: `<span class="ending-mark">RESCUE</span>
+          <h2>B2 门锁在供电切换时打开</h2>
+          <p>你在广播恢复前带林知秋离开声纹室。她能说话，却需要停顿很久，确认每一句是不是自己的。</p>
+          <p>协调办公室同时启动档案销毁。异常名单仍可作证，但 WHITE-TOWER 的完整授权链只剩下林知秋记住的几个片段。</p>
+          <p class="quote">“你救了我。可他们会说，我只是一个受创后记忆混乱的人。”</p>`
+      },
+      coordinated: {
+        title: "人和证据都离开了鹿原",
+        subtitle: "完整结局 · 双线协调",
+        html: `<span class="ending-mark">COORDINATED</span>
+          <h2>04:17，两个系统同时失去控制</h2>
+          <p>地下层切换供电时，证据包已经分散进入多个镜像。档案销毁命令抵达时，异常名单、伪造听证和 WHITE-TOWER 授权记录已无法从单一节点撤回。</p>
+          <p>同一时间，西侧档案通道保持静默。林知秋在 04:18 离开 B2。她走出门后没有问发生了什么，只问你有没有把陈砚明、程野和苏黎的材料放在一起。</p>
+          <p class="quote">“我留下的是一条只能保住证据的路线。你把它改成了也能保住人的路线。”</p>
+          <p>鹿原试点暂停，协调办公室接受调查。林知秋确认：WHITE-TOWER 不是某座楼，也不属于任何城市。它是所有地方审批请求最终抵达的授权节点。</p>
+          <h2>鹿原篇完成</h2>
+          <p>这不是整个故事的结束。但从这一刻起，林知秋不再只是失踪者，而是重新加入调查的人。</p>`
+      }
+    };
+
+    if (!endings[ending]) {
+      title.textContent = "行动记录不存在";
+      subtitle.textContent = "当前存档没有可核验的执行结果。";
+      content.innerHTML = `<h2>返回行动准备</h2><p>完成至少一条线路，并在正确窗口执行。</p><a class="action primary" href="operation.html">重新布置行动</a>`;
+    } else {
+      title.textContent = endings[ending].title;
+      subtitle.textContent = endings[ending].subtitle;
+      content.innerHTML = endings[ending].html;
+    }
+  </script>
+</body>
+</html>

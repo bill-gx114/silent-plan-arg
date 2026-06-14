@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鹿原同步执行台</title>
+  <link rel="stylesheet" href="../series/series.css">
+  <link rel="stylesheet" href="chapter4.css">
+  <script src="../series/series.js" defer></script>
+</head>
+<body class="theme-ops" data-chapter="4" data-objective="在唯一窗口同步触发证据公开与林知秋营救">
+  <main class="chapter-shell">
+    <div class="reading-column">
+      <header class="masthead">
+        <p class="eyebrow">协调办公室内部调度 · 本地维护模式</p>
+        <h1>同步执行台</h1>
+        <p class="lead">输入两条线路共同成立的执行时间。镜像过早会触发样本转移；进入过早会触发档案销毁。</p>
+      </header>
+
+      <section class="panel prerequisite hidden" id="prerequisite">
+        <h2>缺失的准备</h2>
+        <p id="missing-copy">至少完成证据镜像或营救路线，才能承担对应行动结果。</p>
+        <a class="action primary" href="operation.html">返回双线准备</a>
+      </section>
+
+      <section class="panel" id="console">
+        <h2>当前线路状态</h2>
+        <div class="evidence-grid">
+          <article class="evidence-card"><p class="eyebrow">线路 A</p><h3>证据镜像</h3><p id="mirror-state">未准备</p></article>
+          <article class="evidence-card"><p class="eyebrow">线路 B</p><h3>营救路线</h3><p id="rescue-state">未准备</p></article>
+        </div>
+        <p class="lead" style="margin-top:16px">行动日志复核：04:10 样本转运占用东侧走廊；04:17 地下层切换供电，B2 门锁进入 93 秒本地维护模式。</p>
+        <form id="execute-form" class="form-stack" style="margin-top:18px">
+          <label class="field-group">同步触发时间<input id="execution-time" type="text" inputmode="numeric" autocomplete="off" placeholder="HH:MM"></label>
+          <button class="action primary" type="submit">确认并执行</button>
+          <p class="status" id="status" role="status"></p>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import {
+      loadChapter4State,
+      normalizeExecutionTime,
+      resolveChapter4Ending,
+      saveChapter4State
+    } from "./chapter4.js";
+
+    const state = loadChapter4State();
+    const prerequisite = document.querySelector("#prerequisite");
+    const consoleNode = document.querySelector("#console");
+    const status = document.querySelector("#status");
+
+    document.querySelector("#mirror-state").textContent = state.mirrorReady ? "已就绪" : "缺失的准备";
+    document.querySelector("#rescue-state").textContent = state.rescueReady ? "已就绪" : "缺失的准备";
+
+    if (!state.mirrorReady && !state.rescueReady) {
+      prerequisite.classList.remove("hidden");
+      consoleNode.classList.add("hidden");
+    }
+
+    document.querySelector("#execute-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = document.querySelector("#execution-time").value;
+      const ending = resolveChapter4Ending(loadChapter4State(), input);
+      if (!ending) {
+        status.dataset.state = "error";
+        status.textContent = "这个时间无法形成同步窗口。重新核对供电切换、样本转运和广播恢复记录。";
+        return;
+      }
+      const current = loadChapter4State();
+      saveChapter4State({
+        ...current,
+        executionTime: normalizeExecutionTime(input),
+        ending
+      });
+      location.href = `end.html?ending=${ending}`;
+    });
+  </script>
+</body>
+</html>
