@@ -24,6 +24,15 @@ test("built application serves all critical routes and evidence assets", async (
     "/chapter3/decode.html",
     "/chapter3/station.html",
     "/chapter3/end.html",
+    "/chapter4/index.html",
+    "/chapter4/portal.html",
+    "/chapter4/notices.html",
+    "/chapter4/hearing.html",
+    "/chapter4/operation.html",
+    "/chapter4/execute.html",
+    "/chapter4/end.html",
+    "/chapter4/chapter4.js",
+    "/chapter4/chapter4.css",
     "/series/series.css",
     "/series/series.js"
   ];
