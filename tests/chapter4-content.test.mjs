@@ -46,3 +46,18 @@ test("notice variants reconstruct the hidden approval batch", async () => {
   assert.match(html, /volunteersVerified/);
   assert.match(html, /href="hearing\.html"/);
 });
+
+test("hearing archive supports a multi-source forgery reconstruction", async () => {
+  const html = await read("hearing.html");
+  assert.match(html, /座次图/);
+  assert.match(html, /麦克风编号/);
+  assert.match(html, /门禁记录/);
+  assert.match(html, /新闻稿发布时间/);
+  assert.match(html, /data-scroll/);
+  assert.match(html, /代表 2.*进入会场/s);
+  assert.match(html, /安抚姓/);
+  assert.match(html, /hearingExposed/);
+  assert.match(html, /WHITE-TOWER/);
+  assert.match(html, /B2 声纹室/);
+  assert.match(html, /href="operation\.html"/);
+});
