@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LY-MH-04 听证档案</title>
+  <link rel="stylesheet" href="../series/series.css">
+  <link rel="stylesheet" href="chapter4.css">
+  <script src="../series/series.js" defer></script>
+  <style>
+    .seat-map{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}.seat{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--panel-2)}.seat strong{display:block;color:var(--accent)}
+    blockquote{margin:0;border-left:3px solid var(--accent);padding-left:14px;color:var(--muted)}
+  </style>
+</head>
+<body class="theme-paper" data-chapter="4" data-objective="重建听证会座次并证明公众同意被伪造">
+  <main class="chapter-shell">
+    <header class="masthead">
+      <p class="eyebrow">联合审批批次 LY-MH-04 · 附件 7</p>
+      <h1>“记忆健康”试点公众听证档案</h1>
+      <p class="lead">官方结论称三名居民代表一致同意项目。座次、门禁、录音转写和新闻稿却无法同时成立。</p>
+    </header>
+
+    <div class="progress-strip"><span class="done">1. 自愿者名单</span><span class="done">2. 审批公示</span><span>3. 听证档案</span><span>4. 双线行动</span></div>
+
+    <section class="panel prerequisite hidden" id="prerequisite">
+      <h2>尚未取得 LY-MH-04</h2>
+      <p>先从三版公示材料中恢复完整审批批次。</p>
+      <a class="action primary" href="notices.html">返回公示材料</a>
+    </section>
+
+    <div id="workspace">
+      <section class="panel">
+        <h2>座次图与麦克风编号</h2>
+        <div class="seat-map" aria-label="听证会座次图">
+          <div class="seat"><strong>席位 A · 麦克风 M-01</strong>靠近东门，门禁摄像可见。</div>
+          <div class="seat"><strong>席位 B · 麦克风 M-02</strong>靠近记录员，桌面留有蓝色文件夹。</div>
+          <div class="seat"><strong>席位 C · 麦克风 M-03</strong>靠近西墙，无独立出入口。</div>
+          <div class="seat"><strong>主持席 · 麦克风 M-00</strong>协调办公室工作人员。</div>
+        </div>
+      </section>
+
+      <section class="evidence-grid" style="margin-top:16px">
+        <article class="evidence-card">
+          <p class="eyebrow">代表 1 · 录音 M-02</p>
+          <h2>证词节选</h2>
+          <blockquote>“项目能安抚姓创伤记忆，我们支持尽快启动。”</blockquote>
+          <p>签到表标注：代表 1 坐席 B。</p>
+        </article>
+        <article class="evidence-card">
+          <p class="eyebrow">代表 2 · 录音 M-01</p>
+          <h2>证词节选</h2>
+          <blockquote>“我本人自愿参加，也相信所有邻居都是自愿的。”</blockquote>
+          <p>录音时间：14:12。</p>
+        </article>
+        <article class="evidence-card">
+          <p class="eyebrow">代表 3 · 录音 M-03</p>
+          <h2>证词节选</h2>
+          <blockquote>“项目能安抚姓创伤记忆，反对只是因为不了解。”</blockquote>
+          <p>签到表标注：代表 3 坐席 C。</p>
+        </article>
+      </section>
+
+      <section class="panel" style="margin-top:16px">
+        <h2>时间与门禁记录</h2>
+        <div class="data-scroll">
+          <table>
+            <thead><tr><th>时间</th><th>来源</th><th>记录</th><th>对应对象</th></tr></thead>
+            <tbody>
+              <tr><td>13:58</td><td>听证录音</td><td>M-02 开始发言</td><td>代表 1</td></tr>
+              <tr><td>14:12</td><td>听证录音</td><td>M-01 开始发言</td><td>代表 2</td></tr>
+              <tr><td><strong>14:19</strong></td><td>东门门禁记录</td><td><strong>代表 2 首次刷证进入会场</strong></td><td>证件 R-02</td></tr>
+              <tr><td>14:26</td><td>听证录音</td><td>M-03 开始发言</td><td>代表 3</td></tr>
+              <tr><td>14:41</td><td>主持记录</td><td>宣布听证结束</td><td>全体</td></tr>
+              <tr><td><strong>14:08</strong></td><td>政务新闻后台</td><td><strong>新闻稿发布时间：听证一致通过</strong></td><td>协调办公室账号</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="lead" style="margin-top:12px">文本取证备注：“安抚姓”并非公开材料中的常见词，是协调办公室草稿把“安抚性”误写后的内部错别字。</p>
+      </section>
+
+      <section class="panel" style="margin-top:16px">
+        <h2>重建听证会</h2>
+        <form id="hearing-form" class="form-stack">
+          <label class="field-group">代表 2 的真实状态
+            <select id="representative-two">
+              <option value="">选择证据支持的状态</option>
+              <option value="present">14:12 已在席位 A 发言</option>
+              <option value="absent">14:12 尚未进入会场，录音并非本人现场发言</option>
+            </select>
+          </label>
+          <label class="field-group">三份证词与新闻稿说明什么
+            <select id="conclusion">
+              <option value="">选择因果结论</option>
+              <option value="mistake">听证真实，只存在记录错误</option>
+              <option value="forged">项目先启动，协调办公室后补听证并统一代写同意证词</option>
+              <option value="protest">代表临时改变意见，新闻稿只是提前准备</option>
+            </select>
+          </label>
+          <div class="actions"><button class="action primary" type="submit">提交重建结果</button></div>
+          <p class="status" id="status" role="status"></p>
+        </form>
+        <div class="hidden" id="reveal">
+          <div class="evidence-grid" style="margin-top:16px">
+            <article class="evidence-card"><p class="eyebrow">位置</p><h3>B2 声纹室</h3><p>样本 L-0001 将在下一次供电切换后转运。</p></article>
+            <article class="evidence-card"><p class="eyebrow">上级授权</p><h3>WHITE-TOWER</h3><p>授权节点不属于鹿原市任何在编机构。</p></article>
+          </div>
+          <div class="actions" style="margin-top:16px"><a class="action primary" href="operation.html">开始准备证据镜像与营救路线 →</a></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import {
+      completeChapter4Step,
+      loadChapter4State,
+      saveChapter4State
+    } from "./chapter4.js";
+
+    const initial = loadChapter4State();
+    const prerequisite = document.querySelector("#prerequisite");
+    const workspace = document.querySelector("#workspace");
+    const status = document.querySelector("#status");
+    const reveal = document.querySelector("#reveal");
+
+    if (!initial.batchRecovered) {
+      prerequisite.classList.remove("hidden");
+      workspace.classList.add("hidden");
+    }
+
+    function showSuccess() {
+      status.dataset.state = "success";
+      status.textContent = "重建成立：听证发生在项目启动后，三份“同意”证词由协调办公室预先制作。";
+      reveal.classList.remove("hidden");
+    }
+
+    if (initial.hearingExposed) showSuccess();
+
+    document.querySelector("#hearing-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const representativeTwo = document.querySelector("#representative-two").value;
+      const conclusion = document.querySelector("#conclusion").value;
+      if (representativeTwo !== "absent" || conclusion !== "forged") {
+        status.dataset.state = "error";
+        status.textContent = "重建无法解释全部材料。代表 2 的入场时间、重复错别字和新闻稿时间必须形成同一条因果链。";
+        return;
+      }
+      let state = loadChapter4State();
+      state = completeChapter4Step(state, "hearingExposed");
+      saveChapter4State(state);
+      showSuccess();
+    });
+  </script>
+</body>
+</html>

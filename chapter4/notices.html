@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>记忆健康试点公示材料</title>
+  <link rel="stylesheet" href="../series/series.css">
+  <link rel="stylesheet" href="chapter4.css">
+  <script src="../series/series.js" defer></script>
+</head>
+<body class="theme-paper" data-chapter="4" data-objective="从三版公示中恢复被删除的审批批次">
+  <main class="chapter-shell">
+    <header class="masthead">
+      <p class="eyebrow">鹿原市公共信息公开平台 · 历史材料</p>
+      <h1>记忆健康试点公示材料</h1>
+      <p class="lead">同一份公示被保存为网页、打印件和无障碍朗读文本。审批字段在三个版本中并不一致。</p>
+    </header>
+
+    <div class="progress-strip"><span class="done">1. 自愿者名单</span><span>2. 审批公示</span><span>3. 听证档案</span><span>4. 双线行动</span></div>
+
+    <section class="panel prerequisite hidden" id="prerequisite">
+      <h2>需要先确认名单异常</h2>
+      <p>审批批次的调查建立在“公开名单并非真实自愿”的证据上。</p>
+      <a class="action primary" href="portal.html">返回核验自愿者名单</a>
+    </section>
+
+    <div id="workspace">
+      <section class="evidence-grid">
+        <article class="evidence-card">
+          <p class="eyebrow">网页版公示</p>
+          <h2>现行页面</h2>
+          <p>项目名称：鹿原市记忆健康便民服务试点</p>
+          <p>审批批次：<span style="color:var(--muted)">[字段已按要求移除]</span></p>
+          <p>公开日期：2024-05-18</p>
+        </article>
+        <article class="evidence-card">
+          <p class="eyebrow">打印版</p>
+          <h2>政务大厅留存件</h2>
+          <p>页脚归档：卫健联审 / 2024 / 第 <strong>04</strong> 批</p>
+          <p>盖章日期：2024-04-28</p>
+        </article>
+        <article class="evidence-card">
+          <p class="eyebrow">无障碍朗读文本</p>
+          <h2>屏幕阅读器缓存</h2>
+          <p>“本项目依据鹿原记忆健康联合审批批次 <strong>LY-MH-04</strong> 执行。”</p>
+          <p>缓存生成：2024-05-17 23:46</p>
+        </article>
+      </section>
+
+      <section class="panel" style="margin-top:16px">
+        <h2>恢复审批批次</h2>
+        <form id="batch-form" class="form-stack">
+          <label class="field-group">完整批次编号<input id="batch-input" type="text" autocomplete="off" placeholder="例如 LY-XX-00"></label>
+          <div class="actions"><button class="action primary" type="submit">调取批次档案</button></div>
+          <p class="status" id="status" role="status"></p>
+        </form>
+        <div class="actions hidden" id="next-action">
+          <a class="action primary" href="hearing.html">调取 LY-MH-04 听证档案 →</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import {
+      completeChapter4Step,
+      loadChapter4State,
+      saveChapter4State
+    } from "./chapter4.js";
+
+    const stateAtLoad = loadChapter4State();
+    const prerequisite = document.querySelector("#prerequisite");
+    const workspace = document.querySelector("#workspace");
+    const status = document.querySelector("#status");
+    const nextAction = document.querySelector("#next-action");
+
+    if (!stateAtLoad.volunteersVerified) {
+      prerequisite.classList.remove("hidden");
+      workspace.classList.add("hidden");
+    }
+
+    function showSuccess() {
+      status.dataset.state = "success";
+      status.textContent = "批次恢复成功：LY-MH-04。该批次关联一场补录听证会。";
+      nextAction.classList.remove("hidden");
+    }
+
+    if (stateAtLoad.batchRecovered) showSuccess();
+
+    document.querySelector("#batch-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const value = document.querySelector("#batch-input").value
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+      if (value !== "LY-MH-04") {
+        status.dataset.state = "error";
+        status.textContent = "批次不存在。网页缺字段，打印版只给尾号，完整值仍留在朗读文本中。";
+        return;
+      }
+      let state = loadChapter4State();
+      state = completeChapter4Step(state, "batchRecovered");
+      saveChapter4State(state);
+      showSuccess();
+    });
+  </script>
+</body>
+</html>
