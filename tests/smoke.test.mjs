@@ -18,7 +18,14 @@ test("built application serves all critical routes and evidence assets", async (
     "/archive/forensics.html",
     "/archive/integrity.html",
     "/archive/assets/testimony.pkg",
-    "/chapter2/index.html"
+    "/chapter2/index.html",
+    "/chapter3/index.html",
+    "/chapter3/radio.html",
+    "/chapter3/decode.html",
+    "/chapter3/station.html",
+    "/chapter3/end.html",
+    "/series/series.css",
+    "/series/series.js"
   ];
   for (const route of routes) {
     const response = await fetch(`${base}${route}`);
@@ -26,4 +33,3 @@ test("built application serves all critical routes and evidence assets", async (
     assert.ok(Number(response.headers.get("content-length") || 1) > 0, route);
   }
 });
-

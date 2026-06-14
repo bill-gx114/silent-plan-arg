@@ -203,6 +203,68 @@
   font-weight: 800;
 }
 
+.case-progress {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.case-progress > * {
+  margin: 0;
+}
+
+.progress-count {
+  color: var(--accent);
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.evidence-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.evidence-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  color: var(--muted);
+}
+
+.evidence-item.is-found {
+  border-color: var(--success);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--success) 8%, var(--panel));
+}
+
+.evidence-item small {
+  display: block;
+  color: var(--muted);
+}
+
+.evidence-item:not(.is-found) .fragment-chip {
+  letter-spacing: 0;
+}
+
+.next-action {
+  padding: var(--space-3);
+  border-left: 3px solid var(--accent);
+  background: var(--panel-2);
+}
+
+.manual-entry-title {
+  margin-top: var(--space-6);
+}
+
+#token-form {
+  margin-top: var(--space-5);
+}
+
 #endings {
   display: grid;
   gap: var(--space-3);
@@ -220,5 +282,14 @@
   .revision-row,
   .notebook-grid {
     grid-template-columns: 1fr;
+  }
+
+  .evidence-item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .evidence-item .fragment-chip {
+    grid-column: 2;
+    justify-self: start;
   }
 }

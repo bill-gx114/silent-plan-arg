@@ -4,9 +4,11 @@ import {
   loadCase,
   normalizeCredential,
   recordFragment,
+  recordPuzzleEvidence,
   saveCase,
   spendMemo
 } from "../shared/state.js";
+import { fragments } from "../shared/evidence.js";
 import { hintFor } from "../shared/hints.js";
 
 export function wireExternalLinks(root = document) {
@@ -17,9 +19,13 @@ export function wireExternalLinks(root = document) {
 }
 
 export function completePuzzle(name) {
-  const state = loadCase();
-  state.completed[name] = true;
-  saveCase(state);
+  let state = loadCase();
+  state = {
+    ...state,
+    completed: { ...state.completed, [name]: true }
+  };
+  state = recordPuzzleEvidence(state, name);
+  return saveCase(state);
 }
 
 export function submitNotebook(fragmentValue, tokenValue) {
@@ -41,8 +47,27 @@ export function useMemo(puzzle) {
 
 export function notebookView() {
   const state = loadCase();
-  return { state, endings: availableEndings(state) };
+  const evidence = fragments.map((item) => ({
+    ...item,
+    found: state.fragments?.includes(item.code)
+  }));
+  const missing = evidence.find((item) => !item.found);
+  let nextAction = {
+    href: "#endings",
+    label: "证据齐全，可以形成调查结论"
+  };
+  if (missing?.code === "AFTERIMAGE") {
+    nextAction = { href: "report.html", label: "比较报道的修订记录" };
+  } else if (missing?.code === "BLACKOUT") {
+    nextAction = { href: "attachments.html", label: "核验照片与停电时间线" };
+  } else if (missing?.code === "CYPRESS") {
+    nextAction = { href: "../corporate/archive.html", label: "调查回声科技网页存档" };
+  } else if (missing?.code === "DRYRUN") {
+    nextAction = { href: "../corporate/request-log.html", label: "重建隐藏档案路径" };
+  } else if (normalizeCredential(state.switchToken) !== "FOLLOW-THE-TIDE") {
+    nextAction = { href: "../archive/switch-console.html", label: "取得死人开关启动令牌" };
+  }
+  return { state, evidence, nextAction, endings: availableEndings(state) };
 }
 
 wireExternalLinks();
-

@@ -5,6 +5,7 @@ import {
   createInitialCase,
   normalizeCredential,
   recordFragment,
+  recordPuzzleEvidence,
   spendMemo
 } from "../src/shared/state.js";
 
@@ -20,7 +21,18 @@ test("spending a memo cannot reduce balance below zero", () => {
   assert.equal(spendMemo(spendMemo(state)).memos, 0);
 });
 
-test("true ending requires all four fragments and a switch token", () => {
+test("endings remain locked until all four fragments are recorded", () => {
+  let state = createInitialCase();
+  assert.deepEqual(availableEndings(state), []);
+  state = recordFragment(state, "AFTERIMAGE");
+  assert.deepEqual(availableEndings(state), []);
+  for (const fragment of ["BLACKOUT", "CYPRESS", "DRYRUN"]) {
+    state = recordFragment(state, fragment);
+  }
+  assert.deepEqual(availableEndings(state), ["publish", "hold"]);
+});
+
+test("true ending additionally requires the switch token", () => {
   let state = createInitialCase();
   for (const fragment of ["AFTERIMAGE", "BLACKOUT", "CYPRESS", "DRYRUN"]) {
     state = recordFragment(state, fragment);
@@ -30,3 +42,12 @@ test("true ending requires all four fragments and a switch token", () => {
   assert.deepEqual(availableEndings(state), ["publish", "hold", "follow"]);
 });
 
+test("records the evidence fragment associated with a completed puzzle", () => {
+  let state = createInitialCase();
+  state = recordPuzzleEvidence(state, "p1");
+  state = recordPuzzleEvidence(state, "p2");
+  state = recordPuzzleEvidence(state, "directory");
+  state = recordPuzzleEvidence(state, "switch");
+  assert.deepEqual(state.fragments, ["AFTERIMAGE", "BLACKOUT", "CYPRESS", "DRYRUN"]);
+  assert.deepEqual(recordPuzzleEvidence(state, "unknown"), state);
+});

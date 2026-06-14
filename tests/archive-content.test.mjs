@@ -51,4 +51,5 @@ test("switch console emits hidden fragment and token", async () => {
   const html = await readFile(new URL("../src/archive/switch-console.html", import.meta.url), "utf8");
   assert.match(html, /DRYRUN/);
   assert.match(html, /FOLLOW-THE-TIDE/);
+  assert.match(html, /recordSwitchEvidence/);
 });

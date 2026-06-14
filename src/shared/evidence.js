@@ -5,6 +5,13 @@ export const fragments = [
   { code: "DRYRUN", source: "死人开关日志", label: "预演" }
 ];
 
+export const puzzleEvidence = {
+  p1: "AFTERIMAGE",
+  p2: "BLACKOUT",
+  directory: "CYPRESS",
+  switch: "DRYRUN"
+};
+
 export function validateFragment(value) {
   const normalized = String(value ?? "").trim().toUpperCase().replace(/[^A-Z]/g, "");
   return fragments.some((item) => item.code === normalized) ? normalized : null;
@@ -22,4 +29,3 @@ export function reconstructArchivePath(employee, deletionBatch) {
   if (employeeId !== "CYM-071" || batchId !== "DEL-1109") return null;
   return `/legacy/${employeeId}/${batchId}/testimony.pkg`;
 }
-

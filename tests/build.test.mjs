@@ -8,3 +8,13 @@ for (const site of ["blog", "corporate", "archive"]) {
   });
 }
 
+for (const page of ["index.html", "radio.html", "decode.html", "station.html", "end.html"]) {
+  test(`build contains chapter 3 ${page}`, async () => {
+    await assert.doesNotReject(() => access(new URL(`../dist/chapter3/${page}`, import.meta.url)));
+  });
+}
+
+test("build contains shared series orientation assets", async () => {
+  await assert.doesNotReject(() => access(new URL("../dist/series/series.css", import.meta.url)));
+  await assert.doesNotReject(() => access(new URL("../dist/series/series.js", import.meta.url)));
+});

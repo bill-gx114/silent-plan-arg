@@ -1,4 +1,4 @@
-import { fragments, validateFragment } from "./evidence.js";
+import { fragments, puzzleEvidence, validateFragment } from "./evidence.js";
 
 export const STORAGE_KEY = "silent-plan-case-v2";
 
@@ -47,12 +47,17 @@ export function recordFragment(state, value) {
   return { ...state, fragments: [...new Set([...(state.fragments || []), fragment])] };
 }
 
+export function recordPuzzleEvidence(state, puzzle) {
+  const fragment = puzzleEvidence[puzzle];
+  return fragment ? recordFragment(state, fragment) : state;
+}
+
 export function availableEndings(state) {
-  const endings = ["publish", "hold"];
   const hasAllFragments = fragments.every((item) => state.fragments?.includes(item.code));
+  if (!hasAllFragments) return [];
+  const endings = ["publish", "hold"];
   if (hasAllFragments && normalizeCredential(state.switchToken) === "FOLLOW-THE-TIDE") {
     endings.push("follow");
   }
   return endings;
 }
-

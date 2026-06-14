@@ -24,5 +24,11 @@
       </section>
     </div>
   </main>
+  <script type="module">
+    import { loadCase, recordPuzzleEvidence, saveCase } from "../shared/state.js";
+    let state = loadCase();
+    state = recordPuzzleEvidence(state, "directory");
+    saveCase(state);
+  </script>
 </body>
 </html>

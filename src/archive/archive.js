@@ -1,4 +1,9 @@
 import { ARG_CONFIG } from "../shared/config.js";
+import {
+  loadCase,
+  recordPuzzleEvidence,
+  saveCase
+} from "../shared/state.js";
 
 export const expectedPath = "/legacy/CYM-071/DEL-1109/testimony.pkg";
 
@@ -34,3 +39,9 @@ export function blogNotebookUrl() {
   return url.href;
 }
 
+export function recordSwitchEvidence() {
+  let state = loadCase();
+  state = recordPuzzleEvidence(state, "switch");
+  state = { ...state, switchToken: "FOLLOW-THE-TIDE" };
+  return saveCase(state);
+}

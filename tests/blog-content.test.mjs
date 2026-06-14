@@ -26,6 +26,8 @@ test("revision puzzle asks for structured evidence", async () => {
   assert.match(html, /钟楼街 29 号/);
   assert.match(html, /2019-03-15/);
   assert.match(html, /AFTERIMAGE/);
+  assert.match(html, /href="attachments\.html"/);
+  assert.match(html, /继续核验照片/);
 });
 
 test("photo lab combines brightness, metadata, and conclusion", async () => {
@@ -40,6 +42,16 @@ test("case notebook tracks fragments, memos, and switch token", async () => {
   assert.match(html, /剩余备忘/);
   assert.match(html, /证据片段/);
   assert.match(html, /启动令牌/);
+  assert.match(html, /id="progress-count"/);
+  assert.match(html, /id="evidence-list"/);
+  assert.match(html, /id="next-action"/);
+  assert.match(html, /fragments\.map/);
+});
+
+test("completed blog puzzles automatically record their evidence", async () => {
+  const js = await readFile(new URL("../src/blog/blog.js", import.meta.url), "utf8");
+  assert.match(js, /recordPuzzleEvidence/);
+  assert.match(js, /state = recordPuzzleEvidence\(state, name\)/);
 });
 
 test("chapter 2 is not permanently linked from blog source", async () => {
@@ -48,4 +60,3 @@ test("chapter 2 is not permanently linked from blog source", async () => {
     assert.doesNotMatch(html, /chapter2/i);
   }
 });
-
