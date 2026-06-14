@@ -22,3 +22,27 @@ test("chapter four entry loads shared orientation and chapter skin", async () =>
   assert.match(html, /data-objective="[^"]+"/);
   assert.equal((html.match(/<h1\b/g) || []).length, 1);
 });
+
+test("government portal exposes two-source volunteer evidence and layered hints", async () => {
+  const html = await read("portal.html");
+  assert.match(html, /平台开放时间：2024-04-03/);
+  assert.match(html, /东七码头/);
+  assert.match(html, /预约编号前缀/);
+  assert.match(html, /volunteersVerified/);
+  assert.match(html, /所谓自愿并不成立/);
+  assert.match(html, /第一层提示/);
+  assert.match(html, /第二层提示/);
+  assert.match(html, /第三层提示/);
+  assert.match(html, /href="notices\.html"/);
+});
+
+test("notice variants reconstruct the hidden approval batch", async () => {
+  const html = await read("notices.html");
+  assert.match(html, /网页版公示/);
+  assert.match(html, /打印版/);
+  assert.match(html, /无障碍朗读文本/);
+  assert.match(html, /LY-MH-04/);
+  assert.match(html, /batchRecovered/);
+  assert.match(html, /volunteersVerified/);
+  assert.match(html, /href="hearing\.html"/);
+});

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鹿原记忆健康便民服务平台</title>
+  <link rel="stylesheet" href="../series/series.css">
+  <link rel="stylesheet" href="chapter4.css">
+  <script src="../series/series.js" defer></script>
+</head>
+<body data-chapter="4" data-objective="证明公开名单中存在未申请的居民">
+  <main class="chapter-shell">
+    <header class="masthead">
+      <p class="eyebrow">鹿原市卫生与生活质量联合服务</p>
+      <h1>“记忆健康”便民服务平台</h1>
+      <p class="lead">帮助市民自愿减轻创伤记忆。平台开放时间：2024-04-03 09:00，所有参与者均须本人预约并签署知情同意。</p>
+    </header>
+
+    <div class="progress-strip" aria-label="第四章进度">
+      <span>1. 自愿者名单</span><span>2. 审批公示</span><span>3. 听证档案</span><span>4. 双线行动</span>
+    </div>
+
+    <section class="panel">
+      <h2>首批自愿者公开名单（节选）</h2>
+      <p>隐去姓名，仅公开所属街道、预约编号及回执时间，以接受社会监督。</p>
+      <div class="data-scroll">
+        <table>
+          <thead><tr><th>记录</th><th>所属街道</th><th>预约编号</th><th>申请回执时间</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>V-003</td><td>北湖街道</td><td>01-240403-003</td><td>2024-04-03 09:18</td><td>本人预约</td></tr>
+            <tr><td>V-011</td><td>西城街道</td><td>03-240403-011</td><td>2024-04-03 10:04</td><td>本人预约</td></tr>
+            <tr><td>V-019</td><td>东七码头街道</td><td><strong>07-240401-019</strong></td><td><strong>2024-04-01 08:12</strong></td><td>本人预约</td></tr>
+            <tr><td>V-024</td><td>南河街道</td><td>05-240404-024</td><td>2024-04-04 13:42</td><td>本人预约</td></tr>
+            <tr><td>V-028</td><td>东七码头街道</td><td><strong>07-240402-028</strong></td><td><strong>2024-04-02 22:31</strong></td><td>本人预约</td></tr>
+            <tr><td>V-031</td><td>东七码头街道</td><td><strong>07-240401-031</strong></td><td><strong>2024-04-01 08:16</strong></td><td>本人预约</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="evidence-grid" style="margin-top:16px">
+      <article class="evidence-card">
+        <p class="eyebrow">编号规则</p>
+        <h2>预约编号前缀</h2>
+        <p><code>01</code> 北湖、<code>03</code> 西城、<code>05</code> 南河、<code>09</code> 东七码头。</p>
+        <p class="lead">系统说明：未分配的前缀不会生成有效回执。</p>
+      </article>
+      <article class="evidence-card">
+        <p class="eyebrow">系统公告</p>
+        <h2>预约开放记录</h2>
+        <p>试点预约接口于 2024-04-03 09:00 首次上线。此前未开放线下代录、团体导入或预登记。</p>
+      </article>
+    </section>
+
+    <section class="panel" style="margin-top:16px">
+      <h2>调查结论</h2>
+      <form id="conclusion-form" class="form-stack">
+        <label class="choice"><input type="radio" name="conclusion" value="normal"><span>名单与系统规则一致，所有人均为本人预约。</span></label>
+        <label class="choice"><input type="radio" name="conclusion" value="clerical"><span>只有编号录入错误，无法判断预约是否真实。</span></label>
+        <label class="choice"><input type="radio" name="conclusion" value="coerced"><span>名单包含平台开放前且使用无效前缀的记录，所谓自愿并不成立。</span></label>
+        <div class="actions"><button class="action primary" type="submit">提交证据判断</button><button class="action" id="hint-button" type="button">查看方法提示</button></div>
+        <p class="status" id="status" role="status"></p>
+      </form>
+      <div class="hint-box" id="hints" aria-live="polite">
+        <p class="hidden" data-hint="1"><strong>第一层提示：</strong>先比较名单里的预约编号前两位与街道编码表。</p>
+        <p class="hidden" data-hint="2"><strong>第二层提示：</strong>再比较申请回执时间与平台正式开放时间。</p>
+        <p class="hidden" data-hint="3"><strong>第三层提示：</strong>东七码头应使用 <code>09</code>，而名单出现了 <code>07</code>；三份回执都早于 4 月 3 日。</p>
+      </div>
+      <div class="actions hidden" id="next-action" style="margin-top:16px">
+        <a class="action primary" href="notices.html">继续核验审批公示 →</a>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import {
+      completeChapter4Step,
+      loadChapter4State,
+      saveChapter4State
+    } from "./chapter4.js";
+
+    const form = document.querySelector("#conclusion-form");
+    const status = document.querySelector("#status");
+    const nextAction = document.querySelector("#next-action");
+    const hintButton = document.querySelector("#hint-button");
+    let hintLevel = 0;
+
+    function showSuccess() {
+      status.dataset.state = "success";
+      status.textContent = "结论成立：至少 12 条记录在预约系统开放前被批量写入，且使用未分配前缀。";
+      nextAction.classList.remove("hidden");
+    }
+
+    if (loadChapter4State().volunteersVerified) showSuccess();
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const selected = new FormData(form).get("conclusion");
+      if (selected !== "coerced") {
+        status.dataset.state = "error";
+        status.textContent = "这项结论无法同时解释编号前缀和申请时间。继续比对两类记录。";
+        return;
+      }
+      let state = loadChapter4State();
+      state = completeChapter4Step(state, "volunteersVerified");
+      saveChapter4State(state);
+      showSuccess();
+    });
+
+    hintButton.addEventListener("click", () => {
+      hintLevel = Math.min(3, hintLevel + 1);
+      document.querySelector(`[data-hint="${hintLevel}"]`)?.classList.remove("hidden");
+      if (hintLevel === 3) hintButton.hidden = true;
+    });
+  </script>
+</body>
+</html>
