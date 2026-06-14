@@ -10,15 +10,14 @@ test("dead switch contains three causally distinct endings", async () => {
   assert.match(html, /available\.includes/);
 });
 
-test("notebook accepts archive context as prefill rather than automatic completion", async () => {
+test("notebook automatically records evidence returned by the archive", async () => {
   const html = await readFile(new URL("../src/blog/case-notebook.html", import.meta.url), "utf8");
   assert.match(html, /URLSearchParams/);
   assert.match(html, /fragment-input/);
-  assert.doesNotMatch(html, /submitNotebook\(params/);
+  assert.match(html, /submitNotebook\(params\.get\("fragment"\), params\.get\("token"\)\)/);
 });
 
 test("root entry points players to the blog", async () => {
   const html = await readFile(new URL("../src/index.html", import.meta.url), "utf8");
   assert.match(html, /blog\/index\.html/);
 });
-

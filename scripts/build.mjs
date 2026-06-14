@@ -14,6 +14,10 @@ for (const directory of ["shared", "blog", "corporate", "archive"]) {
   });
 }
 
-await cp(new URL("chapter2/", root), new URL("chapter2/", dist), { recursive: true });
+for (const directory of ["chapter2", "chapter3", "series"]) {
+  await cp(new URL(`${directory}/`, root), new URL(`${directory}/`, dist), {
+    recursive: true
+  });
+}
 
-console.log("Built dist/blog, dist/corporate, and dist/archive");
+console.log("Built first-chapter sites, Chapters 2-3, and shared series assets");

@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>e2ee · 加密会话</title>
+<link rel="stylesheet" href="../series/series.css">
+<script src="../series/series.js" defer></script>
 <!-- 入口不写在明面上。每个前端都把它落在同一个地方。 -->
 <style>
   :root{ --bg:#0a0e12; --panel:#11161d; --in:#161c25; --text:#dbe2ea; --muted:#6b7480; --acc:#3ad1c4; }
@@ -25,14 +27,16 @@
   .typing-bubble span{ width:6px; height:6px; border-radius:50%; background:var(--muted); animation:td 1.3s infinite; }
   .typing-bubble span:nth-child(2){animation-delay:.2s;} .typing-bubble span:nth-child(3){animation-delay:.4s;}
   @keyframes td{0%,60%,100%{opacity:.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-4px);}}
-  .hint{ text-align:center; font-size:11px; color:#3a424c; padding:10px; }
+  .hint{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:11px; color:#6b7480; padding:10px 14px; border-top:1px solid #1d242d; }
+  .hint button{ border:0; padding:6px 8px; background:transparent; color:var(--acc); font:inherit; cursor:pointer; }
+  .hint button:hover{ text-decoration:underline; }
   .fx-grain,.fx-vignette{ position:fixed; inset:0; pointer-events:none; z-index:99; }
   .fx-vignette{ box-shadow:inset 0 0 180px 40px rgba(0,0,0,.7); }
   .fx-grain{ opacity:.04; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation:grain .5s steps(3) infinite; }
   @keyframes grain{0%{transform:translate(0,0)}33%{transform:translate(-5px,3px)}66%{transform:translate(4px,-4px)}100%{transform:translate(0,0)}}
 </style>
 </head>
-<body>
+<body data-chapter="2" data-objective="确认程野留下的调查入口">
   <div class="fx-vignette"></div>
   <div class="fx-grain"></div>
   <div class="win">
@@ -42,7 +46,7 @@
       <div class="lock">🔒 端到端加密</div>
     </div>
     <div class="feed" id="feed"></div>
-    <div class="hint">本会话不留存记录。</div>
+    <div class="hint"><span>本会话不留存记录。</span><button id="reveal-all" type="button">立即显示全部</button></div>
   </div>
 <script>
   const feed=document.getElementById('feed');
@@ -62,7 +66,7 @@
     {t:'in',x:'快一点。我不知道这个号还能撑多久。'},
     {t:'sys',x:'对方正在保持在线…'},
   ];
-  let i=0;
+  let i=0, timer=null, typing=null, pending=null;
   function render(m){
     const el=document.createElement('div');
     if(m.t==='sys'){el.className='msg sys';el.textContent=m.x;}
@@ -71,18 +75,46 @@
     feed.appendChild(el); feed.scrollTop=feed.scrollHeight;
   }
   function showTyping(cb,dur){
-    const t=document.createElement('div'); t.className='msg typing-bubble';
-    t.innerHTML='<span></span><span></span><span></span>';
-    feed.appendChild(t); feed.scrollTop=feed.scrollHeight;
-    setTimeout(()=>{t.remove();cb();},dur);
+    typing=document.createElement('div'); typing.className='msg typing-bubble';
+    typing.innerHTML='<span></span><span></span><span></span>';
+    feed.appendChild(typing); feed.scrollTop=feed.scrollHeight;
+    timer=setTimeout(()=>{
+      typing?.remove(); typing=null; timer=null; cb();
+    },dur);
   }
   function next(){
-    if(i>=script.length)return;
+    if(i>=script.length){
+      document.getElementById('reveal-all').hidden=true;
+      return;
+    }
     const m=script[i++];
-    if(m.t==='in'){ showTyping(()=>{render(m);setTimeout(next,480);}, Math.min(1700,600+m.x.length*30)); }
-    else{ render(m); setTimeout(next,m.t==='link'?900:1000); }
+    pending=m;
+    if(m.t==='in'){
+      showTyping(()=>{
+        render(m); pending=null;
+        timer=setTimeout(next,480);
+      },Math.min(1700,600+m.x.length*30));
+    } else {
+      render(m); pending=null;
+      timer=setTimeout(next,m.t==='link'?900:1000);
+    }
   }
-  setTimeout(next,700);
+  function finishConversation(){
+    if(timer) clearTimeout(timer);
+    timer=null;
+    typing?.remove();
+    typing=null;
+    if(pending) render(pending);
+    pending=null;
+    while(i<script.length) render(script[i++]);
+    document.getElementById('reveal-all').hidden=true;
+  }
+  document.getElementById('reveal-all').addEventListener('click',finishConversation);
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    finishConversation();
+  } else {
+    timer=setTimeout(next,700);
+  }
 </script>
 </body>
 </html>

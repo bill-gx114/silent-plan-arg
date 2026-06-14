@@ -34,17 +34,22 @@ for (const path of files) {
 }
 
 const createdTree = gh("git/trees", "POST", { tree });
+let currentMain = null;
+try {
+  currentMain = gh("git/ref/heads/main");
+} catch (error) {
+  if (!String(error.message).includes("HTTP 404")) throw error;
+}
 const commit = gh("git/commits", "POST", {
   message: "Build layered investigation ARG",
-  tree: createdTree.sha
+  tree: createdTree.sha,
+  ...(currentMain ? { parents: [currentMain.object.sha] } : {})
 });
 
-try {
+if (!currentMain) {
   gh("git/refs", "POST", { ref: "refs/heads/main", sha: commit.sha });
-} catch (error) {
-  if (!String(error.message).includes("Reference already exists")) throw error;
-  gh("git/refs/heads/main", "PATCH", { sha: commit.sha, force: true });
+} else {
+  gh("git/refs/heads/main", "PATCH", { sha: commit.sha, force: false });
 }
 
 console.log(JSON.stringify({ repository, commit: commit.sha, files: files.length }));
-

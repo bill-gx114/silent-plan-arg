@@ -31,6 +31,7 @@ test("employee directory exposes the residual employee id and hidden fragment", 
   const html = await readFile(new URL("../src/corporate/directory.html", import.meta.url), "utf8");
   assert.match(html, /CYM-071/);
   assert.match(html, /CYPRESS/);
+  assert.match(html, /recordPuzzleEvidence\(state, "directory"\)/);
 });
 
 test("request log reconstructs deletion batch and archive package", async () => {
@@ -46,4 +47,3 @@ test("corporate bridge clue has a second source", async () => {
   assert.match(directory, /DEL-1109/);
   assert.match(log, /CYM-071/);
 });
-
