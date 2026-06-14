@@ -49,4 +49,4 @@
 
 - [x] Run a clean build, full tests and `git diff --check`.
 - [x] Verify the main journey in the in-app browser.
-- [ ] Commit scoped files, push the branch and verify GitHub Pages deployment.
+- [x] Commit scoped files, push the branch and verify GitHub Pages deployment.
